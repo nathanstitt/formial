@@ -12,3 +12,11 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+#example-builder {
+  height: 80vh;
+  width: calc(80vw - 40px);
+  margin: auto;
+  margin-top: 40px;
+  border: 1px dashed grey;
+}

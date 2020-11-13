@@ -1,10 +1,23 @@
-import * as React from 'react'
-import styles from './styles.module.css'
+// import * as React from 'react'
 
-interface Props {
-  text: string
+export * from './builder'
+
+export class Foo {
+
+    constructor() {
+        console.log("new Foo")
+    }
+
+    speak() {
+        console.log("hi from foo")
+    }
+
 }
 
-export const ExampleComponent = ({ text }: Props) => {
-  return <div className={styles.test}>Example Component: {text}</div>
-}
+// export { Builder }
+
+// interface Props { }
+//
+// export const ExampleComponent = ({  }: Props) => {
+//   return <Builder />
+// }
