@@ -1,10 +1,15 @@
 import React from 'react'
 
-import { ExampleComponent } from 'formial'
+import { Builder } from 'formial'
 import 'formial/dist/index.css'
 
 const App = () => {
-  return <ExampleComponent text="Create React Library Example 😄" />
+  
+  return (
+    <div id="example-builder">
+      <Builder />
+    </div>
+  )
 }
 
 export default App
