@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import { useStoreContext, Element } from './store'
+import { useStoreContext, Element, Container, isContainer } from './store'
 import { useKeyPress } from '../hooks/use-key-press'
 
 const NewAttribute: React.FC<{ element: Element; nested: string }> = ({
@@ -137,7 +137,7 @@ const Options: React.FC<{
     )
 }
 
-const Edit: React.FC<{ element: Element }> = ({ element }) => {
+const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
     const sc = useStoreContext()
     const { data } = element
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_ELEMENT', element, patch })
@@ -198,6 +198,35 @@ const Edit: React.FC<{ element: Element }> = ({ element }) => {
         </div>
     )
 }
+
+const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
+    const sc = useStoreContext()
+    const { data } = container
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_CONTAINER', container, patch })
+
+    return (
+        <div>
+            <label>
+                <span>Class:</span>
+                <input
+                    className="value"
+                    value={data.className || ''}
+                    onChange={({ target: { value } }) => dp({ className: value })}
+                />
+            </label>
+        </div>
+    )
+
+}
+
+
+const Edit: React.FC<{ target: Element | Container }> = ({ target }) => {
+    if (isContainer(target)) {
+        return <ContainerEdit container={target} />
+    }
+    return <ElementEdit element={target} />
+}
+
 
 const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
     position: 'absolute',
@@ -266,12 +295,12 @@ export const EditPanel = () => {
     return (
         <EditPanelEl editing={!!editing}>
             <div className='edit-pane'>
-                {editing && <Edit element={editing} />}
+                {editing && <Edit target={editing} />}
             </div>
             <div className='footer'>
                 <button
                     className="btn btn-primary"
-                    onClick={() => sc.dispatch({ type: 'HIDE_ELEMENT_EDIT' })}
+                    onClick={() => sc.dispatch({ type: 'HIDE_EDIT' })}
                 >
                     Done
                 </button>

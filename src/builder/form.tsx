@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import cn from 'classnames'
-import { useDrop, useDrag } from 'react-dnd'
+import { useDrop, useDrag, DragElementWrapper, DragSourceOptions } from 'react-dnd'
 import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
@@ -9,7 +9,7 @@ import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import {
     useStore,
     Element,
-    isContainerOrElement,
+    isContainer,
     useStoreContext,
     Container,
 } from './store'
@@ -166,12 +166,39 @@ const ElementPreviewEl = styled.div({
     },
 })
 
-const ControlPreview: React.FC<{
-    index: number
-    element: Element
-    container: Container
-}> = ({ index, element, container }) => {
+const Controls:React.FC<{
+    target: Element | Container
+    container: Container,
+    drag: DragElementWrapper<DragSourceOptions>,
+}> = ({
+    target, container, drag,
+}) => {
     const sc = useStoreContext()
+
+    return (
+        <div className={cn('controls', { container: isContainer(target) })}>
+            <button className='trash' onClick={() => sc.dispatch({
+                type: 'DELETE', target, container,
+            })}>
+                <TrashAlt />
+            </button>
+            <button onClick={() => sc.dispatch({ type: 'EDIT', target })}>
+                <Edit />
+            </button>
+            <button className='move' ref={drag}>
+                <GripHorizontal />
+            </button>
+        </div>
+    )
+}
+
+const ControlPreview: React.FC<{
+        index: number
+        element: Element
+        container: Container
+}> = ({
+    index, element, container,
+}) => {
     const [{ opacity }, drag, preview] = useDrag({
         item: { id: element.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
@@ -189,19 +216,7 @@ const ControlPreview: React.FC<{
                 <span>{element.data.label}</span>
                 {element.placeholder}
             </div>
-            <div className='controls'>
-                <button className='trash' onClick={() => sc.dispatch({
-                    type: 'DEL_ELEMENT', element, container,
-                })}>
-                    <TrashAlt />
-                </button>
-                <button onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', element })}>
-                    <Edit />
-                </button>
-                <button className='move' ref={drag}>
-                    <GripHorizontal />
-                </button>
-            </div>
+            <Controls target={element} container={container} drag={drag} />
         </ElementPreviewEl>
     )
 }
@@ -259,7 +274,6 @@ const ContainerPreview:React.FC<{
     parent: Container
     index: number
 }> = ({ parent, container, index }) => {
-    const sc = useStoreContext()
     const [{ opacity }, drag, preview] = useDrag({
         item: { id: container.id, fromIndex: index, fromContainer: parent, type: 'control' },
         collect: monitor => ({
@@ -284,16 +298,7 @@ const ContainerPreview:React.FC<{
                 </React.Fragment>
             ))}
 
-
-            <div className='controls container'>
-                <button className='trash' onClick={() => sc.dispatch({ type: 'DEL_ELEMENT', container: parent, element: container })}>
-                    <TrashAlt />
-                </button>
-
-                <button className='move' ref={drag}>
-                    <GripHorizontal />
-                </button>
-            </div>
+            <Controls target={container} container={parent} drag={drag} />
 
         </ContainerPreviewEl>
     )
@@ -305,7 +310,7 @@ const ElementPreview:React.FC<{
     index: number,
     container: Container,
 }> = ({ el, index, container }) => {
-    if (isContainerOrElement(el)) {
+    if (isContainer(el)) {
         return <ContainerPreview parent={container} container={el} index={index} />
     }
     return <ControlPreview container={container} element={el} index={index} />

@@ -14,17 +14,21 @@ export interface ControlDefinition {
 export interface Store {
     controls: Map<string, Control>,
     container: Container
-    editing?: Element
+    editing?: Container | Element
 }
 
-export interface ContainerDefinition {
+export interface ContainerData {
+    className: string
+}
+
+export interface ContainerOptions {
     id?: string
     type: 'row' | 'column'
-    className?: string
+    data?: ContainerData
     children?: Array<Element | Container>
 }
 
-export function isContainerOrElement(
+export function isContainer(
     toBeDetermined: Container|Element,
 ): toBeDetermined is Container {
     if ((toBeDetermined as Container).type) {
@@ -37,21 +41,23 @@ export class Container {
 
     id: string
     type: 'row' | 'column'
-    className: string
+    data: ContainerData
     children: Array<Element | Container>
 
-    constructor(options: ContainerDefinition) {
+    constructor(options: ContainerOptions) {
         this.id = options.id || uuidv4()
         this.type = options.type
-        this.className = options.className || this.type === 'row' ? 'row' : 'col'
         this.children = options.children || []
+        this.data = options.data || {
+            className: this.type === 'row' ? 'row' : 'col'
+        }
     }
 
     merge(patch: any): Container {
         return new Container({
             id: this.id,
             type: this.type,
-            className: this.className,
+            data: deepmerge(this.data, patch.data),
             children: [...patch.children || []],
         })
     }
@@ -60,7 +66,7 @@ export class Container {
         return new Container({
             id: this.id,
             type: this.type,
-            className: this.className,
+            data: {...this.data },
             children: [...this.children],
         })
     }
@@ -226,10 +232,11 @@ type Action =
     | { type: 'ADD_ELEMENT', id: string,
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
-    | { type: 'DEL_ELEMENT', element: Element | Container, container: Container }
+    | { type: 'DELETE', target: Element | Container, container: Container }
     | { type: 'UPDATE_ELEMENT', element: Element, patch: any }
-    | { type: 'EDIT_ELEMENT', element: Element }
-    | { type: 'HIDE_ELEMENT_EDIT' }
+    | { type: 'UPDATE_CONTAINER', container: Container, patch: any }
+    | { type: 'EDIT', target: Element | Container }
+    | { type: 'HIDE_EDIT' }
     | { type: 'ADD_ATTRIBUTE', element: Element, nested: string }
     | { type: 'REPLACE_NEW_ATTRIBUTE', element: Element, nested: string, name: string, }
     | { type: 'DELETE_ATTRIBUTE', element: Element, nested: string, name: string }
@@ -240,9 +247,9 @@ const storeReducer = (st:Store, action: Action): Store => {
         case 'ADD_ELEMENT': {
             return addElement(st, action)
         }
-        case 'DEL_ELEMENT': {
+        case 'DELETE': {
             action.container.children = [
-                ...action.container.children.filter(e => e.id !== action.element.id),
+                ...action.container.children.filter(e => e.id !== action.target.id),
             ]
             return { ...st }
         }
@@ -250,10 +257,14 @@ const storeReducer = (st:Store, action: Action): Store => {
             action.element.data = deepmerge(action.element.data, action.patch)
             return { ...st }
         }
-        case 'EDIT_ELEMENT': {
+        case 'UPDATE_CONTAINER': {
+            action.container.data = deepmerge(action.container.data, action.patch)
             return { ...st }
         }
-        case 'HIDE_ELEMENT_EDIT': {
+        case 'EDIT': {
+            return { ...st, editing: action.target }
+        }
+        case 'HIDE_EDIT': {
             return { ...st, editing: undefined }
         }
         case 'ADD_ATTRIBUTE': {
