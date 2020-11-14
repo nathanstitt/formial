@@ -2,7 +2,7 @@ import * as React from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import {
-    useStoreContext, Input, Element, Container, isContainer, isInput,
+    useStoreContext, InputElement, Element, Container, isContainer, isInput, isText, TextElement,
 } from './store'
 import { useKeyPress } from '../hooks/use-key-press'
 
@@ -42,14 +42,16 @@ const Sizes:React.FC<{
     return (
         <fieldset className="widths">
             <legend>Widths (1-12):</legend>
-            <Width size="mobile" el={el} />
-            <Width size="tablet" el={el} />
-            <Width size="desktop" el={el} />
+            <div className="row">
+                <Width size="mobile" el={el} />
+                <Width size="tablet" el={el} />
+                <Width size="desktop" el={el} />
+            </div>
         </fieldset>
     )
 }
 
-const NewAttribute: React.FC<{ input: Input; nested: string }> = ({
+const NewAttribute: React.FC<{ input: InputElement; nested: string }> = ({
     input,
     nested,
 }) => {
@@ -94,7 +96,7 @@ const NewAttribute: React.FC<{ input: Input; nested: string }> = ({
 
 
 const EditAttribute: React.FC<{
-    input: Input
+    input: InputElement
     nested: string
     attributeName: string
 }> = ({ input, nested, attributeName }) => {
@@ -136,7 +138,7 @@ const EditAttribute: React.FC<{
 }
 
 const Attribute: React.FC<{
-    input: Input
+    input: InputElement
     nested: string
     attributeName: string,
 }> = ({ input, nested, attributeName }) => {
@@ -148,7 +150,7 @@ const Attribute: React.FC<{
 
 
 const Options: React.FC<{
-    label: string, input: Input, nested: string,
+    label: string, input: InputElement, nested: string,
 }> = ({ label, input, nested }) => {
     const sc = useStoreContext()
     const options = input.data[nested]
@@ -182,14 +184,14 @@ const Options: React.FC<{
     )
 }
 
-const InputEdit: React.FC<{ input: Input }> = ({ input }) => {
+const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
     const { data } = input
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: input, patch })
 
     return (
         <div>
-            <h4>Edit {input.control.name}</h4>
+            <h4 className="title">Edit {input.control.name}</h4>
             <label>
                 <span>Label:</span>
                 <input
@@ -206,7 +208,9 @@ const InputEdit: React.FC<{ input: Input }> = ({ input }) => {
                     onChange={({ target: { value } }) => dp({ name: value })}
                 />
             </label>
-            <Sizes el={input} />
+
+            <Options input={input} label="Attributes" nested="attributes" />
+
             <fieldset>
                 <legend>Class Names:</legend>
                 <label>
@@ -238,9 +242,9 @@ const InputEdit: React.FC<{ input: Input }> = ({ input }) => {
                 </label>
             </fieldset>
 
-            <Options input={input} label="Options" nested="options" />
-            <Options input={input} label="Attributes" nested="attributes" />
+            <Sizes el={input} />
 
+            <Options input={input} label="Options" nested="options" />
         </div>
     )
 }
@@ -265,6 +269,63 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
     )
 }
 
+const TextHeadingSize: React.FC<{
+    txt: TextElement
+    onChange: (value: string) => void
+}> = ({ txt, onChange }) => {
+    if (txt.control.id !== 'heading') {
+        return null
+    }
+    return (
+        <label>
+            <span>Size:</span>
+            <select value={txt.data.tag} onChange={ev => onChange(ev.target.value)}>
+                <option value="h1">Heading 1</option>
+                <option value="h2">Heading 2</option>
+                <option value="h3">Heading 3</option>
+                <option value="h4">Heading 4</option>
+                <option value="h5">Heading 5</option>
+                <option value="h6">Heading 6</option>
+            </select>
+        </label>
+    )
+}
+
+const TextEdit: React.FC<{ control: TextElement }> = ({ control }) => {
+    const sc = useStoreContext()
+    const { data } = control
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: control, patch })
+
+    return (
+        <div>
+            <label>
+                <span>Text:</span>
+
+                <textarea
+                    id={control.id}
+                    value={data.text || ''}
+                    onChange={({ target: { value } }) => dp({ text: value })}
+                />
+            </label>
+            <TextHeadingSize
+                txt={control}
+                onChange={(tag:string) => dp({ tag })}
+
+            />
+            <label>
+                <span>Class:</span>
+
+                <input
+                    className="value"
+                    value={data.className || ''}
+                    onChange={({ target: { value } }) => dp({ className: value })}
+                />
+            </label>
+            <Sizes el={control} />
+        </div>
+    )
+}
+
 
 const Edit: React.FC<{ target: Element }> = ({ target }) => {
     if (isContainer(target)) {
@@ -272,6 +333,9 @@ const Edit: React.FC<{ target: Element }> = ({ target }) => {
     }
     if (isInput(target)) {
         return <InputEdit input={target} />
+    }
+    if (isText(target)) {
+        return <TextEdit control={target} />
     }
     return null
 }
@@ -286,6 +350,12 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
     transition: 'right 0.3s ease-in-out',
     display: 'flex',
     boxShadow: '-5px 0px 5px 0px rgba(50, 50, 50, 0.75)',
+
+    '.title': {
+        margin: '15px 0',
+        borderBottom: '1px solid lightgray',
+        paddingBottom: '10px',
+    },
     '.edit-pane': {
         flex: 1,
         overflowY: 'auto',
@@ -308,9 +378,6 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
         '> *:first-child': {
             width: '125px',
         },
-        // '> *:last-child': {
-        //     flex: 1,
-        // },
     },
     '.heading > *': {
         fontWeight: 'bold',
@@ -336,23 +403,43 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
             },
         },
     },
+    textarea: {
+        width: '100%',
+        minHeight: '50px',
+        padding: '4px',
+    },
     '.widths': {
-        span: {
-            flex: 1,
+        '.row': {
             display: 'flex',
-            justifyContent: 'flex-end',
-            marginRight: '10px',
+            justifyContent: 'space-between',
+            span: {
+                flex: 1,
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginRight: '10px',
+                width: 'inherit',
+            },
         },
     },
-
 }))
 
 export const EditPanel = () => {
     const sc = useStoreContext()
+    const panelRef = React.useRef<HTMLDivElement>(null)
     const { editing } = sc.store
+    React.useEffect(() => {
+        if (editing && panelRef.current) {
+            const firstInput = panelRef.current.querySelector('input,textarea')
+            if (firstInput) {
+                setTimeout(() => { // setTimeout to focus after animation completes
+                    (firstInput as HTMLInputElement).focus()
+                }, 250)
+            }
+        }
+    }, [editing])
     return (
         <EditPanelEl editing={!!editing}>
-            <div className='edit-pane'>
+            <div ref={panelRef} className='edit-pane'>
                 {editing && <Edit target={editing} />}
             </div>
             <div className='footer'>

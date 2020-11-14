@@ -2,15 +2,20 @@ import * as React from 'react'
 import { CaretSquareDown } from '@styled-icons/fa-regular/CaretSquareDown'
 import { Font } from '@styled-icons/fa-solid/Font'
 import { GripLines } from '@styled-icons/fa-solid/GripLines'
+import { Square } from '@styled-icons/fa-regular/Square'
+import { Heading } from '@styled-icons/fa-solid/Heading'
+import { Paragraph } from '@styled-icons/fa-solid/Paragraph'
 import { GripLinesVertical } from '@styled-icons/fa-solid/GripLinesVertical'
 import { DotCircle } from '@styled-icons/fa-solid/DotCircle'
 import { CheckSquare } from '@styled-icons/fa-solid/CheckSquare'
 
-import { Control, RowControl, ColumnControl, Element, defaultControls } from './store'
+import {
+    Control, RowControl, ColumnControl, InputElement, TextControl, TextElement, defaultControls,
+} from './store'
 
 type RenderT = (key: string, value: string) => React.ReactNode
 
-const renderOptions = (el: Element, rend: RenderT) => {
+const renderOptions = (el: InputElement, rend: RenderT) => {
     const options = el.optionPairs
     if (options.length === 0) {
         return rend('', '')
@@ -32,6 +37,21 @@ defaultControls.register([
         name: 'Column',
         icon: <GripLinesVertical />,
     }),
+
+    new TextControl({
+        id: 'heading',
+        name: 'Heading',
+        icon: <Heading />,
+        placeholder(h:TextElement) { return React.createElement(h.data.tag, h.data.text) },
+    }),
+
+    new TextControl({
+        id: 'para',
+        name: 'Paragraph',
+        icon: <Paragraph />,
+        placeholder(para:TextElement) { return <p>{para.data.text}</p> },
+    }),
+
     new Control({
         id: 'input',
         name: 'Text Input',
@@ -40,14 +60,21 @@ defaultControls.register([
     }),
 
     new Control({
+        id: 'textarea',
+        name: 'Text Area',
+        icon: <Square />,
+        placeholder() { return <textarea className='form-control' readOnly /> },
+    }),
+
+    new Control({
         id: 'checkbox',
         name: 'Checkboxes',
         icon: <CheckSquare />,
         hasOptions: true,
-        placeholder(el: Element) {
+        placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
                 <input type="checkbox" name={n}
-                    className={el.data.classNames.element} readOnly />
+                    className={el.data.classNames.input} readOnly />
             ))
         },
     }),
@@ -55,9 +82,9 @@ defaultControls.register([
         id: 'radio',
         name: 'Radio Input',
         icon: <DotCircle />,
-        placeholder(el: Element) {
+        placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input key={n} type="radio" name={n} className={el.data.classNames.element} readOnly />
+                <input key={n} type="radio" name={n} className={el.data.classNames.input} readOnly />
             ))
         },
     }),
@@ -66,7 +93,7 @@ defaultControls.register([
         name: 'Select',
         hasOptions: true,
         icon: <CaretSquareDown />,
-        placeholder(el: Element) {
+        placeholder(el: InputElement) {
             const options = el.optionPairs
             return (
                 <select name={el.data.name}>

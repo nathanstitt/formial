@@ -10,6 +10,10 @@ import {
     useStore,
     Element,
     isContainer,
+    isText,
+    isInput,
+    InputElement,
+    TextElement,
     useStoreContext,
     Container,
 } from './store'
@@ -71,6 +75,7 @@ const ElementPreviewEl = styled.div({
     color: '#0c0c0c',
     justifyContent: 'space-between',
     alignItems: 'stretch',
+    minHeight: '40px',
     '&.row': {
         '> .column': {
             margin: '-1px',
@@ -160,6 +165,7 @@ const ElementPreviewEl = styled.div({
         flexWrap: 'wrap',
         alignItems: 'flex-start',
         flexDirection: 'column',
+        justifyContent: 'center',
         '&.row': {
             flexDirection: 'column',
         },
@@ -192,15 +198,15 @@ const Controls:React.FC<{
     )
 }
 
-const ControlPreview: React.FC<{
-        index: number
-        element: Element
-        container: Container
+const InputPreview: React.FC<{
+    index: number
+    input: InputElement
+    container: Container
 }> = ({
-    index, element, container,
+    index, input, container,
 }) => {
     const [{ opacity }, drag, preview] = useDrag({
-        item: { id: element.id, fromIndex: index, fromContainer: container, type: 'control' },
+        item: { id: input.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,
         }),
@@ -210,16 +216,46 @@ const ControlPreview: React.FC<{
         <ElementPreviewEl
             ref={preview}
             style={{ opacity }}
-            className={cn('element-preview', element.control.id)}
+            className={cn('element-preview', input.control.id)}
         >
             <div className='control-preview'>
-                <span>{element.data.label}</span>
-                {element.placeholder}
+                <span>{input.data.label}</span>
+                {input.placeholder}
             </div>
-            <Controls target={element} container={container} drag={drag} />
+            <Controls target={input} container={container} drag={drag} />
         </ElementPreviewEl>
     )
 }
+
+const TextPreview: React.FC<{
+    index: number
+    control: TextElement
+    container: Container
+}> = ({
+    index, control, container,
+}) => {
+    const [{ opacity }, drag, preview] = useDrag({
+        item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
+        collect: monitor => ({
+            opacity: monitor.isDragging() ? 0.4 : 1,
+        }),
+    })
+    const text = React.createElement(control.data.tag, {}, control.data.text)
+
+    return (
+        <ElementPreviewEl
+            ref={preview}
+            style={{ opacity }}
+            className={cn('element-preview', control.control.id)}
+        >
+            <div className='control-preview'>
+                {text}
+            </div>
+            <Controls target={control} container={container} drag={drag} />
+        </ElementPreviewEl>
+    )
+}
+
 
 const ContainerPreviewEl = styled(ElementPreviewEl)({
     border: '1px dashed gray',
@@ -313,7 +349,13 @@ const ElementPreview:React.FC<{
     if (isContainer(el)) {
         return <ContainerPreview parent={container} container={el} index={index} />
     }
-    return <ControlPreview container={container} element={el} index={index} />
+    if (isText(el)) {
+        return <TextPreview control={el} container={container} index={index} />
+    }
+    if (isInput(el)) {
+        return <InputPreview input={el} container={container} index={index} />
+    }
+    return null
 }
 
 
@@ -349,6 +391,10 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     },
     '.drop:hover': {
         backgroundColor: dropAcceptableColor,
+    },
+    'p, h1, h2, h3, h4, h5, h6': {
+        padding: 0,
+        margin: 0,
     },
 }))
 export const FormElements = () => {

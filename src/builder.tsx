@@ -20,13 +20,13 @@ const FormPanel = () => {
     )
 }
 
-const ControlsPanel = () => {
-    return (
-        <div>
-            <ControlsListing />
-        </div>
-    )
-}
+// const ControlsPanel = () => {
+//     return (
+//         <div>
+//             <ControlsListing />
+//         </div>
+//     )
+// }
 
 const BuilderEl = styled.div({
     display: 'grid',
@@ -59,7 +59,7 @@ export const Builder:React.FC<BuilderProps> = ({ onChange }) => {
             <StoreContext.Provider value={ctx}>
                 <BuilderEl>
                     <FormPanel />
-                    <ControlsPanel />
+                    <ControlsListing />
                     <EditPanel />
                 </BuilderEl>
             </StoreContext.Provider>

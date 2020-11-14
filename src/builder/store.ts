@@ -61,33 +61,26 @@ export interface ContainerOptions {
     children?: Array<Element>
 }
 
-export function isContainer(
-    toBeDetermined: Element,
-): toBeDetermined is Container {
-    if (toBeDetermined instanceof Container) {
-        return true
-    }
-    return false
+interface TextData extends ElementData {
+    tag: string
+    text: string
 }
 
-export function isInput(
-    toBeDetermined: Element,
-): toBeDetermined is Input {
-    if (toBeDetermined instanceof Input) {
-        return true
+export class TextElement extends Element {
+    data: TextData
+
+    constructor(control:Control, data = {}) {
+        super(control, data)
+        this.data = deepmerge.all([(this as this).data, {
+            tag: control.id == 'para' ? 'p' : 'h3',
+            text: 'Some text…'
+        }, data]) as TextData
     }
-    return false
 }
-
-
 
 export class Container extends Element {
-
-    // id: string
     type: 'row' | 'column'
-
     children: Array<Element>
-
     constructor(control:Control, options: ContainerOptions) {
         super(control, options)
         this.type = options.type
@@ -131,7 +124,7 @@ export interface InputData extends ElementData {
     }
 }
 
-export class Input extends Element {
+export class InputElement extends Element {
     data: InputData
 
     constructor(control: Control, data = {}) {
@@ -188,11 +181,37 @@ export class Control implements ControlDefinition {
     }
 
     createElement(): Element {
-        return new Input(this)
+        return new InputElement(this)
     }
 
 }
 
+export function isContainer(
+    toBeDetermined: Element,
+): toBeDetermined is Container {
+    if (toBeDetermined instanceof Container) {
+        return true
+    }
+    return false
+}
+
+export function isInput(
+    toBeDetermined: Element,
+): toBeDetermined is InputElement {
+    if (toBeDetermined instanceof InputElement) {
+        return true
+    }
+    return false
+}
+
+export function isText(
+    toBeDetermined: Element,
+): toBeDetermined is TextElement {
+    if (toBeDetermined instanceof TextElement) {
+        return true
+    }
+    return false
+}
 
 export class RowControl extends Control {
 
@@ -202,13 +221,16 @@ export class RowControl extends Control {
 
 }
 
+export class TextControl extends Control {
+    createElement(): Element {
+        return new TextElement(this)
+    }
+}
 
 export class ColumnControl extends Control {
-
     createElement(): Element {
         return new Container(this, { type: 'column' })
     }
-
 }
 
 
@@ -278,9 +300,9 @@ type Action =
     | { type: 'UPDATE', target: Element, patch: any }
     | { type: 'EDIT', target: Element }
     | { type: 'HIDE_EDIT' }
-    | { type: 'ADD_ATTRIBUTE', input: Input, nested: string }
-    | { type: 'DELETE_ATTRIBUTE', input: Input, nested: string, name: string }
-    | { type: 'REPLACE_NEW_ATTRIBUTE', input: Input, nested: string, name: string, }
+    | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: string }
+    | { type: 'DELETE_ATTRIBUTE', input: InputElement, nested: string, name: string }
+    | { type: 'REPLACE_NEW_ATTRIBUTE', input: InputElement, nested: string, name: string, }
 
 
 const storeReducer = (st:Store, action: Action): Store => {

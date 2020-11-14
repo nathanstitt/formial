@@ -30,15 +30,22 @@ const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
     )
 }
 
-const ControlsListingEl = styled.ul({
-    padding: 0,
+const ControlsListingEl = styled.div({
+    overflow: 'auto',
+    paddingRight: '10px',
+    ul: {
+        padding: 0,
+        margin: 0,
+    },
 })
 export const ControlsListing:React.FC = () => {
     const { controls } = useStore()
     return (
-        <ControlsListingEl>
-            {[...controls.values()].map(definition => (
-                <ControlLabel key={definition.id} {...definition} />))}
+        <ControlsListingEl className="controls-listing">
+            <ul>
+                {[...controls.values()].map(definition => (
+                    <ControlLabel key={definition.id} {...definition} />))}
+            </ul>
         </ControlsListingEl>
     )
 }
