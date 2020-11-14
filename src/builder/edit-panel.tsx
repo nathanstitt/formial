@@ -4,6 +4,46 @@ import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { useStoreContext, Element, Container, isContainer } from './store'
 import { useKeyPress } from '../hooks/use-key-press'
 
+
+const Width:React.FC<{
+    el: Element | Container,
+    size: string,
+}> = ({ el, size }) => {
+
+    const sc = useStoreContext()
+    const inputRef = React.useRef<HTMLInputElement>(null)
+
+    return (
+        <label>
+            <span>{size}:</span>
+            <input
+                ref={inputRef}
+                type="number"
+                min="1"
+                max="12"
+                value={el.data.sizes[size] || 12}
+                onChange={({ target: { value } }) => sc.dispatch({
+                    type: 'UPDATE',
+                    target: el,
+                    patch: { sizes: { [size]: Math.max(1, Math.min(12, Number(value))) } },
+                })}
+            />
+        </label>
+    )
+}
+
+const Sizes:React.FC<{
+    el: Element | Container,
+}> = ({ el }) => (
+    <fieldset className="widths">
+        <legend>Widths (1-12):</legend>
+        <Width size="mobile" el={el} />
+        <Width size="tablet" el={el} />
+        <Width size="desktop" el={el} />
+    </fieldset>
+)
+
+
 const NewAttribute: React.FC<{ element: Element; nested: string }> = ({
     element,
     nested,
@@ -73,8 +113,8 @@ const EditAttribute: React.FC<{
                 className="value"
                 value={element.data[nested][attributeName] || ''}
                 onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE_ELEMENT',
-                    element,
+                    type: 'UPDATE',
+                    target: element,
                     patch: { [nested]: { [attributeName]: value } },
                 })}
             />
@@ -103,7 +143,7 @@ const Attribute: React.FC<{
 
 
 const Options: React.FC<{
-    label: string, element: Element, nested: string
+    label: string, element: Element, nested: string,
 }> = ({ label, element, nested }) => {
     const sc = useStoreContext()
     const options = element.data[nested]
@@ -140,7 +180,7 @@ const Options: React.FC<{
 const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
     const sc = useStoreContext()
     const { data } = element
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_ELEMENT', element, patch })
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: element, patch })
 
     return (
         <div>
@@ -161,6 +201,7 @@ const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
                     onChange={({ target: { value } }) => dp({ name: value })}
                 />
             </label>
+            <Sizes el={element} />
             <fieldset>
                 <legend>Class Names:</legend>
                 <label>
@@ -202,7 +243,7 @@ const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
 const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
     const sc = useStoreContext()
     const { data } = container
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_CONTAINER', container, patch })
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: container, patch })
 
     return (
         <div>
@@ -214,9 +255,9 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
                     onChange={({ target: { value } }) => dp({ className: value })}
                 />
             </label>
+            <Sizes el={container} />
         </div>
     )
-
 }
 
 
@@ -287,6 +328,15 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
             },
         },
     },
+    '.widths': {
+        span: {
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginRight: '10px',
+        },
+    },
+
 }))
 
 export const EditPanel = () => {

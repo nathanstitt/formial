@@ -11,6 +11,12 @@ export interface ControlDefinition {
     hasOptions?: boolean
 }
 
+export interface SizeData {
+    mobile: number
+    tablet: number
+    desktop: number
+}
+
 export interface Store {
     controls: Map<string, Control>,
     container: Container
@@ -19,6 +25,7 @@ export interface Store {
 
 export interface ContainerData {
     className: string
+    sizes: SizeData
 }
 
 export interface ContainerOptions {
@@ -37,6 +44,12 @@ export function isContainer(
     return false
 }
 
+const defaultSizes = ():SizeData => ({
+    mobile: 12,
+    tablet: 12,
+    desktop: 12,
+})
+
 export class Container {
 
     id: string
@@ -49,6 +62,7 @@ export class Container {
         this.type = options.type
         this.children = options.children || []
         this.data = options.data || {
+            sizes: defaultSizes(),
             className: this.type === 'row' ? 'row' : 'col'
         }
     }
@@ -81,6 +95,7 @@ export interface ElementData {
         label: string
         element: string
     }
+    sizes: SizeData
     attributes: object
     options?: {
         [value: string]: string
@@ -104,6 +119,7 @@ export class Element {
                 label: 'col-sm-2',
                 element: 'form-control col-sm-10',
             },
+            sizes: defaultSizes(),
             attributes: {},
         })
         if (control.hasOptions) {
@@ -233,8 +249,7 @@ type Action =
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
     | { type: 'DELETE', target: Element | Container, container: Container }
-    | { type: 'UPDATE_ELEMENT', element: Element, patch: any }
-    | { type: 'UPDATE_CONTAINER', container: Container, patch: any }
+    | { type: 'UPDATE', target: Element | Container, patch: any }
     | { type: 'EDIT', target: Element | Container }
     | { type: 'HIDE_EDIT' }
     | { type: 'ADD_ATTRIBUTE', element: Element, nested: string }
@@ -253,12 +268,8 @@ const storeReducer = (st:Store, action: Action): Store => {
             ]
             return { ...st }
         }
-        case 'UPDATE_ELEMENT': {
-            action.element.data = deepmerge(action.element.data, action.patch)
-            return { ...st }
-        }
-        case 'UPDATE_CONTAINER': {
-            action.container.data = deepmerge(action.container.data, action.patch)
+        case 'UPDATE': {
+            action.target.data = deepmerge(action.target.data as any, action.patch)
             return { ...st }
         }
         case 'EDIT': {
