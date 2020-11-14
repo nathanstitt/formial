@@ -18,14 +18,6 @@ const ControlLabelEl = styled.li({
     },
 })
 
-// const Row = () => {
-//     <ControlLabelEl ref={drag}>
-//         <GripHorizontal />
-//         <span>Row</span>
-//     </ControlLabelEl>
-//
-// }
-
 const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
     const [, drag] = useDrag({
         item: { id, type: 'control' },
@@ -37,7 +29,6 @@ const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
         </ControlLabelEl>
     )
 }
-
 
 const ControlsListingEl = styled.ul({
     padding: 0,

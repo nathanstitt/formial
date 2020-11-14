@@ -240,7 +240,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
 
 const ContainerDropEl = styled(FormDropEl)({
     minWidth: '20px',
-    height: '100%',
+
 })
 
 const ContainerDrop: React.FC<DropProps> = (props) => {

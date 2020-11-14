@@ -15,7 +15,9 @@ const renderOptions = (el: Element, rend: RenderT) => {
     if (options.length === 0) {
         return rend('', '')
     }
-    return options.map(([name, label]) => rend(name, label))
+    return options.map(([name, label]) => (
+        <label key={name}>{rend(name, label)}<span>{label}</span></label>
+    ))
 }
 
 
@@ -44,7 +46,8 @@ defaultControls.register([
         hasOptions: true,
         placeholder(el: Element) {
             return renderOptions(el, (n: string) => (
-                <input type="checkbox" name={n} className={el.data.classNames.element} readOnly />
+                <input type="checkbox" name={n}
+                    className={el.data.classNames.element} readOnly />
             ))
         },
     }),
@@ -54,7 +57,7 @@ defaultControls.register([
         icon: <DotCircle />,
         placeholder(el: Element) {
             return renderOptions(el, (n: string) => (
-                <input type="radio" name={n} className={el.data.classNames.element} readOnly />
+                <input key={n} type="radio" name={n} className={el.data.classNames.element} readOnly />
             ))
         },
     }),
@@ -64,9 +67,10 @@ defaultControls.register([
         hasOptions: true,
         icon: <CaretSquareDown />,
         placeholder(el: Element) {
+            const options = el.optionPairs
             return (
                 <select name={el.data.name}>
-                    {renderOptions(el, (v: string, l:string) => (
+                    {options.map(([v, l]) => (
                         <option key={v} value={v}>{l}</option>
                     ))}
                 </select>

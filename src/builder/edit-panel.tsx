@@ -55,7 +55,8 @@ const EditAttribute: React.FC<{
 }> = ({ element, nested, attributeName }) => {
     const sc = useStoreContext()
     const inputRef = React.useRef<HTMLInputElement>(null)
-    useKeyPress('Enter', () => {
+    useKeyPress(['Enter', 'Tab'], (ev) => {
+        ev.preventDefault()
         sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, element })
     }, { target: inputRef })
     React.useEffect(() => {
@@ -213,7 +214,7 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
         padding: '10px',
     },
     '.footer': {
-        padding: '20px',
+        padding: '10px',
         display: 'flex',
         justifyContent: 'flex-end',
         borderTop: '1px solid lightGrey',
