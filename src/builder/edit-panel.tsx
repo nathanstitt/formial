@@ -1,15 +1,16 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import { useStoreContext, Element, Container, isContainer } from './store'
+import {
+    useStoreContext, Input, Element, Container, isContainer, isInput,
+} from './store'
 import { useKeyPress } from '../hooks/use-key-press'
 
 
 const Width:React.FC<{
-    el: Element | Container,
+    el: Element,
     size: string,
 }> = ({ el, size }) => {
-
     const sc = useStoreContext()
     const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -33,27 +34,31 @@ const Width:React.FC<{
 }
 
 const Sizes:React.FC<{
-    el: Element | Container,
-}> = ({ el }) => (
-    <fieldset className="widths">
-        <legend>Widths (1-12):</legend>
-        <Width size="mobile" el={el} />
-        <Width size="tablet" el={el} />
-        <Width size="desktop" el={el} />
-    </fieldset>
-)
+    el: Element,
+}> = ({ el }) => {
+    if (isContainer(el) && el.type === 'row') {
+        return null
+    }
+    return (
+        <fieldset className="widths">
+            <legend>Widths (1-12):</legend>
+            <Width size="mobile" el={el} />
+            <Width size="tablet" el={el} />
+            <Width size="desktop" el={el} />
+        </fieldset>
+    )
+}
 
-
-const NewAttribute: React.FC<{ element: Element; nested: string }> = ({
-    element,
+const NewAttribute: React.FC<{ input: Input; nested: string }> = ({
+    input,
     nested,
 }) => {
     const sc = useStoreContext()
     const inputRef = React.useRef<HTMLInputElement>(null)
     const saveValue = () => sc.dispatch({
-        type: 'REPLACE_NEW_ATTRIBUTE', nested, element, name: inputRef.current!.value,
+        type: 'REPLACE_NEW_ATTRIBUTE', nested, input, name: inputRef.current!.value,
     })
-    const deleteAttr = () => sc.dispatch({ type: 'DELETE_ATTRIBUTE', element, nested, name: '' })
+    const deleteAttr = () => sc.dispatch({ type: 'DELETE_ATTRIBUTE', input, nested, name: '' })
 
     useKeyPress(['Enter', 'Escape'], (ev) => {
         switch (ev.key) {
@@ -89,18 +94,18 @@ const NewAttribute: React.FC<{ element: Element; nested: string }> = ({
 
 
 const EditAttribute: React.FC<{
-    element: Element
+    input: Input
     nested: string
     attributeName: string
-}> = ({ element, nested, attributeName }) => {
+}> = ({ input, nested, attributeName }) => {
     const sc = useStoreContext()
     const inputRef = React.useRef<HTMLInputElement>(null)
     useKeyPress(['Enter', 'Tab'], (ev) => {
         ev.preventDefault()
-        sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, element })
+        sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
     }, { target: inputRef })
     React.useEffect(() => {
-        const attrs = Object.keys(element.data[nested])
+        const attrs = Object.keys(input.data[nested])
         if (attributeName === attrs[attrs.length - 1]) {
             inputRef.current!.focus()
         }
@@ -111,16 +116,16 @@ const EditAttribute: React.FC<{
             <input
                 ref={inputRef}
                 className="value"
-                value={element.data[nested][attributeName] || ''}
+                value={input.data[nested][attributeName] || ''}
                 onChange={({ target: { value } }) => sc.dispatch({
                     type: 'UPDATE',
-                    target: element,
+                    target: input,
                     patch: { [nested]: { [attributeName]: value } },
                 })}
             />
             <button
                 onClick={() => {
-                    sc.dispatch({ type: 'DELETE_ATTRIBUTE', element, nested, name: attributeName })
+                    sc.dispatch({ type: 'DELETE_ATTRIBUTE', input, nested, name: attributeName })
                 }}
                 className='del-attr'
             >
@@ -131,26 +136,26 @@ const EditAttribute: React.FC<{
 }
 
 const Attribute: React.FC<{
-    element: Element
+    input: Input
     nested: string
     attributeName: string,
-}> = ({ element, nested, attributeName }) => {
+}> = ({ input, nested, attributeName }) => {
     if ('' === attributeName) {
-        return <NewAttribute nested={nested} element={element} />
+        return <NewAttribute nested={nested} input={input} />
     }
-    return <EditAttribute nested={nested} attributeName={attributeName} element={element} />
+    return <EditAttribute nested={nested} attributeName={attributeName} input={input} />
 }
 
 
 const Options: React.FC<{
-    label: string, element: Element, nested: string,
-}> = ({ label, element, nested }) => {
+    label: string, input: Input, nested: string,
+}> = ({ label, input, nested }) => {
     const sc = useStoreContext()
-    const options = element.data[nested]
+    const options = input.data[nested]
     if (!options) {
         return null
     }
-    const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, element })
+    const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
     const optionNames = Object.keys(options)
     return (
         <fieldset className='options'>
@@ -169,7 +174,7 @@ const Options: React.FC<{
                 <Attribute
                     key={attrName}
                     nested={nested}
-                    element={element}
+                    input={input}
                     attributeName={attrName}
                 />
             ))}
@@ -177,14 +182,14 @@ const Options: React.FC<{
     )
 }
 
-const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
+const InputEdit: React.FC<{ input: Input }> = ({ input }) => {
     const sc = useStoreContext()
-    const { data } = element
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: element, patch })
+    const { data } = input
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: input, patch })
 
     return (
         <div>
-            <h4>Edit {element.control.name}</h4>
+            <h4>Edit {input.control.name}</h4>
             <label>
                 <span>Label:</span>
                 <input
@@ -201,7 +206,7 @@ const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
                     onChange={({ target: { value } }) => dp({ name: value })}
                 />
             </label>
-            <Sizes el={element} />
+            <Sizes el={input} />
             <fieldset>
                 <legend>Class Names:</legend>
                 <label>
@@ -223,18 +228,18 @@ const ElementEdit: React.FC<{ element: Element }> = ({ element }) => {
                     />
                 </label>
                 <label>
-                    <span>Element:</span>
+                    <span>Input:</span>
                     <input
                         className="value"
-                        value={data.classNames.element || ''}
-                        onChange={({ target: { value } }) => dp({ classNames: { element: value } })
+                        value={data.classNames.input || ''}
+                        onChange={({ target: { value } }) => dp({ classNames: { input: value } })
                         }
                     />
                 </label>
             </fieldset>
 
-            <Options element={element} label="Options" nested="options" />
-            <Options element={element} label="Attributes" nested="attributes" />
+            <Options input={input} label="Options" nested="options" />
+            <Options input={input} label="Attributes" nested="attributes" />
 
         </div>
     )
@@ -261,11 +266,14 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
 }
 
 
-const Edit: React.FC<{ target: Element | Container }> = ({ target }) => {
+const Edit: React.FC<{ target: Element }> = ({ target }) => {
     if (isContainer(target)) {
         return <ContainerEdit container={target} />
     }
-    return <ElementEdit element={target} />
+    if (isInput(target)) {
+        return <InputEdit input={target} />
+    }
+    return null
 }
 
 

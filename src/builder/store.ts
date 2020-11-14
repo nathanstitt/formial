@@ -20,28 +20,12 @@ export interface SizeData {
 export interface Store {
     controls: Map<string, Control>,
     container: Container
-    editing?: Container | Element
+    editing?: Element
 }
 
-export interface ContainerData {
+export interface ElementData {
     className: string
     sizes: SizeData
-}
-
-export interface ContainerOptions {
-    id?: string
-    type: 'row' | 'column'
-    data?: ContainerData
-    children?: Array<Element | Container>
-}
-
-export function isContainer(
-    toBeDetermined: Container|Element,
-): toBeDetermined is Container {
-    if ((toBeDetermined as Container).type) {
-        return true
-    }
-    return false
 }
 
 const defaultSizes = ():SizeData => ({
@@ -50,50 +34,95 @@ const defaultSizes = ():SizeData => ({
     desktop: 12,
 })
 
-export class Container {
-
+export class Element {
     id: string
-    type: 'row' | 'column'
-    data: ContainerData
-    children: Array<Element | Container>
-
-    constructor(options: ContainerOptions) {
-        this.id = options.id || uuidv4()
-        this.type = options.type
-        this.children = options.children || []
-        this.data = options.data || {
+    control: Control
+    data: ElementData
+    constructor(control: Control, data = {}) {
+        this.control = control
+        this.id = uuidv4()
+        this.data = deepmerge({
+            className: '',
             sizes: defaultSizes(),
-            className: this.type === 'row' ? 'row' : 'col'
-        }
-    }
-
-    merge(patch: any): Container {
-        return new Container({
-            id: this.id,
-            type: this.type,
-            data: deepmerge(this.data, patch.data),
-            children: [...patch.children || []],
-        })
-    }
-
-    clone() {
-        return new Container({
-            id: this.id,
-            type: this.type,
-            data: {...this.data },
-            children: [...this.children],
-        })
+        }, data)
     }
 
 }
 
-export interface ElementData {
+interface ContainerData extends ElementData {
+    children: Array<Element>
+}
+
+
+export interface ContainerOptions {
+    id?: string
+    type: 'row' | 'column'
+    data?: ContainerData
+    children?: Array<Element>
+}
+
+export function isContainer(
+    toBeDetermined: Element,
+): toBeDetermined is Container {
+    if (toBeDetermined instanceof Container) {
+        return true
+    }
+    return false
+}
+
+export function isInput(
+    toBeDetermined: Element,
+): toBeDetermined is Input {
+    if (toBeDetermined instanceof Input) {
+        return true
+    }
+    return false
+}
+
+
+
+export class Container extends Element {
+
+    // id: string
+    type: 'row' | 'column'
+
+    children: Array<Element>
+
+    constructor(control:Control, options: ContainerOptions) {
+        super(control, options)
+        this.type = options.type
+        this.children = options.children || []
+    }
+
+    // merge(patch: any): Container {
+    //     return new Container({
+    //         id: this.id,
+    //         type: this.type,
+    //         data: deepmerge(this.data, patch.data),
+    //         children: [...patch.children || []],
+    //     })
+    // }
+
+    // clone() {
+    //     return new Container({
+    //         id: this.id,
+    //         type: this.type,
+    //         data: {...this.data },
+    //         children: [...this.children],
+    //     })
+    // }
+
+}
+
+
+
+export interface InputData extends ElementData {
     label: string
     name: string
     classNames: {
         wrapper: string
         label: string
-        element: string
+        input: string
     }
     sizes: SizeData
     attributes: object
@@ -102,24 +131,21 @@ export interface ElementData {
     }
 }
 
-export class Element {
-
-    id: string
-    control: Control
-    data: ElementData
+export class Input extends Element {
+    data: InputData
 
     constructor(control: Control, data = {}) {
-        this.control = control
-        this.id = uuidv4()
+        super(control, data)
         this.data = deepmerge(data, {
             label: `${this.control.name} label`,
+            className: '',
+            sizes: defaultSizes(),
             name: '',
             classNames: {
-                wrapper: 'form-wrapper',
+                wrapper: 'form-group',
                 label: 'col-sm-2',
-                element: 'form-control col-sm-10',
+                input: 'form-control col-sm-10',
             },
-            sizes: defaultSizes(),
             attributes: {},
         })
         if (control.hasOptions) {
@@ -161,8 +187,8 @@ export class Control implements ControlDefinition {
         this.hasOptions = definition.hasOptions
     }
 
-    createElement(): Element | Container {
-        return new Element(this)
+    createElement(): Element {
+        return new Input(this)
     }
 
 }
@@ -170,8 +196,8 @@ export class Control implements ControlDefinition {
 
 export class RowControl extends Control {
 
-    createElement(): Element | Container {
-        return new Container({ type: 'row' })
+    createElement(): Element {
+        return new Container(this, { type: 'row' })
     }
 
 }
@@ -179,8 +205,8 @@ export class RowControl extends Control {
 
 export class ColumnControl extends Control {
 
-    createElement(): Element | Container {
-        return new Container({ type: 'column' })
+    createElement(): Element {
+        return new Container(this, { type: 'column' })
     }
 
 }
@@ -206,7 +232,7 @@ export function addElement(
     }: InsertElementOptions,
 ): Store {
     let cntrl: Control | undefined
-    let element: Element| Container | undefined
+    let element: Element | undefined
 
     if (fromIndex != null && fromContainer) {
         element = fromContainer.children[fromIndex]
@@ -248,13 +274,13 @@ type Action =
     | { type: 'ADD_ELEMENT', id: string,
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
-    | { type: 'DELETE', target: Element | Container, container: Container }
-    | { type: 'UPDATE', target: Element | Container, patch: any }
-    | { type: 'EDIT', target: Element | Container }
+    | { type: 'DELETE', target: Element, container: Container }
+    | { type: 'UPDATE', target: Element, patch: any }
+    | { type: 'EDIT', target: Element }
     | { type: 'HIDE_EDIT' }
-    | { type: 'ADD_ATTRIBUTE', element: Element, nested: string }
-    | { type: 'REPLACE_NEW_ATTRIBUTE', element: Element, nested: string, name: string, }
-    | { type: 'DELETE_ATTRIBUTE', element: Element, nested: string, name: string }
+    | { type: 'ADD_ATTRIBUTE', input: Input, nested: string }
+    | { type: 'DELETE_ATTRIBUTE', input: Input, nested: string, name: string }
+    | { type: 'REPLACE_NEW_ATTRIBUTE', input: Input, nested: string, name: string, }
 
 
 const storeReducer = (st:Store, action: Action): Store => {
@@ -279,16 +305,16 @@ const storeReducer = (st:Store, action: Action): Store => {
             return { ...st, editing: undefined }
         }
         case 'ADD_ATTRIBUTE': {
-            action.element.data[action.nested][''] = ''
+            action.input.data[action.nested][''] = ''
             return { ...st }
         }
         case 'REPLACE_NEW_ATTRIBUTE': {
-            delete action.element.data[action.nested]['']
-            action.element.data[action.nested][action.name] = ''
+            delete action.input.data[action.nested]['']
+            action.input.data[action.nested][action.name] = ''
             return { ...st }
         }
         case 'DELETE_ATTRIBUTE': {
-            delete action.element.data[action.nested][action.name]
+            delete action.input.data[action.nested][action.name]
             return { ...st }
         }
     }
@@ -299,7 +325,7 @@ const storeReducer = (st:Store, action: Action): Store => {
 export const initStore = ():Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
-    store.container = new Container({ type: 'row' })
+    store.container = new Container(store.controls.get('row'), { type: 'row' })
 
     // store.elements.push(store.controls.get('select')!.createElement());
     // [store.editing] = store.elements
