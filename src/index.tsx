@@ -1,6 +1,7 @@
 // import * as React from 'react'
 
 export * from './builder'
+export * from './builder/store'
 
 export class Foo {
 

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
 import { ControlsListing } from './builder/controls'
-import { useProvidedStoreContext, StoreContext } from './builder/store'
+import { useProvidedStoreContext, StoreContext, Container } from './builder/store'
 import { FormElements } from './builder/form'
 import { EditPanel } from './builder/edit-panel'
 
@@ -41,8 +41,18 @@ const BuilderEl = styled.div({
         flexDirection: 'column',
     },
 })
-export const Builder = () => {
+
+interface BuilderProps {
+    onChange?(form: Container): void
+}
+
+export const Builder:React.FC<BuilderProps> = ({ onChange }) => {
     const ctx = useProvidedStoreContext()
+    React.useEffect(() => {
+        if (onChange) {
+            onChange(ctx.store.container)
+        }
+    }, [onChange, ctx.store])
 
     return (
         <DndProvider backend={HTML5Backend}>

@@ -13,7 +13,6 @@ export interface ControlDefinition {
 
 export interface Store {
     controls: Map<string, Control>,
-    elements: Array<Element>
     container: Container
     editing?: Element
 }
@@ -249,26 +248,26 @@ const storeReducer = (st:Store, action: Action): Store => {
         }
         case 'UPDATE_ELEMENT': {
             action.element.data = deepmerge(action.element.data, action.patch)
-            return { ...st, elements: [...st.elements] }
+            return { ...st }
         }
         case 'EDIT_ELEMENT': {
-            return { ...st, editing: action.element }
+            return { ...st }
         }
         case 'HIDE_ELEMENT_EDIT': {
             return { ...st, editing: undefined }
         }
         case 'ADD_ATTRIBUTE': {
             action.element.data[action.nested][''] = ''
-            return { ...st, elements: [...st.elements] }
+            return { ...st }
         }
         case 'REPLACE_NEW_ATTRIBUTE': {
             delete action.element.data[action.nested]['']
             action.element.data[action.nested][action.name] = ''
-            return { ...st, elements: [...st.elements] }
+            return { ...st }
         }
         case 'DELETE_ATTRIBUTE': {
             delete action.element.data[action.nested][action.name]
-            return { ...st, elements: [...st.elements] }
+            return { ...st }
         }
     }
 
@@ -278,7 +277,6 @@ const storeReducer = (st:Store, action: Action): Store => {
 export const initStore = ():Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
-    store.elements = []
     store.container = new Container({ type: 'row' })
 
     // store.elements.push(store.controls.get('select')!.createElement());
