@@ -81,6 +81,7 @@ defaultControls.register([
     new Control({
         id: 'radio',
         name: 'Radio Input',
+        hasOptions: true,
         icon: <DotCircle />,
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (

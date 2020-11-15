@@ -36,7 +36,7 @@ const Width:React.FC<{
 const Sizes:React.FC<{
     el: Element,
 }> = ({ el }) => {
-    if (isContainer(el) && el.type === 'row') {
+    if (isContainer(el) && el.direction === 'row') {
         return null
     }
     return (
@@ -209,7 +209,7 @@ const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
                 />
             </label>
 
-            <Options input={input} label="Attributes" nested="attributes" />
+            <Options input={input} label="Options" nested="options" />
 
             <fieldset>
                 <legend>Class Names:</legend>
@@ -244,7 +244,8 @@ const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
 
             <Sizes el={input} />
 
-            <Options input={input} label="Options" nested="options" />
+            <Options input={input} label="Attributes" nested="attributes" />
+
         </div>
     )
 }

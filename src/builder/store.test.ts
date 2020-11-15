@@ -1,5 +1,9 @@
-import { Control, Store, initStore, addElement, Container, Element } from './store'
-
+import {
+    Control, Store, initStore, addElement, Container, Element, unserialize, TextElement, InputElement,
+} from './store'
+import {
+    SerializedInputElement, SerializedContainer
+} from '../data'
 
 class TestElement extends Element {
 
@@ -72,11 +76,11 @@ describe('merging', () => {
         })
 
         test('across containers', () => {
-            store.container.children.push(new Container({
-                type: 'row',
+            store.container.children.push(new Container(testCntrl, {
+                direction: 'row',
             }))
-            store.container.children.push(new Container({
-                type: 'row',
+            store.container.children.push(new Container(testCntrl, {
+                direction: 'row',
             }))
 
             addStoreElement(store.container.children[0] as Container)
@@ -99,18 +103,118 @@ describe('merging', () => {
         })
     })
 
-    test('containers', () => {
-        const el = testCntrl.createElement()
-        const c = new Container({ type: 'row' })
-        c.children.push(el)
+    describe('serializing', () => {
+        test('elements', () => {
+            const obj = {
+                id: '1234',
+                type: 'ELEMENT',
+                control: 'test',
+                className: 'testcls',
+                sizes: { mobile: 3, tablet: 2, desktop: 1 },
+            }
+            const el = unserialize(store.controls, obj) as Element
+            expect(el).not.toBeNull()
+            expect(el).toBeInstanceOf(Element)
+            expect(el).toMatchObject({
+                id: "1234",
+                data: {
+                    className: 'testcls',
+                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                },
+            })
+            expect(el.serialized).toEqual(obj)
+        })
 
-        const newC = c.merge({ children: c.children })
+        test('containers', () => {
+            const obj: SerializedContainer = {
+                id: '1234-col',
+                type: 'CONTAINER',
+                control: 'test',
+                direction: 'column',
+                className: 'testcls',
+                sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                children: [
+                    {
+                        id: '12345',
+                        type: 'ELEMENT',
+                        control: 'test',
+                        className: 'testcls',
+                        sizes: { mobile: 3, tablet: 2, desktop: 1 },
 
-        expect(newC.id).toEqual(c.id)
+                    }
+                ],
+            }
+            const ct = unserialize(store.controls, obj) as Container
+            expect(ct).toBeInstanceOf(Container)
+            expect(ct).toMatchObject({
+                direction: 'column',
+                id: '1234-col',
+            })
+            expect(ct.children[0]).toBeInstanceOf(Element)
+            expect(ct.children[0].serialized).toMatchObject({
+                id: '12345',
+                type: 'ELEMENT',
+            })
+        })
 
-        expect(newC.children[0].id).toEqual(el.id)
-
-        // const el = cntrl.createElement()
-        // expect(el).toBeInstanceOf(TestElement)
+        test('text', () => {
+            const obj = {
+                id: '1234',
+                type: 'TEXT',
+                control: 'test',
+                className: 'testcls',
+                sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                tag: 'p',
+                text: "hello world"
+            }
+            const el = unserialize(store.controls, obj) as TextElement
+            expect(el).not.toBeNull()
+            expect(el).toBeInstanceOf(TextElement)
+            expect(el).toMatchObject({
+                id: "1234",
+                data: {
+                    text: 'hello world',
+                    className: 'testcls',
+                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                },
+            })
+            expect(el.serialized).toEqual(obj)
+        })
+        test('input', () => {
+            const obj: SerializedInputElement = {
+                id: '1234',
+                type: 'INPUT',
+                control: 'test',
+                className: 'testcls',
+                sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                label: 'My Input',
+                name: 'input-test',
+                classNames: {
+                    wrapper: 'form-group',
+                    label: '',
+                    input: ''
+                },
+                attributes: {
+                    'data-test': 'true'
+                },
+                options: {
+                    'one': 'One',
+                    'two': 'Two',
+                }
+            }
+            const el = unserialize(store.controls, obj) as InputElement
+            expect(el).not.toBeNull()
+            expect(el).toBeInstanceOf(InputElement)
+            expect(el).toMatchObject({
+                id: "1234",
+                data: {
+                    label: 'My Input',
+                    className: 'testcls',
+                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
+                },
+            })
+            expect(el.serialized).toEqual(obj)
+        })
     })
+
 })

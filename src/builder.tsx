@@ -6,6 +6,7 @@ import { ControlsListing } from './builder/controls'
 import { useProvidedStoreContext, StoreContext, Container } from './builder/store'
 import { FormElements } from './builder/form'
 import { EditPanel } from './builder/edit-panel'
+import { SerializedContainer } from './data'
 
 const FormPanelEl = styled.div({
     display: 'flex',
@@ -19,14 +20,6 @@ const FormPanel = () => {
         </FormPanelEl>
     )
 }
-
-// const ControlsPanel = () => {
-//     return (
-//         <div>
-//             <ControlsListing />
-//         </div>
-//     )
-// }
 
 const BuilderEl = styled.div({
     display: 'grid',
@@ -44,14 +37,17 @@ const BuilderEl = styled.div({
 
 interface BuilderProps {
     onChange?(form: Container): void
+    defaultValue?: SerializedContainer
+    value?: SerializedContainer
 }
 
-export const Builder:React.FC<BuilderProps> = ({ onChange }) => {
-    const ctx = useProvidedStoreContext()
+export const Builder:React.FC<BuilderProps> = ({ onChange, value, defaultValue }) => {
+    const ctx = useProvidedStoreContext(defaultValue)
     React.useEffect(() => {
-        if (onChange) {
-            onChange(ctx.store.container)
-        }
+        ctx.dispatch({ type: 'REPLACE', container: value })
+    }, [value])
+    React.useEffect(() => {
+        if (onChange) { onChange(ctx.store.container) }
     }, [onChange, ctx.store])
 
     return (

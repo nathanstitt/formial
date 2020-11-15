@@ -3,8 +3,9 @@ import cn from 'classnames'
 import { useKeyPress } from '../hooks/use-key-press'
 
 interface EditableTextProps {
-    className: string
-    children: string
+    className?: string
+    children: React.ReactNode
+    textValue: string
     onTextSaved(text: string): void
 }
 
@@ -15,12 +16,12 @@ interface EditingState {
 // mostly take from joelmturner.com/blog/inline-text-edit-react-hooks
 // but sets cursor position to match click position
 export const EditableText:React.FC<EditableTextProps> = (props) => {
-    const { onTextSaved, children: textValue } = props
+    const { onTextSaved, textValue, children } = props
 
     const [isInputActive, setIsInputActive] = useState<boolean | EditingState>(
         false,
     )
-    const [inputValue, setInputValue] = useState(props.children)
+    const [inputValue, setInputValue] = useState(textValue)
 
     const wrapperRef = useRef<HTMLSpanElement>(null)
     const textRef = useRef(null)
@@ -85,12 +86,12 @@ export const EditableText:React.FC<EditableTextProps> = (props) => {
                 style={{ display: isInputActive ? 'none' : 'inline' }}
                 className='inline-text display'
             >
-                {textValue}
+                {children}
             </span>
             <input
                 ref={inputRef}
                 style={{
-                    minWidth: `${Math.ceil(inputValue.length)}ch`,
+
                     display: isInputActive ? 'inline' : 'none',
                 }}
                 value={inputValue}

@@ -236,7 +236,6 @@ const TextPreview: React.FC<{
     index, control, container,
 }) => {
     const sc = useStoreContext()
-
     const [{ opacity }, drag, preview] = useDrag({
         item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
