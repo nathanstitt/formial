@@ -5,6 +5,7 @@ import { useDrop, useDrag, DragElementWrapper, DragSourceOptions } from 'react-d
 import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
+import { EditableText } from './editable-text'
 
 import {
     useStore,
@@ -234,6 +235,8 @@ const TextPreview: React.FC<{
 }> = ({
     index, control, container,
 }) => {
+    const sc = useStoreContext()
+
     const [{ opacity }, drag, preview] = useDrag({
         item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
@@ -249,7 +252,12 @@ const TextPreview: React.FC<{
             className={cn('element-preview', control.control.id)}
         >
             <div className='control-preview'>
-                {text}
+                <EditableText
+                    onTextSaved={(updated) => {
+                        sc.dispatch({ type: 'UPDATE', target: control, patch: { text: updated } })
+                    }}
+                    textValue={control.data.text}
+                >{text}</EditableText>
             </div>
             <Controls target={control} container={container} drag={drag} />
         </ElementPreviewEl>
@@ -321,7 +329,7 @@ const ContainerPreview:React.FC<{
         <ContainerPreviewEl
             ref={preview}
             style={{ opacity }}
-            className={cn('container-preview', container.type, {
+            className={cn('container-preview', container.direction, {
                 empty: container.children.length === 0,
             })}
         >
