@@ -10,6 +10,9 @@ export interface SerializedElement {
     control: string
     className: string
     sizes: SerializedSize
+    attributes?: {
+        [value: string]: string
+    }
 }
 
 export interface SerializedInputElement extends SerializedElement {
@@ -20,9 +23,6 @@ export interface SerializedInputElement extends SerializedElement {
         wrapper: string
         label: string
         input: string
-    }
-    attributes: {
-        [value: string]: string
     }
     options?: {
         [value: string]: string
@@ -36,7 +36,7 @@ export interface SerializedTextElement extends SerializedElement {
 //  id: string; type: string; control: string;   tag: string; text: string;
 
 export interface SerializedContainer extends SerializedElement {
-    direction: 'row' | 'column'
+    direction: string // 'row' | 'column'
     children: Array<SerializedElement|SerializedContainer|SerializedInputElement|SerializedTextElement>
 }
 

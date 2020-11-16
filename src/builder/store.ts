@@ -35,6 +35,9 @@ export interface Store {
 export interface ElementData {
     className: string
     sizes: SizeData
+    attributes?: {
+        [value: string]: string
+    }
 }
 
 const defaultSizes = ():SizeData => ({
@@ -104,7 +107,7 @@ interface ContainerData extends ElementData {
 
 export interface ContainerOptions {
     id?: string
-    direction: 'row' | 'column'
+    direction: string // 'row' | 'column'
     data?: ContainerData
     children?: Array<Element>
 }
@@ -112,7 +115,7 @@ export interface ContainerOptions {
 type ContainerChild = Element|TextElement|Container|InputElement
 
 export class Container extends Element {
-    direction: 'row' | 'column'
+    direction: string // 'row' | 'column'
     children: Array<ContainerChild>
     constructor(control:Control, options: ContainerOptions) {
         super(control, options)
@@ -165,9 +168,6 @@ export interface InputData extends ElementData {
         label: string
         input: string
     }
-    attributes: {
-        [value: string]: string
-    }
     options?: {
         [value: string]: string
     }
@@ -182,7 +182,7 @@ export class InputElement extends Element {
             label: `${this.control.name} label`,
             className: '',
             sizes: defaultSizes(),
-            name: '',
+            name: `${this.control.id}-${Math.round(Math.random() * 9999) + 1000}`,
             classNames: {
                 wrapper: 'form-group',
                 label: 'col-sm-2',
@@ -405,12 +405,10 @@ const storeReducer = (st:Store, action: Action): Store => {
             return { ...st }
         }
     }
-
     return st
 }
 
 export const initStore = (defaultValue?: SerializedContainer):Store => {
-    console.log(defaultValue)
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
     store.container = defaultValue ? unserialize(store.controls, defaultValue) :
