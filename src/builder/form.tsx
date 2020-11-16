@@ -376,9 +376,12 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     boxSizing: 'border-box',
     boxShadow: '0 0 2px 1px rgba(0, 0, 0, 0.1)',
     opacity: editing ? '0.3' : '1',
-    transition: 'opacity 0.3s ease-in-out',
+    transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
+    '.drop': {
+        transition: 'all 0.3s ease-in-out',
+    },
     '> .container-preview': {
         margin: '0 2px',
     },
