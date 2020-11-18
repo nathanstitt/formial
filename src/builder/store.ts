@@ -2,7 +2,6 @@ import * as React from 'react'
 import deepmerge from 'deepmerge'
 import { uuidv4 } from '../lib'
 import {
-    SerializedSize,
     SerializedElement,
     SerializedContainer,
     SerializedTextElement,
@@ -20,10 +19,6 @@ export interface ControlDefinition {
     hasOptions?: boolean
 }
 
-export interface SizeData extends SerializedSize {
-
-}
-
 type ControlsMap = Map<string, Control>
 
 export interface Store {
@@ -34,17 +29,10 @@ export interface Store {
 
 export interface ElementData {
     className: string
-    sizes: SizeData
     attributes?: {
         [value: string]: string
     }
 }
-
-const defaultSizes = ():SizeData => ({
-    mobile: 12,
-    tablet: 12,
-    desktop: 12,
-})
 
 type ElementSerialization =
     | SerializedElement
@@ -85,7 +73,6 @@ export class Element {
         this.id = data.id || uuidv4()
         this.data = deepmerge({
             className: '',
-            sizes: defaultSizes(),
         }, data)
     }
 
@@ -148,7 +135,6 @@ export class TextElement extends Element {
             tag: control.id == 'para' ? 'p' : 'h3',
             text: 'Some text…',
             className: '',
-            sizes: defaultSizes(),
         }, data]) as TextData
     }
     get serialized(): SerializedTextElement {
@@ -173,6 +159,7 @@ export interface InputData extends ElementData {
     }
 }
 
+
 export class InputElement extends Element {
     data: InputData
 
@@ -180,19 +167,29 @@ export class InputElement extends Element {
         super(control, data)
         this.data = deepmerge({
             label: `${this.control.name} label`,
-            className: '',
-            sizes: defaultSizes(),
+            className: 'mb-2',
             name: `${this.control.id}-${Math.round(Math.random() * 9999) + 1000}`,
             classNames: {
-                wrapper: 'form-group',
-                label: 'col-sm-2',
-                input: 'form-control col-sm-10',
+                wrapper: '',
+                label: '',
+                input: this.inputClassName,
             },
             attributes: {},
         }, data)
         if (control.hasOptions && !this.data.options) {
             this.data.options = {}
         }
+    }
+
+    get inputClassName() {
+        switch (this.control.id) {
+            case 'input':
+            case 'textarea':
+            case 'select': {
+                return 'form-floating'
+            }
+        }
+        return 'form-control'
     }
 
     get placeholder(): React.ReactNode {
@@ -243,7 +240,7 @@ export class Control implements ControlDefinition {
 }
 
 export function isContainer(
-    toBeDetermined: Element,
+    toBeDetermined: any,
 ): toBeDetermined is Container {
     if (toBeDetermined instanceof Container) {
         return true
@@ -412,7 +409,7 @@ export const initStore = (defaultValue?: SerializedContainer):Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
     store.container = defaultValue ? unserialize(store.controls, defaultValue) :
-        new Container(store.controls.get('row'), { direction: 'row' })
+        new Container(store.controls.get('col'), { direction: 'col' })
 
     // store.elements.push(store.controls.get('select')!.createElement());
     // [store.editing] = store.elements

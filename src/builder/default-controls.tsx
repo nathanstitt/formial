@@ -30,12 +30,12 @@ defaultControls.register([
     new RowControl({
         id: 'row',
         name: 'Row',
-        icon: <GripLines />,
+        icon: <GripLinesVertical />,
     }),
     new ColumnControl({
         id: 'col',
         name: 'Column',
-        icon: <GripLinesVertical />,
+        icon: <GripLines />,
     }),
 
     new TextControl({
@@ -73,8 +73,7 @@ defaultControls.register([
         hasOptions: true,
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input type="checkbox" name={n}
-                    className={el.data.classNames.input} readOnly />
+                <input type="checkbox" name={n} readOnly />
             ))
         },
     }),
@@ -85,7 +84,7 @@ defaultControls.register([
         icon: <DotCircle />,
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input key={n} type="radio" name={n} className={el.data.classNames.input} readOnly />
+                <input key={n} type="radio" name={n} readOnly />
             ))
         },
     }),

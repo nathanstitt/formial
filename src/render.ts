@@ -10,11 +10,18 @@ import {
 
 import cx from 'classnames'
 
+
+interface UnserializeOptions {
+    parent?: Container
+}
+
 class Element {
     data: SerializedElement
+    options: UnserializeOptions
 
-    constructor(data: SerializedElement) {
+    constructor(data: SerializedElement, options: UnserializeOptions) {
         this.data = data
+        this.options = options
     }
     el?:HTMLElement
 
@@ -22,14 +29,23 @@ class Element {
         return document.createElement('div')
     }
 
+    get columnSmWidth():number {
+        if (this.options.parent instanceof Container && this.options.parent.isRow) {
+            return Math.round(12 / this.options.parent.children.length)
+        }
+        return 0
+    }
+
     render(root:HTMLElement, skipAttributes:boolean = false){
         if (!this.el) {
             this.el = this.createElement()
         }
         this.setAttributes({
-            'data-type': this.data.type,
+            'data-control': this.data.type,
             'data-id': this.data.id,
-            'class': cx(this.data.className, this.sizeClassNames),
+            'class': cx(this.data.className, {
+                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth != 0,
+            }),
         })
 
         if (!skipAttributes) {
@@ -42,19 +58,6 @@ class Element {
         return this
     }
 
-    get sizeClassNames() {
-        if (!this.data) {
-            console.log("NO DATA", this)
-        }
-        const sz = this.data.sizes || {}
-
-        return cx({
-            [`col-sm-${sz.mobile}`]: sz.mobile,
-            [`col-md-${sz.tablet}`]: sz.tablet,
-            [`col-lg-${sz.desktop}`]: sz.desktop,
-        })
-    }
-
     setAttributes(
         attrs = this.data.attributes,
         el:HTMLElement|undefined = this.el,
@@ -63,7 +66,9 @@ class Element {
             return
         }
         Object.keys(attrs).forEach((k) => {
-            el.setAttribute(k, String(attrs[k]))
+            if (k) {
+                el.setAttribute(k, String(attrs[k]))
+            }
         })
     }
 
@@ -81,8 +86,8 @@ class TextElement extends Element {
 
     data: SerializedTextElement
 
-    constructor(data: SerializedTextElement) {
-        super(data)
+    constructor(data: SerializedTextElement, options: UnserializeOptions) {
+        super(data, options)
         this.data = data
     }
 
@@ -104,34 +109,29 @@ class InputElement extends Element {
     label?: HTMLLabelElement
     input?: HTMLElement
 
-    constructor(data: SerializedInputElement) {
-        super(data)
+    constructor(data: SerializedInputElement, options: UnserializeOptions) {
+        super(data, options)
         this.data = data
     }
+
 
     render(root:HTMLElement){
         super.render(root, true)
 
-
         this.setAttributes({
-            class: cx(this.data.classNames.wrapper, this.sizeClassNames),
+            'data-type': this.data.control,
+            class: cx(this.data.className, {
+                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth != 0,
+            }),
         })
-
-        if (!this.label) {
-            this.label = document.createElement('label')
-            this.el!.appendChild(this.label)
-        }
-        this.label.className = this.data.classNames.label
-        this.label.innerText = this.data.label
-        this.label.setAttribute('for', this.data.id)
 
         if (!this.input) {
             const renderer = this[`_${this.data.control}`]
             if (renderer) {
                 const input =  renderer.apply(this)
                 this.input = input as HTMLElement
-                this.input.className = this.data.classNames.input
-                this.input.id = this.data.id
+                // this.input.className = this.data.classNames.input
+                // this.input.id = this.data.id
                 this.el!.appendChild(this.input)
             } else {
                 console.warn(`Can't render input type ${this.data.control}`)
@@ -156,13 +156,29 @@ class InputElement extends Element {
     }
 
     createInput(tag: string) {
+        const float = document.createElement('div')
+        float.className = this.data.classNames.wrapper
+
         const input = document.createElement(tag)
-        this.setAttributes(this.data.attributes, input)
+
         this.setAttributes({
             name: this.data.name,
-            class: this.data.classNames.input,
+            class: 'form-control',
+            placeholder: this.data.label,
+            ...this.data.attributes,
         }, input)
-        return input
+
+        float.appendChild(input)
+
+        const label = document.createElement('label')
+        label.innerText = this.data.label
+        this.setAttributes({
+            for: this.data.id,
+
+        }, label)
+        float.appendChild(label)
+
+        return float
     }
 
     _textarea() {
@@ -176,18 +192,37 @@ class InputElement extends Element {
     renderOptions(cb: (a:string, b:string) => { [k:string]: string }) {
         const wrapper = document.createElement('div')
         this.setAttributes(this.data.attributes, wrapper)
+        wrapper.className = this.data.classNames.wrapper
+
+        const labelTitle = document.createElement('label')
+        labelTitle.innerText = this.data.label
+        wrapper.appendChild(labelTitle)
+
         this.optionPairs.forEach(([optId, optValue]) => {
             const { id, inputType, name, value, label } = cb(optId, optValue)
-            const option = document.createElement('input')
+            const inputId = `${id}-${this.data.id}`
+
+            const option = document.createElement('label')
+            this.setAttributes({ class: 'form-check' }, option)
+
+            const input = document.createElement('input')
             this.setAttributes({
-                'data-id': id, type: inputType, name, value
-            }, option)
-            const labelEl = document.createElement('label')
-            labelEl.appendChild(option)
-            const txt = document.createElement('span')
-            txt.innerText = label
-            labelEl.appendChild(txt)
-            wrapper.appendChild(labelEl)
+                class: 'form-check-input',
+                'data-id': id,
+                type: inputType,
+                name, value,
+                id: inputId,
+            }, input)
+            option.appendChild(input)
+
+            const labelEl = document.createElement('span')
+            this.setAttributes({
+                className: 'form-check-label',
+            }, labelEl)
+            labelEl.innerText = label
+            option.appendChild(labelEl)
+
+            wrapper.appendChild(option)
         })
         return wrapper
     }
@@ -212,16 +247,35 @@ class InputElement extends Element {
         }))
     }
 
-    _select(): HTMLSelectElement {
-        const input = document.createElement('select')
-        input.setAttribute('name', this.data.name)
+    _select(): HTMLDivElement {
+        const wrapper = document.createElement('div')
+        wrapper.className = 'form-floating'
+
+        const select = document.createElement('select')
+        this.setAttributes({
+            name: this.data.name,
+            class: 'form-select',
+            id: this.data.id,
+        }, select)
+
         this.optionPairs.forEach(([value, label]) => {
             const option = document.createElement('option')
             this.setAttributes({ value }, option)
             option.innerText = label
-            input.appendChild(option)
+            select.appendChild(option)
         })
-        return input
+
+        wrapper.appendChild(select)
+
+        const label = document.createElement('label')
+        this.setAttributes({
+            for: this.data.id,
+        }, label)
+        label.innerText = this.data.label
+
+        wrapper.appendChild(label)
+
+        return wrapper
     }
 }
 
@@ -230,15 +284,22 @@ class Container extends Element {
     children: Array<Element>
 
     data: SerializedContainer
-    constructor(data: SerializedContainer) {
-        super(data)
+    constructor(data: SerializedContainer, options: UnserializeOptions) {
+        super(data, options)
         this.data = data
-        this.children = data.children.map(c => unserialize(c)).filter(Boolean) as Array<Element>
+        this.children = data.children.map(c => unserialize(c, { parent: this })).filter(Boolean) as Array<Element>
+    }
+
+    get isRow() {
+        return this.data.direction === 'row'
     }
 
     render(root:HTMLElement){
         super.render(root)
-        this.el!.className = cx(this.el?.className, this.data.direction)
+        this.el!.className = cx( this.el?.className, {
+            row: this.isRow,
+            'd-flex flex-column': !this.isRow,
+        })
         this.children.forEach(c => c.render(this.el!))
         return this
     }
@@ -246,25 +307,29 @@ class Container extends Element {
 }
 
 
-const unserialize = (data: SerializedElement):Element => {
+    // { parent }: { parent?: Container }
+    // const
+
+const unserialize = (data: SerializedElement, options: UnserializeOptions = {}):Element => {
 
     if (isSerializedText(data)) {
-        return new TextElement(data)
+        return new TextElement(data, options)
     }
 
     if (isSerializedContainer(data)) {
-        return new Container(data)
+        return new Container(data, options)
     }
 
     if (isSerializedInput(data)) {
-        return new InputElement(data)
+        return new InputElement(data, options)
     }
 
-    return new Element(data)
+    return new Element(data, options)
 }
 
 
 export const render = (root: HTMLElement, container: SerializedContainer) => {
+    root.innerHTML = ''
     const form = unserialize(container)
     form.render(root)
 }

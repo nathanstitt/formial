@@ -75,10 +75,11 @@ const ElementPreviewEl = styled.div({
     padding: '10px',
     color: '#0c0c0c',
     justifyContent: 'space-between',
-    alignItems: 'stretch',
+    alignItems: 'flex-start',
     minHeight: '40px',
-    '&.row': {
-        '> .column': {
+
+    '&.container-row': {
+        '> .container-col': {
             margin: '-1px',
             flex: 1,
         },
@@ -88,22 +89,29 @@ const ElementPreviewEl = styled.div({
             right: undefined,
             display: 'flex',
             flexDirection: 'column',
+
+            width: '30px',
             '> *': {
                 marginLeft: 0,
             },
         },
     },
-
-    '&.column': {
+    '> .container-preview': {
+        flex: 1,
+    },
+    '&.container-column': {
         flexDirection: 'column',
+        justifyContent: 'flex-start',
         '.container-drop': {
             width: '100%',
         },
-        '&.empty': {
-            flex: 1,
-        },
     },
-
+    '&.input .label, &.textarea .label': {
+        marginBottom: '-20px',
+        zIndex: 1,
+        fontSize: '80%',
+        marginLeft: '10px',
+    },
     '.control-type': {
         fontSize: '0.8rem',
         position: 'absolute',
@@ -125,11 +133,9 @@ const ElementPreviewEl = styled.div({
         opacity: 0,
         transition: 'opacity 0.3s ease-in-out',
         display: 'flex',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-around',
         alignItems: 'flex-start',
-        '> *': {
-            marginLeft: '15px',
-        },
+        width: '110px',
         button: {
             border: 0,
             padding: 0,
@@ -170,6 +176,9 @@ const ElementPreviewEl = styled.div({
         '&.row': {
             flexDirection: 'column',
         },
+    },
+    'input + span': {
+        marginLeft: '10px',
     },
 })
 
@@ -220,7 +229,7 @@ const InputPreview: React.FC<{
             className={cn('element-preview', input.control.id)}
         >
             <div className='control-preview'>
-                <span>{input.data.label}</span>
+                <span className="label">{input.data.label}</span>
                 {input.placeholder}
             </div>
             <Controls target={input} container={container} drag={drag} />
@@ -269,6 +278,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
     minHeight: '40px',
     borderRadius: '5px',
     padding: '0',
+    alignItems: 'stretch',
     '&.empty': {
         alignItems: 'stretch',
         '> .drop': {
@@ -287,7 +297,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
         borderBottomWidth: 0,
     },
     '.element-preview': {
-        flex: 1,
+        // flex: 1,
     },
     '&:hover': {
         '.container-drop': {
@@ -328,7 +338,7 @@ const ContainerPreview:React.FC<{
         <ContainerPreviewEl
             ref={preview}
             style={{ opacity }}
-            className={cn('container-preview', container.direction, {
+            className={cn('container-preview', `container-${container.direction}`, {
                 empty: container.children.length === 0,
             })}
         >

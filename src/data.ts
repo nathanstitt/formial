@@ -1,15 +1,9 @@
-export interface SerializedSize {
-    mobile: number
-    tablet: number
-    desktop: number
-}
 
 export interface SerializedElement {
     type: string
     id: string
     control: string
     className: string
-    sizes: SerializedSize
     attributes?: {
         [value: string]: string
     }

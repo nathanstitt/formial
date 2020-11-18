@@ -190,7 +190,7 @@ describe('merging', () => {
                 label: 'My Input',
                 name: 'input-test',
                 classNames: {
-                    wrapper: 'form-group',
+                    wrapper: 'input-group',
                     label: '',
                     input: ''
                 },

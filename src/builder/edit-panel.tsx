@@ -7,50 +7,6 @@ import {
 import { useKeyPress } from '../hooks/use-key-press'
 
 
-const Width:React.FC<{
-    el: Element,
-    size: string,
-}> = ({ el, size }) => {
-    const sc = useStoreContext()
-    const inputRef = React.useRef<HTMLInputElement>(null)
-
-    return (
-        <label>
-            <span>{size}:</span>
-            <input
-                ref={inputRef}
-                type="number"
-                min="1"
-                max="12"
-                value={el.data.sizes[size] || 12}
-                onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE',
-                    target: el,
-                    patch: { sizes: { [size]: Math.max(1, Math.min(12, Number(value))) } },
-                })}
-            />
-        </label>
-    )
-}
-
-const Sizes:React.FC<{
-    el: Element,
-}> = ({ el }) => {
-    if (isContainer(el) && el.direction === 'row') {
-        return null
-    }
-    return (
-        <fieldset className="widths">
-            <legend>Widths (1-12):</legend>
-            <div className="row">
-                <Width size="mobile" el={el} />
-                <Width size="tablet" el={el} />
-                <Width size="desktop" el={el} />
-            </div>
-        </fieldset>
-    )
-}
-
 const NewAttribute: React.FC<{ input: InputElement; nested: string }> = ({
     input,
     nested,
@@ -208,11 +164,20 @@ const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
                     onChange={({ target: { value } }) => dp({ name: value })}
                 />
             </label>
+            <label>
+                <span>Class:</span>
+
+                <input
+                    className="value"
+                    value={data.className || ''}
+                    onChange={({ target: { value } }) => dp({ className: value })}
+                />
+            </label>
 
             <Options input={input} label="Options" nested="options" />
 
             <fieldset>
-                <legend>Class Names:</legend>
+                <legend>Other Class Names:</legend>
                 <label>
                     <span>Wrapper:</span>
                     <input
@@ -242,7 +207,6 @@ const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
                 </label>
             </fieldset>
 
-            <Sizes el={input} />
 
             <Options input={input} label="Attributes" nested="attributes" />
 
@@ -265,7 +229,7 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
                     onChange={({ target: { value } }) => dp({ className: value })}
                 />
             </label>
-            <Sizes el={container} />
+
         </div>
     )
 }
@@ -322,7 +286,6 @@ const TextEdit: React.FC<{ control: TextElement }> = ({ control }) => {
                     onChange={({ target: { value } }) => dp({ className: value })}
                 />
             </label>
-            <Sizes el={control} />
         </div>
     )
 }
@@ -372,6 +335,7 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
         backgroundColor: '#000',
         color: '#fff',
         padding: '3px 6px',
+        fontSize: '16px',
     },
     'label, .heading': {
         display: 'flex',
@@ -400,7 +364,8 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
 
             justifyContent: 'flex-end',
             '.add-attr': {
-                margin: '-10px -5px 10px 0',
+                border: 0,
+                padding: '0 5px',
             },
         },
     },
