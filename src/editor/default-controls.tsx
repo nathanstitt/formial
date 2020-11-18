@@ -30,12 +30,12 @@ defaultControls.register([
     new RowControl({
         id: 'row',
         name: 'Row',
-        icon: <GripLinesVertical />,
+        icon: <GripLines />,
     }),
     new ColumnControl({
         id: 'col',
         name: 'Column',
-        icon: <GripLines />,
+        icon: <GripLinesVertical />,
     }),
 
     new TextControl({

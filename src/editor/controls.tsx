@@ -43,7 +43,7 @@ export const ControlsListing:React.FC = () => {
     return (
         <ControlsListingEl className="controls-listing">
             <ul>
-                {[...controls.values()].map(definition => (
+                {Array.from(controls.values()).map(definition => (
                     <ControlLabel key={definition.id} {...definition} />))}
             </ul>
         </ControlsListingEl>

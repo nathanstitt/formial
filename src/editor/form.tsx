@@ -389,6 +389,7 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
+
     '.drop': {
         transition: 'all 0.3s ease-in-out',
     },

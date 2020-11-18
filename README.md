@@ -2,7 +2,9 @@
 
 > Form builder and renderer
 
-[![NPM](https://img.shields.io/npm/v/formial.svg)](https://www.npmjs.com/package/formial) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+[![NPM](https://img.shields.io/npm/v/formial.svg)](https://www.npmjs.com/package/formial)
+[![Actions Status](https://github.com/nathanstitt/formial/workflows/CI%20checks/badge.svg)](https://github.com/nathanstitt/formial/actions)
+
 
 ## Install
 
@@ -12,19 +14,41 @@ npm install --save formial
 
 ## Usage
 
+Example from [example/src/App.tsx](example/src/App.tsx)
+
 ```tsx
 import React, { Component } from 'react'
+import { Builder, Container, render } from 'formial'
 
-import MyComponent from 'formial'
-import 'formial/dist/index.css'
+const DEFAULT = {} // this would normally be loaded from server
 
-class Example extends Component {
-  render() {
-    return <MyComponent />
-  }
+const App = () => {
+    const [value, setValue] = React.useState<Container>()
+    const htmlRef = React.useRef(null)
+
+    const onChange = (container: Container) => setValue(container)
+
+    const renderHTML = () => {
+        // json would normally be saved.
+        // It's intended to be loading back into the editor or rendered to a form
+        const json = value!.serialized()
+        console.log(JSON.stringify(json))
+        render(htmlRef.current!, json)
+    }
+
+    return (
+        <div id="example-builder">
+            <Builder onChange={onChange} defaultValue={DEFAULT} />
+            <hr />
+            <div><button onClick={renderHTML}>Render</button></div>
+            <hr />
+            <div ref={htmlRef}></div>
+        </div>
+    )
 }
+
 ```
 
 ## License
 
-MIT © [nathanstitt](https://github.com/nathanstitt)
+MIT © [nathanstitt](https://github.com/nathanstitt/formial)

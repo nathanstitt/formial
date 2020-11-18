@@ -65,11 +65,7 @@ type ElementSerialization =
     | SerializedInputElement
 
 
-// let unserialize:(mp: ControlsMap, data: ElementSerialization) => Element | null
-
-
 interface ContainerData extends ElementData {
-
     children: Array<Element>
 }
 
@@ -84,7 +80,6 @@ export interface ContainerOptions {
 type ContainerChild = Element|TextElement|Container|InputElement
 
 export class Container extends Element {
-
     direction: string // 'row' | 'column'
     children: Array<ContainerChild>
     constructor(control:Control, options: ContainerOptions) {
@@ -102,7 +97,13 @@ export class Container extends Element {
             type: 'CONTAINER',
         }
     }
+}
 
+export class Form extends Container {
+    constructor(control:Control, options: ContainerOptions) {
+        super(control, options)
+        this.direction = 'row'
+    }
 }
 
 interface TextData extends ElementData {
@@ -158,9 +159,9 @@ export class InputElement extends Element {
             className: 'mb-2',
             name: `${this.control.id}-${Math.round(Math.random() * 9999) + 1000}`,
             classNames: {
-                wrapper: '',
+                wrapper: this.wrapperClassName,
                 label: '',
-                input: this.inputClassName,
+                input: 'form-control',
             },
             attributes: {},
         }, data)
@@ -169,7 +170,7 @@ export class InputElement extends Element {
         }
     }
 
-    get inputClassName() {
+    get wrapperClassName() {
         switch (this.control.id) {
             case 'input':
             case 'textarea':
