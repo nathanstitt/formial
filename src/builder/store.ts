@@ -47,7 +47,7 @@ export class Element {
         }, data)
     }
 
-    public get serialized(): SerializedElement {
+    serialized(): SerializedElement {
         return {
             id: this.id,
             type: 'element',
@@ -93,11 +93,11 @@ export class Container extends Element {
         this.children = options.children || []
     }
 
-    public get serialized(): SerializedContainer {
+    serialized(): SerializedContainer {
         return {
-            ...super.serialized,
+            ...super.serialized(),
             ...this.data,
-            children: this.children.map(c => c.serialized),
+            children: this.children.map(c => c.serialized()),
             direction: this.direction,
             type: 'CONTAINER',
         }
@@ -123,9 +123,9 @@ export class TextElement extends Element {
         }, data]) as TextData
     }
 
-    get serialized(): SerializedTextElement {
+    serialized(): SerializedTextElement {
         return {
-            ...super.serialized,
+            ...super.serialized(),
             ...this.data,
             type: 'TEXT',
         }
@@ -194,9 +194,9 @@ export class InputElement extends Element {
         return []
     }
 
-    get serialized(): SerializedInputElement {
+    serialized(): SerializedInputElement {
         return {
-            ...super.serialized,
+            ...super.serialized(),
             ...this.data,
             type: 'INPUT',
         }

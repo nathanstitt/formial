@@ -1,0 +1,17 @@
+name: CI checks
+
+on:
+  push:
+
+jobs:
+  checks:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: bahmutov/npm-install@v1
+      - name: Lint JS
+        run: yarn run test:lint
+      - name: Run Tests
+        run: yarn run test:unit
+      - name: Build TS
+        run: yarn run build:tsc --noEmit

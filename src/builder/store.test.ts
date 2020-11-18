@@ -111,7 +111,6 @@ describe('merging', () => {
                 type: 'ELEMENT',
                 control: 'test',
                 className: 'testcls',
-                sizes: { mobile: 3, tablet: 2, desktop: 1 },
             }
             const el = unserialize(store.controls, obj) as Element
             expect(el).not.toBeNull()
@@ -120,7 +119,6 @@ describe('merging', () => {
                 id: '1234',
                 data: {
                     className: 'testcls',
-                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 },
             })
             expect(el.serialized).toEqual(obj)
@@ -133,14 +131,12 @@ describe('merging', () => {
                 control: 'test',
                 direction: 'column',
                 className: 'testcls',
-                sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 children: [
                     {
                         id: '12345',
                         type: 'ELEMENT',
                         control: 'test',
                         className: 'testcls',
-                        sizes: { mobile: 3, tablet: 2, desktop: 1 },
 
                     },
                 ],
@@ -164,7 +160,6 @@ describe('merging', () => {
                 type: 'TEXT',
                 control: 'test',
                 className: 'testcls',
-                sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 tag: 'p',
                 text: 'hello world',
             }
@@ -176,7 +171,6 @@ describe('merging', () => {
                 data: {
                     text: 'hello world',
                     className: 'testcls',
-                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 },
             })
             expect(el.serialized).toEqual(obj)
@@ -187,7 +181,6 @@ describe('merging', () => {
                 type: 'INPUT',
                 control: 'test',
                 className: 'testcls',
-                sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 label: 'My Input',
                 name: 'input-test',
                 classNames: {
@@ -211,7 +204,6 @@ describe('merging', () => {
                 data: {
                     label: 'My Input',
                     className: 'testcls',
-                    sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 },
             })
             expect(el.serialized).toEqual(obj)
