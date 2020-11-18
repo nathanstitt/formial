@@ -34,37 +34,8 @@ export interface ElementData {
     }
 }
 
-type ElementSerialization =
-    | SerializedElement
-    | SerializedContainer
-    | SerializedTextElement
-    | SerializedInputElement
-
-
-export const unserialize = (mp: ControlsMap, data: ElementSerialization):Element|null => {
-    const control = mp.get(data.control)
-    if (!control) { return null }
-
-    if (isSerializedText(data)) {
-        return new TextElement(control, data)
-    }
-
-    if (isSerializedContainer(data)) {
-        return new Container(control, {
-            ...data,
-            children: data.children.map(c => unserialize(mp, c)).filter(Boolean) as Array<ContainerChild>
-        })
-    }
-
-    if (isSerializedInput(data)) {
-        return new InputElement(control, data)
-    }
-
-    return new Element(control, data)
-}
-
-
 export class Element {
+
     id: string
     control: Control
     data: ElementData
@@ -84,7 +55,18 @@ export class Element {
             ...this.data,
         }
     }
+
 }
+
+type ElementSerialization =
+    | SerializedElement
+    | SerializedContainer
+    | SerializedTextElement
+    | SerializedInputElement
+
+
+// let unserialize:(mp: ControlsMap, data: ElementSerialization) => Element | null
+
 
 interface ContainerData extends ElementData {
 
@@ -102,6 +84,7 @@ export interface ContainerOptions {
 type ContainerChild = Element|TextElement|Container|InputElement
 
 export class Container extends Element {
+
     direction: string // 'row' | 'column'
     children: Array<ContainerChild>
     constructor(control:Control, options: ContainerOptions) {
@@ -119,6 +102,7 @@ export class Container extends Element {
             type: 'CONTAINER',
         }
     }
+
 }
 
 interface TextData extends ElementData {
@@ -127,16 +111,18 @@ interface TextData extends ElementData {
 }
 
 export class TextElement extends Element {
+
     data: TextData
 
     constructor(control:Control, data = {}) {
         super(control, data)
         this.data = deepmerge.all([{
-            tag: control.id == 'para' ? 'p' : 'h3',
+            tag: control.id === 'para' ? 'p' : 'h3',
             text: 'Some text…',
             className: '',
         }, data]) as TextData
     }
+
     get serialized(): SerializedTextElement {
         return {
             ...super.serialized,
@@ -144,6 +130,7 @@ export class TextElement extends Element {
             type: 'TEXT',
         }
     }
+
 }
 
 export interface InputData extends ElementData {
@@ -161,6 +148,7 @@ export interface InputData extends ElementData {
 
 
 export class InputElement extends Element {
+
     data: InputData
 
     constructor(control: Control, data = {}) {
@@ -213,6 +201,7 @@ export class InputElement extends Element {
             type: 'INPUT',
         }
     }
+
 }
 
 
@@ -275,15 +264,19 @@ export class RowControl extends Control {
 }
 
 export class TextControl extends Control {
+
     createElement(): Element {
         return new TextElement(this)
     }
+
 }
 
 export class ColumnControl extends Control {
+
     createElement(): Element {
         return new Container(this, { direction: 'column' })
     }
+
 }
 
 
@@ -343,6 +336,29 @@ export const useStoreContext = ():StoreContext => React.useContext(sc)
 
 export const useStore = ():Store => useStoreContext().store
 
+const unserialize = (mp: ControlsMap, data: ElementSerialization):Element|null => {
+    const control = mp.get(data.control)
+    if (!control) { return null }
+
+    if (isSerializedText(data)) {
+        return new TextElement(control, data)
+    }
+
+    if (isSerializedContainer(data)) {
+        return new Container(control, {
+            ...data,
+            children: data.children
+                .map(c => unserialize(mp, c))
+                .filter(Boolean) as Array<ContainerChild>,
+        })
+    }
+
+    if (isSerializedInput(data)) {
+        return new InputElement(control, data)
+    }
+
+    return new Element(control, data)
+}
 
 type Action =
     | { type: 'REPLACE', container?: SerializedContainer }
@@ -356,7 +372,6 @@ type Action =
     | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: string }
     | { type: 'DELETE_ATTRIBUTE', input: InputElement, nested: string, name: string }
     | { type: 'REPLACE_NEW_ATTRIBUTE', input: InputElement, nested: string, name: string, }
-
 
 const storeReducer = (st:Store, action: Action): Store => {
     switch (action.type) {
@@ -408,8 +423,8 @@ const storeReducer = (st:Store, action: Action): Store => {
 export const initStore = (defaultValue?: SerializedContainer):Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
-    store.container = defaultValue ? unserialize(store.controls, defaultValue) :
-        new Container(store.controls.get('col'), { direction: 'col' })
+    store.container = defaultValue ? unserialize(store.controls, defaultValue)
+        : new Container(store.controls.get('col'), { direction: 'col' })
 
     // store.elements.push(store.controls.get('select')!.createElement());
     // [store.editing] = store.elements
@@ -417,8 +432,9 @@ export const initStore = (defaultValue?: SerializedContainer):Store => {
     return store
 }
 
-export const useStoreReducer = (defaultValue?: SerializedContainer) =>
+export const useStoreReducer = (defaultValue?: SerializedContainer) => (
     React.useReducer(storeReducer, defaultValue, initStore)
+)
 
 export const useProvidedStoreContext = (defaultValue?: SerializedContainer):StoreContext => {
     const [store, dispatch] = useStoreReducer(defaultValue)
@@ -426,4 +442,4 @@ export const useProvidedStoreContext = (defaultValue?: SerializedContainer):Stor
     return React.useMemo<StoreContext>(() => ({ store, dispatch }), [store])
 }
 
-export { sc as StoreContext }
+export { sc as StoreContext, unserialize }

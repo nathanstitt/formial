@@ -1,8 +1,9 @@
 import {
-    Control, Store, initStore, addElement, Container, Element, unserialize, TextElement, InputElement,
+    Control, Store, initStore, addElement, Container,
+    Element, unserialize, TextElement, InputElement,
 } from './store'
 import {
-    SerializedInputElement, SerializedContainer
+    SerializedInputElement, SerializedContainer,
 } from '../data'
 
 class TestElement extends Element {
@@ -116,7 +117,7 @@ describe('merging', () => {
             expect(el).not.toBeNull()
             expect(el).toBeInstanceOf(Element)
             expect(el).toMatchObject({
-                id: "1234",
+                id: '1234',
                 data: {
                     className: 'testcls',
                     sizes: { mobile: 3, tablet: 2, desktop: 1 },
@@ -141,7 +142,7 @@ describe('merging', () => {
                         className: 'testcls',
                         sizes: { mobile: 3, tablet: 2, desktop: 1 },
 
-                    }
+                    },
                 ],
             }
             const ct = unserialize(store.controls, obj) as Container
@@ -165,13 +166,13 @@ describe('merging', () => {
                 className: 'testcls',
                 sizes: { mobile: 3, tablet: 2, desktop: 1 },
                 tag: 'p',
-                text: "hello world"
+                text: 'hello world',
             }
             const el = unserialize(store.controls, obj) as TextElement
             expect(el).not.toBeNull()
             expect(el).toBeInstanceOf(TextElement)
             expect(el).toMatchObject({
-                id: "1234",
+                id: '1234',
                 data: {
                     text: 'hello world',
                     className: 'testcls',
@@ -192,21 +193,21 @@ describe('merging', () => {
                 classNames: {
                     wrapper: 'input-group',
                     label: '',
-                    input: ''
+                    input: '',
                 },
                 attributes: {
-                    'data-test': 'true'
+                    'data-test': 'true',
                 },
                 options: {
-                    'one': 'One',
-                    'two': 'Two',
-                }
+                    one: 'One',
+                    two: 'Two',
+                },
             }
             const el = unserialize(store.controls, obj) as InputElement
             expect(el).not.toBeNull()
             expect(el).toBeInstanceOf(InputElement)
             expect(el).toMatchObject({
-                id: "1234",
+                id: '1234',
                 data: {
                     label: 'My Input',
                     className: 'testcls',
@@ -216,5 +217,4 @@ describe('merging', () => {
             expect(el.serialized).toEqual(obj)
         })
     })
-
 })
