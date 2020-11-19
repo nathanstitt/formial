@@ -19,11 +19,15 @@ const ControlLabelEl = styled.li({
 })
 
 const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
-    const [, drag] = useDrag({
+    const [{ opacity }, drag] = useDrag({
         item: { id, type: 'control' },
+        collect: (monitor) => ({
+            opacity: monitor.isDragging() ? 0.4 : 1,
+        }),
     })
+
     return (
-        <ControlLabelEl ref={drag}>
+        <ControlLabelEl ref={drag} style={{ opacity }}>
             {icon}
             <span>{name}</span>
         </ControlLabelEl>
