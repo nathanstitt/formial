@@ -3,10 +3,10 @@ import styled from 'styled-components'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
 import { ControlsListing } from './editor/controls'
-import { useProvidedStoreContext, StoreContext, Container } from './editor/store'
+import { useProvidedStoreContext, StoreContext, Form } from './editor/store'
 import { FormElements } from './editor/form'
 import { EditPanel } from './editor/edit-panel'
-import { SerializedContainer } from './data'
+import { SerializedForm } from './data'
 
 const FormPanelEl = styled.div({
     display: 'flex',
@@ -35,19 +35,19 @@ const EditorEl = styled.div({
     },
 })
 
-interface EditorProps {
-    onChange?(form: Container): void
-    defaultValue?: SerializedContainer
-    value?: SerializedContainer
+export interface EditorProps {
+    onChange?(form: Form): void
+    defaultValue?: SerializedForm
+    value?: SerializedForm
 }
 
 export const Editor:React.FC<EditorProps> = ({ onChange, value, defaultValue }) => {
     const ctx = useProvidedStoreContext(defaultValue)
     React.useEffect(() => {
-        ctx.dispatch({ type: 'REPLACE', container: value })
+        ctx.dispatch({ type: 'REPLACE', form: value })
     }, [value])
     React.useEffect(() => {
-        if (onChange) { onChange(ctx.store.container) }
+        if (onChange) { onChange(ctx.store.form) }
     }, [onChange, ctx.store])
 
     return (

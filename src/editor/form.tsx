@@ -368,6 +368,7 @@ const ElementPreview:React.FC<{
     index: number,
     container: Container,
 }> = ({ el, index, container }) => {
+
     if (isContainer(el)) {
         return <ContainerPreview parent={container} container={el} index={index} />
     }
@@ -377,6 +378,7 @@ const ElementPreview:React.FC<{
     if (isInput(el)) {
         return <InputPreview input={el} container={container} index={index} />
     }
+
     return null
 }
 
@@ -424,7 +426,7 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     },
 }))
 export const FormElements = () => {
-    const { container, editing } = useStore()
+    const { form, editing } = useStore()
     const [{ isHovered }, drop] = useDrop({
         accept: 'control',
         collect(item) {
@@ -438,11 +440,11 @@ export const FormElements = () => {
 
     return (
         <FormElementsEl ref={drop} editing={!!editing} className={cn('form-elements', { isHovered })}>
-            <FormDrop container={container} index={0} />
-            {container.children.map((e, i) => (
+            <FormDrop container={form} index={0} />
+            {form.children.map((e, i) => (
                 <React.Fragment key={i}>
-                    <ElementPreview index={i} container={container} el={e} />
-                    <FormDrop container={container} index={i + 1} />
+                    <ElementPreview index={i} container={form} el={e} />
+                    <FormDrop container={form} index={i + 1} />
                 </React.Fragment>
             ))}
         </FormElementsEl>

@@ -221,6 +221,7 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
 
     return (
         <div>
+            <h4 className="title">Edit {container.control.name} container</h4>
             <label>
                 <span>Class:</span>
                 <input
@@ -263,6 +264,7 @@ const TextEdit: React.FC<{ control: TextElement }> = ({ control }) => {
 
     return (
         <div>
+            <h4 className="title">Edit text</h4>
             <label>
                 <span>Text:</span>
 

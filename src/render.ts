@@ -1,9 +1,10 @@
 import {
     isSerializedText,
-    isSerializedContainer,
+    isSerializedForm,
     isSerializedInput,
     SerializedElement,
     SerializedContainer,
+    isSerializedContainer,
     SerializedTextElement,
     SerializedInputElement
 } from './data'
@@ -30,7 +31,7 @@ class Element {
     }
 
     get columnSmWidth():number {
-        if (this.options.parent instanceof Container && this.options.parent.isRow) {
+        if (this.options.parent instanceof Container && this.options.parent.isBSRow) {
             return Math.round(12 / this.options.parent.children.length)
         }
         return 0
@@ -290,15 +291,16 @@ class Container extends Element {
         this.children = data.children.map(c => unserialize(c, { parent: this })).filter(Boolean) as Array<Element>
     }
 
-    get isRow() {
-        return this.data.direction === 'row'
+    get isBSRow() {
+        // counter intuitively, a bootstrap row is laid out in columns
+        return this.data.direction === 'column'
     }
 
     render(root:HTMLElement){
         super.render(root)
         this.el!.className = cx( this.el?.className, {
-            row: this.isRow,
-            'd-flex flex-column': !this.isRow,
+            row: this.isBSRow, // a bootstrap row lays out in columns
+            'd-flex flex-column': !this.isBSRow,
         })
         this.children.forEach(c => c.render(this.el!))
         return this
@@ -316,7 +318,7 @@ const unserialize = (data: SerializedElement, options: UnserializeOptions = {}):
         return new TextElement(data, options)
     }
 
-    if (isSerializedContainer(data)) {
+    if (isSerializedContainer(data) || isSerializedForm(data)) {
         return new Container(data, options)
     }
 

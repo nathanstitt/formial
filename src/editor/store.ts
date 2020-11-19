@@ -2,6 +2,7 @@ import * as React from 'react'
 import deepmerge from 'deepmerge'
 import { uuidv4 } from '../lib'
 import {
+    SerializedForm,
     SerializedElement,
     SerializedContainer,
     SerializedTextElement,
@@ -9,6 +10,7 @@ import {
     isSerializedText,
     isSerializedContainer,
     isSerializedInput,
+    ElementSerialization,
 } from '../data'
 
 export interface ControlDefinition {
@@ -23,7 +25,7 @@ type ControlsMap = Map<string, Control>
 
 export interface Store {
     controls: ControlsMap,
-    container: Container
+    form: Form
     editing?: Element
 }
 
@@ -57,12 +59,6 @@ export class Element {
     }
 
 }
-
-type ElementSerialization =
-    | SerializedElement
-    | SerializedContainer
-    | SerializedTextElement
-    | SerializedInputElement
 
 
 interface ContainerData extends ElementData {
@@ -100,10 +96,19 @@ export class Container extends Element {
 }
 
 export class Form extends Container {
-    constructor(control:Control, options: ContainerOptions) {
-        super(control, options)
-        this.direction = 'row'
+    constructor(cm: ControlsMap, options?: ContainerOptions) {
+        const col = cm.get('col')
+        if (!col) { throw new Error("Column control doesn't exist?") }
+        super(col, { ...options, direction: 'row' })
     }
+
+    serialized(): SerializedForm {
+        return {
+            ...super.serialized(),
+            type: 'FORM',
+        }
+    }
+
 }
 
 interface TextData extends ElementData {
@@ -232,28 +237,19 @@ export class Control implements ControlDefinition {
 export function isContainer(
     toBeDetermined: any,
 ): toBeDetermined is Container {
-    if (toBeDetermined instanceof Container) {
-        return true
-    }
-    return false
+    return (toBeDetermined instanceof Container)
 }
 
 export function isInput(
-    toBeDetermined: Element,
+    toBeDetermined: any,
 ): toBeDetermined is InputElement {
-    if (toBeDetermined instanceof InputElement) {
-        return true
-    }
-    return false
+    return (toBeDetermined instanceof InputElement);
 }
 
 export function isText(
-    toBeDetermined: Element,
+    toBeDetermined: any,
 ): toBeDetermined is TextElement {
-    if (toBeDetermined instanceof TextElement) {
-        return true
-    }
-    return false
+    return (toBeDetermined instanceof TextElement)
 }
 
 export class RowControl extends Control {
@@ -279,7 +275,6 @@ export class ColumnControl extends Control {
     }
 
 }
-
 
 export const defaultControls = {
     registered: new Map<string, Control>(),
@@ -337,32 +332,38 @@ export const useStoreContext = ():StoreContext => React.useContext(sc)
 
 export const useStore = ():Store => useStoreContext().store
 
-const unserialize = (mp: ControlsMap, data: ElementSerialization):Element|null => {
-    const control = mp.get(data.control)
+const unserialize = (cm: ControlsMap, data: ElementSerialization):Element|null => {
+    const control = cm.get(data.control)
     if (!control) { return null }
 
     if (isSerializedText(data)) {
         return new TextElement(control, data)
     }
 
-    if (isSerializedContainer(data)) {
-        return new Container(control, {
-            ...data,
-            children: data.children
-                .map(c => unserialize(mp, c))
-                .filter(Boolean) as Array<ContainerChild>,
-        })
-    }
-
     if (isSerializedInput(data)) {
         return new InputElement(control, data)
     }
 
-    return new Element(control, data)
+
+    let children:Array<ContainerChild> = []
+    const dataChildren = (data as any).children
+    if (dataChildren) {
+        dataChildren.forEach((c:ElementSerialization) => {
+            const child = unserialize(cm, c)
+            if (child) children.push(child)
+        })
+    }
+
+    if (isSerializedContainer(data)) {
+        return new Container(control, { ...data, children })
+    }
+
+    // if all else fails attempt to create a form and unserialize it
+    return new Form(cm, { ...data, children } as any as ContainerOptions)
 }
 
 type Action =
-    | { type: 'REPLACE', container?: SerializedContainer }
+    | { type: 'REPLACE', form?: SerializedForm }
     | { type: 'ADD_ELEMENT', id: string,
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
@@ -380,10 +381,10 @@ const storeReducer = (st:Store, action: Action): Store => {
             return addElement(st, action)
         }
         case 'REPLACE': {
-            if (action.container) {
-                const container = unserialize(st.controls, action.container)
-                if (container && isContainer(container)) {
-                    return { ...st, container }
+            if (action.form) {
+                const form = unserialize(st.controls, action.form)
+                if (form && form instanceof Form) {
+                    return { ...st, form }
                 }
             }
             return st
@@ -421,11 +422,11 @@ const storeReducer = (st:Store, action: Action): Store => {
     return st
 }
 
-export const initStore = (defaultValue?: SerializedContainer):Store => {
+export const initStore = (defaultValue?: SerializedForm):Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
-    store.container = defaultValue ? unserialize(store.controls, defaultValue)
-        : new Container(store.controls.get('col'), { direction: 'col' })
+    store.form = defaultValue ? unserialize(store.controls, defaultValue)
+        : new Form(store.controls, defaultValue)
 
     // store.elements.push(store.controls.get('select')!.createElement());
     // [store.editing] = store.elements
@@ -433,11 +434,11 @@ export const initStore = (defaultValue?: SerializedContainer):Store => {
     return store
 }
 
-export const useStoreReducer = (defaultValue?: SerializedContainer) => (
+export const useStoreReducer = (defaultValue?: SerializedForm) => (
     React.useReducer(storeReducer, defaultValue, initStore)
 )
 
-export const useProvidedStoreContext = (defaultValue?: SerializedContainer):StoreContext => {
+export const useProvidedStoreContext = (defaultValue?: SerializedForm):StoreContext => {
     const [store, dispatch] = useStoreReducer(defaultValue)
 
     return React.useMemo<StoreContext>(() => ({ store, dispatch }), [store])

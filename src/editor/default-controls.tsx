@@ -84,7 +84,7 @@ defaultControls.register([
         icon: <DotCircle />,
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input key={n} type="radio" name={n} readOnly />
+                <input key={n} type="radio" name={el.data.name} readOnly />
             ))
         },
     }),

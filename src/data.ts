@@ -29,10 +29,23 @@ export interface SerializedTextElement extends SerializedElement {
 }
 //  id: string; type: string; control: string;   tag: string; text: string;
 
+export type ElementSerialization =
+    | SerializedForm
+    | SerializedElement
+    | SerializedContainer
+    | SerializedTextElement
+    | SerializedInputElement
+
+
 export interface SerializedContainer extends SerializedElement {
     direction: string // 'row' | 'column'
-    children: Array<SerializedElement|SerializedContainer|SerializedInputElement|SerializedTextElement>
+    children: Array<ElementSerialization>
 }
+
+export interface SerializedForm extends SerializedContainer {
+
+}
+
 
 export function isSerializedInput(
     toBeDetermined: SerializedElement
@@ -42,7 +55,11 @@ export function isSerializedContainer(
     toBeDetermined: SerializedElement
 ): toBeDetermined is SerializedContainer { return (toBeDetermined.type === 'CONTAINER') }
 
-
 export function isSerializedText(
     toBeDetermined: SerializedElement
 ): toBeDetermined is SerializedTextElement { return (toBeDetermined.type === 'TEXT') }
+
+export function isSerializedForm(
+    toBeDetermined: any
+): toBeDetermined is SerializedForm { return (toBeDetermined.type === 'FORM') }
+
