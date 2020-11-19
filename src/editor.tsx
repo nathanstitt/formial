@@ -36,12 +36,15 @@ const EditorEl = styled.div({
 })
 
 export interface EditorProps {
+    className?: string
     onChange?(form: Form): void
     defaultValue?: SerializedForm
     value?: SerializedForm
 }
 
-export const Editor:React.FC<EditorProps> = ({ onChange, value, defaultValue }) => {
+export const Editor:React.FC<EditorProps> = ({
+    className, onChange, value, defaultValue,
+}) => {
     const ctx = useProvidedStoreContext(defaultValue)
     React.useEffect(() => {
         ctx.dispatch({ type: 'REPLACE', form: value })
@@ -53,7 +56,7 @@ export const Editor:React.FC<EditorProps> = ({ onChange, value, defaultValue }) 
     return (
         <DndProvider backend={HTML5Backend}>
             <StoreContext.Provider value={ctx}>
-                <EditorEl>
+                <EditorEl className={className}>
                     <FormPanel />
                     <ControlsListing />
                     <EditPanel />
