@@ -287,7 +287,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
             flex: 1,
         },
     },
-    '&.container-col': {
+    '&.container-column': {
         '> .container.controls': {
             top: 'calc(50% - 40px)',
             left: '-25px',
@@ -434,9 +434,6 @@ export const FormElements = () => {
         },
         canDrop: () => false,
     })
-    // if (!container.children.length) {
-    //     return <FormDrop container={container} index={0} />
-    // }
 
     return (
         <FormElementsEl ref={drop} editing={!!editing} className={cn('form-elements', { isHovered })}>
