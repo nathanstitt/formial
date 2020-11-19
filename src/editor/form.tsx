@@ -72,40 +72,12 @@ const ElementPreviewEl = styled.div({
     display: 'flex',
     flexDirection: 'row',
     position: 'relative',
-    padding: '10px',
+    padding: '20px',
     color: '#0c0c0c',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     minHeight: '40px',
 
-    '&.container-row': {
-        '> .container-col': {
-            margin: '-1px',
-            flex: 1,
-        },
-        '> .container.controls': {
-            top: 'calc(50% - 22px)',
-            left: '-15px',
-            right: undefined,
-            display: 'flex',
-            flexDirection: 'column',
-
-            width: '30px',
-            '> *': {
-                marginLeft: 0,
-            },
-        },
-    },
-    '> .container-preview': {
-        flex: 1,
-    },
-    '&.container-column': {
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        '.container-drop': {
-            width: '100%',
-        },
-    },
     '&.input .label, &.textarea .label': {
         marginBottom: '-20px',
         zIndex: 1,
@@ -279,25 +251,58 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
     borderRadius: '5px',
     padding: '0',
     alignItems: 'stretch',
+    '> .container.controls': {
+        background: 'white',
+        border: '1px dashed gray',
+        position: 'absolute',
+    },
+    '&.container-row': {
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        minHeight: '80px',
+        '> .container-drop': {
+            width: '100%',
+        },
+        '> .container-column': {
+            margin: '-1px',
+            flex: 1,
+        },
+        '> .container.controls': {
+            position: 'absolute',
+            top: '-27px',
+            left: 'calc(50% - 15px)',
+            padding: '2px 5px',
+            borderTopRightRadius: '5px',
+            borderTopLeftRadius: '5px',
+            borderBottomWidth: 0,
+        },
+    },
+    '> .container-preview': {
+        flex: 1,
+    },
+
     '&.empty': {
         alignItems: 'stretch',
         '> .drop': {
             flex: 1,
         },
     },
-    '.container.controls': {
-        position: 'absolute',
-        top: '-27px',
-        left: 'calc(50% - 15px)',
-        background: 'white',
-        padding: '2px 5px',
-        borderTopRightRadius: '5px',
-        borderTopLeftRadius: '5px',
-        border: '1px dashed gray',
-        borderBottomWidth: 0,
-    },
-    '.element-preview': {
-        // flex: 1,
+    '&.container-col': {
+        '> .container.controls': {
+            top: 'calc(50% - 40px)',
+            left: '-25px',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '30px',
+            borderRadius: '5px',
+            alignItems: 'center',
+            '> *': {
+                marginLeft: 0,
+            },
+        },
+        '> .element-preview': {
+            flex: 1,
+        },
     },
     '&:hover': {
         '.container-drop': {
@@ -382,7 +387,7 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     flexDirection: 'column',
     justifyItems: 'flex-start',
     background: '#fafafa',
-    padding: '10px',
+    padding: '20px',
     boxSizing: 'border-box',
     boxShadow: '0 0 2px 1px rgba(0, 0, 0, 0.1)',
     opacity: editing ? '0.3' : '1',
