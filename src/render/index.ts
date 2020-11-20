@@ -7,7 +7,7 @@ import {
     isSerializedContainer,
     SerializedTextElement,
     SerializedInputElement
-} from './data'
+} from '../data'
 
 import cx from 'classnames'
 

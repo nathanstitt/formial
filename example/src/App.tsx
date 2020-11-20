@@ -15,7 +15,7 @@ const App = () => {
     const renderHTML = () => {
         // json would normally be saved.
         // It's intended to be loading back into the editor or rendered to a form
-        const json = value!.serialized()
+        const json = value!.serialize()
         console.log(JSON.stringify(json))
         render(htmlRef.current!, json)
     }

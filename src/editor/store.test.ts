@@ -123,7 +123,7 @@ describe('merging', () => {
                     className: 'testcls',
                 },
             })
-            expect(el.serialized()).toEqual(obj)
+            expect(el.serialize()).toEqual(obj)
         })
 
         test('containers', () => {
@@ -150,7 +150,7 @@ describe('merging', () => {
                 id: '1234-col',
             })
             expect(ct.children[0]).toBeInstanceOf(Element)
-            expect(ct.children[0].serialized()).toMatchObject({
+            expect(ct.children[0].serialize()).toMatchObject({
                 id: '12345',
                 type: 'FORM',
             })
@@ -175,7 +175,7 @@ describe('merging', () => {
                     className: 'testcls',
                 },
             })
-            expect(el.serialized()).toEqual(obj)
+            expect(el.serialize()).toEqual(obj)
         })
         test('input', () => {
             const obj: SerializedInputElement = {
@@ -208,7 +208,7 @@ describe('merging', () => {
                     className: 'testcls',
                 },
             })
-            expect(el.serialized()).toEqual(obj)
+            expect(el.serialize()).toEqual(obj)
         })
     })
 })

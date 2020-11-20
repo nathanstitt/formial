@@ -49,7 +49,7 @@ export class Element {
         }, data)
     }
 
-    serialized(): SerializedElement {
+    serialize(): SerializedElement {
         return {
             id: this.id,
             type: 'element',
@@ -85,11 +85,11 @@ export class Container extends Element {
         this.children = options.children || []
     }
 
-    serialized(): SerializedContainer {
+    serialize(): SerializedContainer {
         return {
-            ...super.serialized(),
+            ...super.serialize(),
             ...this.data,
-            children: this.children.map(c => c.serialized()),
+            children: this.children.map(c => c.serialize()),
             direction: this.direction,
             type: 'CONTAINER',
         }
@@ -105,9 +105,9 @@ export class Form extends Container {
         super(col, { ...options, direction: 'row' })
     }
 
-    serialized(): SerializedForm {
+    serialize(): SerializedForm {
         return {
-            ...super.serialized(),
+            ...super.serialize(),
             type: 'FORM',
         }
     }
@@ -132,9 +132,9 @@ export class TextElement extends Element {
         }, data]) as TextData
     }
 
-    serialized(): SerializedTextElement {
+    serialize(): SerializedTextElement {
         return {
-            ...super.serialized(),
+            ...super.serialize(),
             ...this.data,
             type: 'TEXT',
         }
@@ -203,9 +203,9 @@ export class InputElement extends Element {
         return []
     }
 
-    serialized(): SerializedInputElement {
+    serialize(): SerializedInputElement {
         return {
-            ...super.serialized(),
+            ...super.serialize(),
             ...this.data,
             type: 'INPUT',
         }
