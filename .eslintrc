@@ -24,6 +24,7 @@
     "rules": {
         "import/prefer-default-export": "off",
         "default-case": 0,
+        "@typescript-eslint/no-use-before-define": "off",
         "func-names:": 0,
         "space-before-function-paren": 0,
         "react/prop-types": 0,

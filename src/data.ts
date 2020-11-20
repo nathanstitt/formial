@@ -46,7 +46,6 @@ export interface SerializedForm extends SerializedContainer {
 
 }
 
-
 export function isSerializedInput(
     toBeDetermined: SerializedElement
 ): toBeDetermined is SerializedInputElement { return (toBeDetermined.type === 'INPUT') }

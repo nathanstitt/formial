@@ -1,3 +1,4 @@
+import cx from 'classnames'
 import {
     isSerializedText,
     isSerializedForm,
@@ -6,10 +7,8 @@ import {
     SerializedContainer,
     isSerializedContainer,
     SerializedTextElement,
-    SerializedInputElement
+    SerializedInputElement,
 } from '../data'
-
-import cx from 'classnames'
 
 
 interface UnserializeOptions {
@@ -17,6 +16,7 @@ interface UnserializeOptions {
 }
 
 class Element {
+
     data: SerializedElement
     options: UnserializeOptions
 
@@ -24,6 +24,7 @@ class Element {
         this.data = data
         this.options = options
     }
+
     el?:HTMLElement
 
     createElement():HTMLElement {
@@ -37,15 +38,15 @@ class Element {
         return 0
     }
 
-    render(root:HTMLElement, skipAttributes:boolean = false){
+    render(root:HTMLElement, skipAttributes = false) {
         if (!this.el) {
             this.el = this.createElement()
         }
         this.setAttributes({
             'data-control': this.data.type,
             'data-id': this.data.id,
-            'class': cx(this.data.className, {
-                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth != 0,
+            class: cx(this.data.className, {
+                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth !== 0,
             }),
         })
 
@@ -53,7 +54,7 @@ class Element {
             this.setAttributes()
         }
 
-        if (this.el.parentElement != root) {
+        if (this.el.parentElement !== root) {
             root.appendChild(this.el)
         }
         return this
@@ -74,14 +75,6 @@ class Element {
     }
 
 }
-
-// interface AttrsT { [key: string]: string | number }
-
-// const setAttributes = (el:HTMLElement, attrs:AttrsT = {}) => {
-//     Object.keys(attrs).forEach((k) => {
-//         el.setAttribute(k, String(attrs[k]))
-//     })
-// }
 
 class TextElement extends Element {
 
@@ -116,13 +109,13 @@ class InputElement extends Element {
     }
 
 
-    render(root:HTMLElement){
+    render(root:HTMLElement) {
         super.render(root, true)
 
         this.setAttributes({
             'data-type': this.data.control,
             class: cx(this.data.className, {
-                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth != 0,
+                [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth !== 0,
             }),
         })
 
@@ -134,14 +127,7 @@ class InputElement extends Element {
                 // this.input.className = this.data.classNames.input
                 // this.input.id = this.data.id
                 this.el!.appendChild(this.input)
-            } else {
-                console.warn(`Can't render input type ${this.data.control}`)
             }
-        }
-
-
-        if (this.data.options) {
-
         }
         return this
     }
@@ -211,7 +197,8 @@ class InputElement extends Element {
                 class: 'form-check-input',
                 'data-id': id,
                 type: inputType,
-                name, value,
+                name,
+                value,
                 id: inputId,
             }, input)
             option.appendChild(input)
@@ -278,17 +265,21 @@ class InputElement extends Element {
 
         return wrapper
     }
+
 }
 
 
 class Container extends Element {
+
     children: Array<Element>
 
     data: SerializedContainer
     constructor(data: SerializedContainer, options: UnserializeOptions) {
         super(data, options)
         this.data = data
-        this.children = data.children.map(c => unserialize(c, { parent: this })).filter(Boolean) as Array<Element>
+        this.children = data.children
+            .map(c => unserialize(c, { parent: this }))
+            .filter(Boolean) as Array<Element>
     }
 
     get isBSRow() {
@@ -296,9 +287,9 @@ class Container extends Element {
         return this.data.direction === 'column'
     }
 
-    render(root:HTMLElement){
+    render(root:HTMLElement) {
         super.render(root)
-        this.el!.className = cx( this.el?.className, {
+        this.el!.className = cx(this.el?.className, {
             row: this.isBSRow, // a bootstrap row lays out in columns
             'd-flex flex-column': !this.isBSRow,
         })
@@ -308,12 +299,10 @@ class Container extends Element {
 
 }
 
-
-    // { parent }: { parent?: Container }
-    // const
+// { parent }: { parent?: Container }
+// const
 
 const unserialize = (data: SerializedElement, options: UnserializeOptions = {}):Element => {
-
     if (isSerializedText(data)) {
         return new TextElement(data, options)
     }
