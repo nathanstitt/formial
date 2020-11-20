@@ -24,7 +24,6 @@
     "rules": {
         "import/prefer-default-export": "off",
         "default-case": 0,
-        "@typescript-eslint/no-use-before-define": "off",
         "func-names:": 0,
         "space-before-function-paren": 0,
         "react/prop-types": 0,
@@ -33,6 +32,7 @@
         "react/no-unused-prop-types": 0,
         "import/export": 0,
         "no-unused-vars": "off",
+        "@typescript-eslint/no-use-before-define": "off",
         "@typescript-eslint/no-unused-vars": ["error"],
         "@typescript-eslint/no-non-null-assertion": 'off',
         "@typescript-eslint/no-explicit-any": "off",

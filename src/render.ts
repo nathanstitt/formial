@@ -1,5 +1,6 @@
 import cx from 'classnames'
 import {
+    SerializedForm,
     isSerializedText,
     isSerializedForm,
     isSerializedInput,
@@ -8,7 +9,7 @@ import {
     isSerializedContainer,
     SerializedTextElement,
     SerializedInputElement,
-} from '../data'
+} from './data'
 
 
 interface UnserializeOptions {
@@ -150,6 +151,7 @@ class InputElement extends Element {
 
         this.setAttributes({
             name: this.data.name,
+            id: this.data.id,
             class: 'form-control',
             placeholder: this.data.label,
             ...this.data.attributes,
@@ -289,18 +291,17 @@ class Container extends Element {
 
     render(root:HTMLElement) {
         super.render(root)
+
         this.el!.className = cx(this.el?.className, {
             row: this.isBSRow, // a bootstrap row lays out in columns
             'd-flex flex-column': !this.isBSRow,
+            'formial-form': this.data.type == 'FORM'
         })
         this.children.forEach(c => c.render(this.el!))
         return this
     }
 
 }
-
-// { parent }: { parent?: Container }
-// const
 
 const unserialize = (data: SerializedElement, options: UnserializeOptions = {}):Element => {
     if (isSerializedText(data)) {
@@ -318,9 +319,25 @@ const unserialize = (data: SerializedElement, options: UnserializeOptions = {}):
     return new Element(data, options)
 }
 
+export const findField = (el: any, id: string): SerializedElement | null => {
+    if (el.id === id) {
+        return el
+    }
+    if (Array.isArray(el.children)) {
+        for (const child of el.children) {
+            const match = findField(child, id)
+            if (match) {
+                return match
+            }
+        }
+    }
+    return null
+}
 
-export const render = (root: HTMLElement, container: SerializedContainer) => {
+export const render = (root: HTMLElement, form: SerializedForm) => {
     root.innerHTML = ''
-    const form = unserialize(container)
-    form.render(root)
+    const tree = unserialize(form)
+    if (tree) {
+        tree.render(root)
+    }
 }

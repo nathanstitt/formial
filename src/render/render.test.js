@@ -1,4 +1,4 @@
-import { render } from './index.ts'
+import { render } from '../render.ts'
 import { SerializedContainer } from '../data'
 
 const testData:SerializedContainer = {
