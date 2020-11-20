@@ -76,6 +76,7 @@ export interface ContainerOptions {
 type ContainerChild = Element|TextElement|Container|InputElement
 
 export class Container extends Element {
+
     direction: string // 'row' | 'column'
     children: Array<ContainerChild>
     constructor(control:Control, options: ContainerOptions) {
@@ -93,9 +94,11 @@ export class Container extends Element {
             type: 'CONTAINER',
         }
     }
+
 }
 
 export class Form extends Container {
+
     constructor(cm: ControlsMap, options?: ContainerOptions) {
         const col = cm.get('col')
         if (!col) { throw new Error("Column control doesn't exist?") }
@@ -243,7 +246,7 @@ export function isContainer(
 export function isInput(
     toBeDetermined: any,
 ): toBeDetermined is InputElement {
-    return (toBeDetermined instanceof InputElement);
+    return (toBeDetermined instanceof InputElement)
 }
 
 export function isText(
@@ -345,7 +348,7 @@ const unserialize = (cm: ControlsMap, data: ElementSerialization):Element|null =
     }
 
 
-    let children:Array<ContainerChild> = []
+    const children:Array<ContainerChild> = []
     const dataChildren = (data as any).children
     if (dataChildren) {
         dataChildren.forEach((c:ElementSerialization) => {

@@ -25,7 +25,7 @@ describe('merging', () => {
         name: 'A tester control',
         icon: 'none',
     })
-    defaultControls.register([ testCntrl ])
+    defaultControls.register([testCntrl])
     let store:Store
     beforeEach(() => {
         store = initStore()
@@ -34,7 +34,7 @@ describe('merging', () => {
 
     const addStoreElement = (form:Form = store.form) => {
         store = addElement(store, {
-            id: 'test', container:form, destIndex: 0,
+            id: 'test', container: form, destIndex: 0,
         })
     }
 
@@ -112,7 +112,7 @@ describe('merging', () => {
                 control: 'test',
                 className: 'testcls',
                 children: [],
-                direction: 'row'
+                direction: 'row',
             }
             const el = unserialize(store.controls, obj) as Element
             expect(el).not.toBeNull()
@@ -123,7 +123,6 @@ describe('merging', () => {
                     className: 'testcls',
                 },
             })
-            console.log(el.serialized())
             expect(el.serialized()).toEqual(obj)
         })
 

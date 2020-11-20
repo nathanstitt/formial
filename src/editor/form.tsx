@@ -368,7 +368,6 @@ const ElementPreview:React.FC<{
     index: number,
     container: Container,
 }> = ({ el, index, container }) => {
-
     if (isContainer(el)) {
         return <ContainerPreview parent={container} container={el} index={index} />
     }
