@@ -1,10 +1,11 @@
 # formial
 
-> Form builder and renderer
+A simple drag and drop form builder and renderer
 
 [![NPM](https://img.shields.io/npm/v/formial.svg)](https://www.npmjs.com/package/formial)
 [![Actions Status](https://github.com/nathanstitt/formial/workflows/CI%20checks/badge.svg)](https://github.com/nathanstitt/formial/actions)
 
+![Screenshot](screenshot.png "Screenshot of Editing Interface")
 
 ## Install
 
