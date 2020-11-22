@@ -63,12 +63,12 @@ export default App
 * className?: string
 
 * onChange?(form: Form): void
-  Called anytime the form is modified
+  Called anytime the form is modified.  A form should not be saved as-is, but provides a "serialized()" method that can be called to obtain the "SerializedForm" structure that can be saved
 
-* defaultValue?: SerializedForm
+* defaultValue?: [SerializedForm](src/data.ts#L45)
   Initial state of form editor.
 
-* value?: SerializedForm
+* value?:[SerializedForm](src/data.ts#L45)
   Form state will reset to this whenever value changes.  Note that setting "value" does
   not exactly match the normal behavior of a controlled input.  The form state can still be
   modified but will reset to value whenever it's changed.
