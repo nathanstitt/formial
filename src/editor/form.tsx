@@ -103,11 +103,14 @@ const ElementPreviewEl = styled.div({
 
     '.controls': {
         opacity: 0,
+        position: 'absolute',
+
         transition: 'opacity 0.3s ease-in-out',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'flex-start',
         width: '110px',
+        '.move svg': { cursor: 'move' },
         button: {
             border: 0,
             padding: 0,
@@ -122,7 +125,17 @@ const ElementPreviewEl = styled.div({
             color: 'gray',
             transition: 'opacity 0.3s ease-in-out',
         },
-        '.move svg': { cursor: 'move' },
+        '> .controls': {
+            right: 0,
+        },
+    },
+
+    '>.controls': {
+        background: 'white',
+        right: 0,
+        top: 0,
+        padding: '5px',
+        borderBottomLeftRadius: '5px',
     },
 
     '.inline-text': {
@@ -140,6 +153,7 @@ const ElementPreviewEl = styled.div({
     },
 
     '.control-preview': {
+        flex: 1,
         display: 'flex',
         flexWrap: 'wrap',
         alignItems: 'flex-start',
@@ -268,7 +282,6 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
             flex: 1,
         },
         '> .container.controls': {
-            position: 'absolute',
             top: '-27px',
             left: 'calc(50% - 15px)',
             padding: '2px 5px',
@@ -291,6 +304,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
         '> .container.controls': {
             top: 'calc(50% - 40px)',
             left: '-25px',
+            right: 'auto',
             display: 'flex',
             flexDirection: 'column',
             width: '30px',
