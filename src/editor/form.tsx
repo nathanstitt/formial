@@ -104,13 +104,13 @@ const ElementPreviewEl = styled.div({
     '.controls': {
         opacity: 0,
         position: 'absolute',
-
         transition: 'opacity 0.3s ease-in-out',
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'flex-start',
-        width: '110px',
-        '.move svg': { cursor: 'move' },
+        '.move svg': {
+            cursor: 'move',
+        },
         button: {
             border: 0,
             padding: 0,
@@ -125,9 +125,6 @@ const ElementPreviewEl = styled.div({
             color: 'gray',
             transition: 'opacity 0.3s ease-in-out',
         },
-        '> .controls': {
-            right: 0,
-        },
     },
 
     '>.controls': {
@@ -136,6 +133,11 @@ const ElementPreviewEl = styled.div({
         top: 0,
         padding: '5px',
         borderBottomLeftRadius: '5px',
+        position: 'absolute',
+        width: 'fit-content',
+        '> *': {
+            margin: '0 5px',
+        },
     },
 
     '.inline-text': {
@@ -179,6 +181,7 @@ const Controls:React.FC<{
 
     return (
         <div className={cn('controls', { container: isContainer(target) })}>
+            <span>{target.control.name}</span>
             <button className='trash' onClick={() => sc.dispatch({
                 type: 'DELETE', target, container,
             })}>
@@ -268,7 +271,11 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
     '> .container.controls': {
         background: 'white',
         border: '1px dashed gray',
-        position: 'absolute',
+        flexDirection: 'row-reverse',
+        width: 'fit-content',
+        '> *': {
+            margin: '0 5px',
+        },
     },
     '&.container-row': {
         flexDirection: 'column',
@@ -283,7 +290,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
         },
         '> .container.controls': {
             top: '-27px',
-            left: 'calc(50% - 15px)',
+            left: 0,
             padding: '2px 5px',
             borderTopRightRadius: '5px',
             borderTopLeftRadius: '5px',
@@ -306,12 +313,15 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
             left: '-25px',
             right: 'auto',
             display: 'flex',
-            flexDirection: 'column',
+
             width: '30px',
             borderRadius: '5px',
             alignItems: 'center',
+            writingMode: 'vertical-rl',
+            textOrientation: 'upright',
+            fontSize: '80%',
             '> *': {
-                marginLeft: 0,
+                margin: '5px 0',
             },
         },
         '> .element-preview': {
@@ -362,16 +372,13 @@ const ContainerPreview:React.FC<{
             })}
         >
             <ContainerDrop container={container} index={0} />
-
             {container.children.map((el, i) => (
                 <React.Fragment key={i}>
                     <ElementPreview index={i} container={container} el={el} />
                     <ContainerDrop container={container} index={i + 1} />
                 </React.Fragment>
             ))}
-
             <Controls target={container} container={parent} drag={drag} />
-
         </ContainerPreviewEl>
     )
 }
@@ -449,7 +456,11 @@ export const FormElements = () => {
     })
 
     return (
-        <FormElementsEl ref={drop} editing={!!editing} className={cn('form-elements', { isHovered })}>
+        <FormElementsEl
+            ref={drop}
+            editing={!!editing}
+            className={cn('form-elements', { isHovered })}
+        >
             <FormDrop container={form} index={0} />
             {form.children.map((e, i) => (
                 <React.Fragment key={i}>
