@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useContext, createContext, FC, useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import {
@@ -6,13 +6,16 @@ import {
 } from './store'
 import { useKeyPress } from '../hooks/use-key-press'
 
+const CanFocusContext = createContext<boolean>(false)
+CanFocusContext.displayName = 'FocusContext'
 
-const NewAttribute: React.FC<{ input: InputElement; nested: string }> = ({
+const NewAttribute: FC<{ input: InputElement; nested: string }> = ({
     input,
     nested,
 }) => {
     const sc = useStoreContext()
-    const inputRef = React.useRef<HTMLInputElement>(null)
+    const canFocus = useContext(CanFocusContext)
+    const inputRef = useRef<HTMLInputElement>(null)
     const saveValue = () => sc.dispatch({
         type: 'REPLACE_NEW_ATTRIBUTE', nested, input, name: inputRef.current!.value,
     })
@@ -31,9 +34,11 @@ const NewAttribute: React.FC<{ input: InputElement; nested: string }> = ({
         }
     }, { target: inputRef })
 
-    React.useEffect(() => {
-        inputRef.current!.focus()
-    }, [])
+    useEffect(() => {
+        if (canFocus) {
+            inputRef.current!.focus()
+        }
+    }, [canFocus])
 
     return (
         <label>
@@ -51,23 +56,24 @@ const NewAttribute: React.FC<{ input: InputElement; nested: string }> = ({
 }
 
 
-const EditAttribute: React.FC<{
+const EditAttribute: FC<{
     input: InputElement
     nested: string
     attributeName: string
 }> = ({ input, nested, attributeName }) => {
     const sc = useStoreContext()
-    const inputRef = React.useRef<HTMLInputElement>(null)
+    const canFocus = useContext(CanFocusContext)
+    const inputRef = useRef<HTMLInputElement>(null)
     useKeyPress(['Enter', 'Tab'], (ev) => {
         ev.preventDefault()
         sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
     }, { target: inputRef })
-    React.useEffect(() => {
+    useEffect(() => {
         const attrs = Object.keys(input.data[nested])
-        if (attributeName === attrs[attrs.length - 1]) {
+        if (canFocus && attributeName === attrs[attrs.length - 1]) {
             inputRef.current!.focus()
         }
-    }, [])
+    }, [canFocus])
     return (
         <label>
             <span>{attributeName}:</span>
@@ -93,7 +99,7 @@ const EditAttribute: React.FC<{
     )
 }
 
-const Attribute: React.FC<{
+const Attribute: FC<{
     input: InputElement
     nested: string
     attributeName: string,
@@ -105,7 +111,7 @@ const Attribute: React.FC<{
 }
 
 
-const Options: React.FC<{
+const Options: FC<{
     label: string, input: InputElement, nested: string,
 }> = ({ label, input, nested }) => {
     const sc = useStoreContext()
@@ -140,7 +146,7 @@ const Options: React.FC<{
     )
 }
 
-const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
+const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
     const { data } = input
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: input, patch })
@@ -214,7 +220,7 @@ const InputEdit: React.FC<{ input: InputElement }> = ({ input }) => {
     )
 }
 
-const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
+const ContainerEdit: FC<{ container: Container }> = ({ container }) => {
     const sc = useStoreContext()
     const { data } = container
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: container, patch })
@@ -235,7 +241,7 @@ const ContainerEdit: React.FC<{ container: Container }> = ({ container }) => {
     )
 }
 
-const TextHeadingSize: React.FC<{
+const TextHeadingSize: FC<{
     txt: TextElement
     onChange: (value: string) => void
 }> = ({ txt, onChange }) => {
@@ -257,7 +263,7 @@ const TextHeadingSize: React.FC<{
     )
 }
 
-const TextEdit: React.FC<{ control: TextElement }> = ({ control }) => {
+const TextEdit: FC<{ control: TextElement }> = ({ control }) => {
     const sc = useStoreContext()
     const { data } = control
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: control, patch })
@@ -293,7 +299,7 @@ const TextEdit: React.FC<{ control: TextElement }> = ({ control }) => {
 }
 
 
-const Edit: React.FC<{ target: Element }> = ({ target }) => {
+const Edit: FC<{ target: Element }> = ({ target }) => {
     if (isContainer(target)) {
         return <ContainerEdit container={target} />
     }
@@ -393,31 +399,40 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
 
 export const EditPanel = () => {
     const sc = useStoreContext()
-    const panelRef = React.useRef<HTMLDivElement>(null)
+    const [canFocus, setCanFocus] = useState(false)
+    const panelRef = useRef<HTMLDivElement>(null)
     const { editing } = sc.store
-    React.useEffect(() => {
-        if (editing && panelRef.current) {
-            const firstInput = panelRef.current.querySelector('input,textarea')
-            if (firstInput) {
-                setTimeout(() => { // setTimeout to focus after animation completes
-                    (firstInput as HTMLInputElement).focus()
-                }, 250)
-            }
+    useEffect(() => {
+        if (!editing) {
+            setCanFocus(false)
+        }
+        if (editing) {
+            setTimeout(() => { // setTimeout to focus after animation completes
+                if (panelRef.current) {
+                    setCanFocus(true)
+                    const firstInput = panelRef.current.querySelector('input,textarea')
+                    if (firstInput) {
+                        (firstInput as HTMLInputElement).focus()
+                    }
+                }
+            }, 250)
         }
     }, [editing])
     return (
-        <EditPanelEl editing={!!editing}>
-            <div ref={panelRef} className='edit-pane'>
-                {editing && <Edit target={editing} />}
-            </div>
-            <div className='footer'>
-                <button
-                    className="btn btn-primary"
-                    onClick={() => sc.dispatch({ type: 'HIDE_EDIT' })}
-                >
-                    Done
-                </button>
-            </div>
-        </EditPanelEl>
+        <CanFocusContext.Provider value={canFocus}>
+            <EditPanelEl editing={!!editing}>
+                <div ref={panelRef} className='edit-pane'>
+                    {editing && <Edit target={editing} />}
+                </div>
+                <div className='footer'>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => sc.dispatch({ type: 'HIDE_EDIT' })}
+                    >
+                        Done
+                    </button>
+                </div>
+            </EditPanelEl>
+        </CanFocusContext.Provider>
     )
 }
