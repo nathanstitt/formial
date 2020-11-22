@@ -25,7 +25,7 @@ const App = () => {
             <hr />
             <div><button onClick={renderHTML}>Render</button></div>
             <hr />
-            <div ref={htmlRef}></div>
+            <div className="mb-4" ref={htmlRef}></div>
         </div>
     )
 }

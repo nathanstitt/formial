@@ -9,8 +9,8 @@ A simple drag and drop form builder and renderer.
 
 Demo can be viewed at [https://nathanstitt.github.io/formial/](https://nathanstitt.github.io/formial/)
 
-Editing is a React application with the only major depenedency being react-dnd.  The form's data
-renderer is standalong and renders using only DOM manipulation.
+Editing is a React application with the only major dependency being react-dnd.  The form's data
+renderer is standalone and renders using only DOM manipulation.
 
 
 ## Install
@@ -27,7 +27,8 @@ Example from [example/src/App.tsx](example/src/App.tsx)
 import React, { Component } from 'react'
 import { Editor, Container, render } from 'formial'
 
-const DEFAULT = {} // this would normally be loaded from server
+ // this would normally be loaded from server
+const DEFAULT = {"id":"4f78521b-59a8-4069-8ae8-8b0c793d9f5e","type":"FORM","control":"col","className":"","direction":"row","children":[{"id":"5421839e-6592-4c7b-aea6-72dd889f2354","type":"TEXT","control":"heading","tag":"h3","text":"Hello World!","className":""}]}
 
 const App = () => {
     const [value, setValue] = React.useState<Container>()
@@ -72,6 +73,24 @@ export default App
   Form state will reset to this whenever value changes.  Note that setting "value" does
   not exactly match the normal behavior of a controlled input.  The form state can still be
   modified but will reset to value whenever it's changed.
+
+## Styling
+
+The editor is styled using styled-components but also assigns class names to elements to they can be overridden. The controls on the editor default to assigning elements bootstrap classes.
+
+The form renderer does not include any styles by itself.  The demo loads the bootstrap 5 alpha styles on the page in order to show what's possible.
+
+## Raison d'être
+
+Formial was written for use by the [MyClientSpot](https://myclientspot.com/) project management application.  Customers can use it to easily build or customize premade forms and then embed them in their websites to feed data into their workflows.  It was important that the builder be easy to use and the rendering be very lightweight since it's intended to be loaded onto foreign websites.
+
+Other form builders that were evaluated:
+
+* https://github.com/Draggable/formeo - was almost perfect but the editor's drag and drop seemed a little hard to use, and it wasn't easy to customize.  I went pretty far with it, and even contributed a few PR's to the project though.
+
+* https://github.com/andrewhathaway/Winterfell - very powerful forms, but no builder, and project hasn't been updated in a few years.  I considered using it's schema for the builder but ultimately decided it was too complex.
+
+* https://github.com/blackjk3/react-form-builder - almost what I was looking for but seemed only semi-maintained and had quite a few complex inputs that were unwanted.  The rendering was a pretty large JS bundle.
 
 ## License
 
