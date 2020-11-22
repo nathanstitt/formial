@@ -15,8 +15,11 @@ code {
 
 #example-builder {
   height: 80vh;
-  width: calc(80vw - 40px);
+  width: calc(85vw - 40px);
   margin: auto;
   margin-top: 40px;
+}
+
+.formial-editor {
   border: 1px dashed grey;
 }

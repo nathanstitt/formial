@@ -1,5 +1,6 @@
 import * as React from 'react'
 import styled from 'styled-components'
+import cn from 'classnames'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
 import { ControlsListing } from './editor/controls'
@@ -56,7 +57,7 @@ export const Editor:React.FC<EditorProps> = ({
     return (
         <DndProvider backend={HTML5Backend}>
             <StoreContext.Provider value={ctx}>
-                <EditorEl className={className}>
+                <EditorEl className={cn('formial-editor', className)}>
                     <FormPanel />
                     <ControlsListing />
                     <EditPanel />

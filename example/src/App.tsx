@@ -21,11 +21,16 @@ const App = () => {
 
     return (
         <div id="example-builder">
-            <Editor onChange={onChange} defaultValue={DEFAULT}  />
-            <hr />
-            <div><button onClick={renderHTML}>Render</button></div>
-            <hr />
-            <div className="mb-4" ref={htmlRef}></div>
+            <h3>Formial Demo</h3>
+            <p>
+                This is an example of Formial editing and rendering forms.  The source
+                code for this demo can be viewed in <a href="https://github.com/nathanstitt/formial/blob/main/example/src/App.tsx">example/src/App.tsx</a>.
+            </p>
+                <Editor onChange={onChange} defaultValue={DEFAULT}  />
+                <hr />
+                <div><button onClick={renderHTML}>Render</button></div>
+                <hr />
+                <div className="mb-4" ref={htmlRef}></div>
         </div>
     )
 }
