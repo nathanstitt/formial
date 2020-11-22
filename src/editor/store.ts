@@ -330,7 +330,7 @@ interface StoreContext {
 }
 
 const sc = React.createContext(null as any as StoreContext)
-
+sc.displayName = 'StoreContext'
 export const useStoreContext = ():StoreContext => React.useContext(sc)
 
 export const useStore = ():Store => useStoreContext().store
