@@ -20,11 +20,17 @@ import {
 } from './store'
 
 const revealColor = '#e8e8e8'
-const dropAcceptableColor = '#c1c1c1'
 
-const FormDropEl = styled.div({
-    minHeight: '15px',
-    border: '1px solid white',
+const DropEl = styled.div({
+    transition: 'all 0.3s ease-in-out',
+})
+
+const HorizontalDropEl = styled(DropEl)({
+    height: '15px',
+    '&.isHovered': {
+        height: '100px',
+        background: revealColor,
+    },
     '&:last-child': {
         flex: 1,
     },
@@ -63,9 +69,29 @@ const useFormDrop = ({ index, container }: DropProps) => {
     return { isHovered, dropRef }
 }
 
-export const FormDrop: React.FC<DropProps> = (props) => {
+export const HorizonontalDrop: React.FC<DropProps> = (props) => {
     const { isHovered, dropRef } = useFormDrop(props)
-    return <FormDropEl ref={dropRef} className={cn('drop', { isHovered })} />
+    return <HorizontalDropEl ref={dropRef} className={cn('drop', { isHovered })} />
+}
+
+const VerticalDropEl = styled(DropEl)({
+    minWidth: '20px',
+    '&.isHovered': {
+        flex: 1,
+        // width: '100px',
+        background: revealColor,
+    },
+})
+
+const VerticalDrop: React.FC<DropProps> = (props) => {
+    const { isHovered, dropRef } = useFormDrop(props)
+
+    return (
+        <VerticalDropEl
+            ref={dropRef}
+            className={cn('drop', 'container-drop', { isHovered })}
+        />
+    )
 }
 
 const ElementPreviewEl = styled.div({
@@ -76,7 +102,6 @@ const ElementPreviewEl = styled.div({
     color: '#0c0c0c',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    //minHeight: '40px',
     minHeight: 'fit-content',
 
     '&.input .label, &.textarea .label': {
@@ -218,11 +243,11 @@ const InputPreview: React.FC<{
             style={{ opacity }}
             className={cn('element-preview', input.control.id)}
         >
+            <Controls target={input} container={container} drag={drag} />
             <div className='control-preview'>
                 <span className="label">{input.data.label}</span>
                 {input.placeholder}
             </div>
-            <Controls target={input} container={container} drag={drag} />
         </ElementPreviewEl>
     )
 }
@@ -249,6 +274,7 @@ const TextPreview: React.FC<{
             style={{ opacity }}
             className={cn('element-preview', control.control.id)}
         >
+            <Controls target={control} container={container} drag={drag} />
             <div className='control-preview'>
                 <EditableText
                     onTextSaved={(updated) => {
@@ -257,7 +283,6 @@ const TextPreview: React.FC<{
                     textValue={control.data.text}
                 >{text}</EditableText>
             </div>
-            <Controls target={control} container={container} drag={drag} />
         </ElementPreviewEl>
     )
 }
@@ -265,8 +290,6 @@ const TextPreview: React.FC<{
 
 const ContainerPreviewEl = styled(ElementPreviewEl)({
     border: '1px dashed gray',
-//    minHeight: '40px',
-    borderRadius: '5px',
     padding: '0',
     alignItems: 'stretch',
     '> .container.controls': {
@@ -304,9 +327,6 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
 
     '&.empty': {
         alignItems: 'stretch',
-        '> .drop': {
-            flex: 1,
-        },
     },
     '&.container-column': {
 
@@ -329,28 +349,8 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
             flex: 1,
         },
     },
-    '&:hover': {
-        '.container-drop': {
-            backgroundColor: revealColor,
-        },
-    },
 })
 
-const ContainerDropEl = styled(FormDropEl)({
-    minWidth: '20px',
-
-})
-
-const ContainerDrop: React.FC<DropProps> = (props) => {
-    const { isHovered, dropRef } = useFormDrop(props)
-
-    return (
-        <ContainerDropEl
-            ref={dropRef}
-            className={cn('drop', 'container-drop', { isHovered })}
-        />
-    )
-}
 
 const ContainerPreview:React.FC<{
     container: Container
@@ -364,6 +364,8 @@ const ContainerPreview:React.FC<{
         }),
     })
 
+    const Drop = container.isRow ? HorizonontalDrop : VerticalDrop
+
     return (
         <ContainerPreviewEl
             ref={preview}
@@ -372,14 +374,14 @@ const ContainerPreview:React.FC<{
                 empty: container.children.length === 0,
             })}
         >
-            <ContainerDrop container={container} index={0} />
-            {container.children.map((el, i) => (
-                <React.Fragment key={i}>
-                    <ElementPreview index={i} container={container} el={el} />
-                    <ContainerDrop container={container} index={i + 1} />
-                </React.Fragment>
-            ))}
-            <Controls target={container} container={parent} drag={drag} />
+        <Drop container={container} index={0} />
+        <Controls target={container} container={parent} drag={drag} />
+        {container.children.map((el, i) => (
+            <React.Fragment key={i}>
+                <ElementPreview index={i} container={container} el={el} />
+                <Drop container={container} index={i + 1} />
+            </React.Fragment>
+        ))}
         </ContainerPreviewEl>
     )
 }
@@ -417,30 +419,8 @@ const FormElementsEl = styled(Scrolling)<{editing: boolean}>(({ editing }) => ({
     transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
-
-
-    '.drop': {
-        transition: 'all 0.3s ease-in-out',
-    },
     '> .container-preview': {
         margin: '0 2px',
-    },
-    '&.isHovered': {
-        '.drop': {
-            backgroundColor: revealColor,
-        },
-    },
-    '&:hover': {
-        '.drop': {
-            backgroundColor: revealColor,
-        },
-    },
-    '.drop.isHovered': {
-        borderColor: 'black',
-        backgroundColor: dropAcceptableColor,
-    },
-    '.drop:hover': {
-        backgroundColor: dropAcceptableColor,
     },
     'p, h1, h2, h3, h4, h5, h6': {
         padding: 0,
@@ -464,11 +444,11 @@ export const FormElements = () => {
             className={cn('form-elements', { isHovered })}
         >
 
-            <FormDrop container={form} index={0} />
+            <HorizonontalDrop container={form} index={0} />
             {form.children.map((e, i) => (
                 <React.Fragment key={i}>
                     <ElementPreview index={i} container={form} el={e} />
-                    <FormDrop container={form} index={i + 1} />
+                    <HorizonontalDrop container={form} index={i + 1} />
                 </React.Fragment>
             ))}
 

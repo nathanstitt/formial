@@ -85,6 +85,10 @@ export class Container extends Element {
         this.children = options.children || []
     }
 
+    get isRow(): boolean {
+        return this.direction === 'row'
+    }
+
     serialize(): SerializedContainer {
         return {
             ...super.serialize(),
