@@ -94,6 +94,7 @@ export const EditableText:React.FC<EditableTextProps> = (props) => {
 
                     display: isInputActive ? 'inline' : 'none',
                 }}
+                size={Math.round(inputValue.length * 1.1)}
                 value={inputValue}
                 onChange={handleInputChange}
                 onBlur={onBlur}

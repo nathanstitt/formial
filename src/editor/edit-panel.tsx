@@ -1,4 +1,4 @@
-import React, { useContext, createContext, FC, useState, useRef, useEffect, useCallback } from 'react'
+import React, { useContext, createContext, FC, useState, useRef, useEffect } from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { useOnClickOutside } from '../hooks/use-click-outside'
@@ -399,9 +399,7 @@ export const EditPanel = () => {
     const [canFocus, setCanFocus] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
     const { editing } = sc.store
-    useOnClickOutside(panelRef, () => {
-        useCallback(() => sc.dispatch({ type: 'HIDE_EDIT' }), [sc.dispatch])
-    })
+    useOnClickOutside(panelRef, () => sc.dispatch({ type: 'HIDE_EDIT' }))
     useEffect(() => {
         if (!editing) {
             setCanFocus(false)

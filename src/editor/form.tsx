@@ -94,15 +94,16 @@ const VerticalDrop: React.FC<DropProps> = (props) => {
     )
 }
 
-const ElementPreviewEl = styled.div({
+const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     display: 'flex',
     flexDirection: 'row',
     position: 'relative',
-    padding: '20px',
+    padding: '10px',
     color: '#0c0c0c',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     minHeight: 'fit-content',
+    boxShadow: editing ? '0 3px 5px 3px rgba(0,0,0,0.35)' : 'none',
 
     '&.input .label, &.textarea .label': {
         marginBottom: '-20px',
@@ -194,7 +195,7 @@ const ElementPreviewEl = styled.div({
     'input + span': {
         marginLeft: '10px',
     },
-})
+}))
 
 const Controls:React.FC<{
     target: Element | Container
@@ -223,6 +224,14 @@ const Controls:React.FC<{
     )
 }
 
+const ControlPreview = styled.div.attrs({
+    className: 'control-preview',
+
+})({
+   // boxShadow: '0 10px 9px rgba(0,0,0,0.35)',
+    padding: '10px',
+})
+
 const InputPreview: React.FC<{
     index: number
     input: InputElement
@@ -236,18 +245,25 @@ const InputPreview: React.FC<{
             opacity: monitor.isDragging() ? 0.4 : 1,
         }),
     })
+    const sc = useStoreContext()
 
     return (
         <ElementPreviewEl
             ref={preview}
             style={{ opacity }}
+            editing={sc.store.editing === input}
             className={cn('element-preview', input.control.id)}
         >
             <Controls target={input} container={container} drag={drag} />
-            <div className='control-preview'>
+            <ControlPreview
+                onClick={() => {
+                    console.log("CLICK")
+                    sc.dispatch({ type: 'EDIT', target: input })
+                }}
+            >
                 <span className="label">{input.data.label}</span>
                 {input.placeholder}
-            </div>
+            </ControlPreview>
         </ElementPreviewEl>
     )
 }
@@ -271,6 +287,7 @@ const TextPreview: React.FC<{
     return (
         <ElementPreviewEl
             ref={preview}
+            editing={sc.store.editing === control}
             style={{ opacity }}
             className={cn('element-preview', control.control.id)}
         >
@@ -374,14 +391,14 @@ const ContainerPreview:React.FC<{
                 empty: container.children.length === 0,
             })}
         >
-        <Drop container={container} index={0} />
-        <Controls target={container} container={parent} drag={drag} />
-        {container.children.map((el, i) => (
-            <React.Fragment key={i}>
-                <ElementPreview index={i} container={container} el={el} />
-                <Drop container={container} index={i + 1} />
-            </React.Fragment>
-        ))}
+            <Drop container={container} index={0} />
+            <Controls target={container} container={parent} drag={drag} />
+            {container.children.map((el, i) => (
+                <React.Fragment key={i}>
+                    <ElementPreview index={i} container={container} el={el} />
+                    <Drop container={container} index={i + 1} />
+                </React.Fragment>
+            ))}
         </ContainerPreviewEl>
     )
 }
@@ -401,12 +418,11 @@ const ElementPreview:React.FC<{
     if (isInput(el)) {
         return <InputPreview input={el} container={container} index={index} />
     }
-
     return null
 }
 
 
-const FormElementsEl = styled(Scrolling)<{editing: boolean}>(({ editing }) => ({
+const FormElementsEl = styled(Scrolling)({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
@@ -415,7 +431,7 @@ const FormElementsEl = styled(Scrolling)<{editing: boolean}>(({ editing }) => ({
     padding: '20px',
     boxSizing: 'border-box',
     boxShadow: '0 0 2px 1px rgba(0, 0, 0, 0.1)',
-    opacity: editing ? '0.3' : '1',
+    //opacity: editing ? '0.3' : '1',
     transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
@@ -426,9 +442,9 @@ const FormElementsEl = styled(Scrolling)<{editing: boolean}>(({ editing }) => ({
         padding: 0,
         margin: 0,
     },
-}))
+})
 export const FormElements = () => {
-    const { form, editing } = useStore()
+    const { form } = useStore()
     const [{ isHovered }, drop] = useDrop({
         accept: 'control',
         collect(item) {
@@ -440,7 +456,6 @@ export const FormElements = () => {
     return (
         <FormElementsEl
             ref={drop}
-            editing={!!editing}
             className={cn('form-elements', { isHovered })}
         >
 
