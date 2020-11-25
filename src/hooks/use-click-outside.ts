@@ -10,7 +10,7 @@ import { useEffect } from 'react'
 type handlerT = (event: MouseEvent) => void // / MouseEventHandler<HTMLElement>
 type refT = { current?: HTMLElement | null }
 
-function useOnClickOutside(ref: refT, handler:handlerT) {
+export function useOnClickOutside(ref: refT, handler:handlerT) {
     useEffect(
         () => {
             const listener = (event:MouseEvent) => {
@@ -38,5 +38,3 @@ function useOnClickOutside(ref: refT, handler:handlerT) {
         [ref, handler],
     )
 }
-
-export default useOnClickOutside

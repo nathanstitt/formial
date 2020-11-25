@@ -3,16 +3,15 @@ import styled from 'styled-components'
 import cn from 'classnames'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
-import { ControlsListing } from './editor/controls'
+import { Sidebar } from './editor/sidebar'
 import { useProvidedStoreContext, StoreContext, Form } from './editor/store'
 import { FormElements } from './editor/form'
-import { EditPanel } from './editor/edit-panel'
 import { SerializedForm } from './data'
 
 const FormPanelEl = styled.div({
     display: 'flex',
     width: '100%',
-    overflow: 'scroll',
+    overflow: 'hidden',
 })
 const FormPanel = () => {
     return (
@@ -24,16 +23,16 @@ const FormPanel = () => {
 
 const EditorEl = styled.div({
     display: 'grid',
-    gridTemplateColumns: '1fr 200px',
+    gridTemplateColumns: '1fr 300px',
     gridTemplateRows: '1fr',
     height: '100%',
     gap: '10px',
     position: 'relative',
-    overflow: 'hidden',
-    '> *': {
-        display: 'flex',
-        flexDirection: 'column',
-    },
+
+    // '> *': {
+    //     display: 'flex',
+    //     flexDirection: 'column',
+    // },
 })
 
 export interface EditorProps {
@@ -59,8 +58,7 @@ export const Editor:React.FC<EditorProps> = ({
             <StoreContext.Provider value={ctx}>
                 <EditorEl className={cn('formial-editor', className)}>
                     <FormPanel />
-                    <ControlsListing />
-                    <EditPanel />
+                    <Sidebar />
                 </EditorEl>
             </StoreContext.Provider>
         </DndProvider>

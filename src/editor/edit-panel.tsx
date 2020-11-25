@@ -1,13 +1,16 @@
-import React, { useContext, createContext, FC, useState, useRef, useEffect } from 'react'
+import React, { useContext, createContext, FC, useState, useRef, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
+import { useOnClickOutside } from '../hooks/use-click-outside'
 import {
     useStoreContext, InputElement, Element, Container, isContainer, isInput, isText, TextElement,
 } from './store'
 import { useKeyPress } from '../hooks/use-key-press'
+import { Title, Scrolling, Values } from './components'
 
 const CanFocusContext = createContext<boolean>(false)
 CanFocusContext.displayName = 'FocusContext'
+
 
 const NewAttribute: FC<{ input: InputElement; nested: string }> = ({
     input,
@@ -152,71 +155,72 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: input, patch })
 
     return (
-        <div>
-            <h4 className="title">Edit {input.control.name}</h4>
-            <label>
-                <span>Label:</span>
-                <input
-                    className="value"
-                    value={data.label || ''}
-                    onChange={({ target: { value } }) => dp({ label: value })}
-                />
-            </label>
-            <label>
-                <span>Name:</span>
-                <input
-                    className="value"
-                    value={data.name || ''}
-                    onChange={({ target: { value } }) => dp({ name: value })}
-                />
-            </label>
-            <label>
-                <span>Class:</span>
-
-                <input
-                    className="value"
-                    value={data.className || ''}
-                    onChange={({ target: { value } }) => dp({ className: value })}
-                />
-            </label>
-
-            <Options input={input} label="Options" nested="options" />
-
-            <fieldset>
-                <legend>Other Class Names:</legend>
-                <label>
-                    <span>Wrapper:</span>
-                    <input
-                        className="value"
-                        value={data.classNames.wrapper || ''}
-                        onChange={({ target: { value } }) => dp({ classNames: { wrapper: value } })
-                        }
-                    />
-                </label>
+        <Values className="input">
+            <Title>Edit {input.control.name}</Title>
+            <Scrolling>
                 <label>
                     <span>Label:</span>
                     <input
                         className="value"
-                        value={data.classNames.label || ''}
-                        onChange={({ target: { value } }) => dp({ classNames: { label: value } })
-                        }
+                        value={data.label || ''}
+                        onChange={({ target: { value } }) => dp({ label: value })}
                     />
                 </label>
                 <label>
-                    <span>Input:</span>
+                    <span>Name:</span>
                     <input
                         className="value"
-                        value={data.classNames.input || ''}
-                        onChange={({ target: { value } }) => dp({ classNames: { input: value } })
-                        }
+                        value={data.name || ''}
+                        onChange={({ target: { value } }) => dp({ name: value })}
                     />
                 </label>
-            </fieldset>
+                <label>
+                    <span>Class:</span>
+
+                    <input
+                        className="value"
+                        value={data.className || ''}
+                        onChange={({ target: { value } }) => dp({ className: value })}
+                    />
+                </label>
+
+                <Options input={input} label="Options" nested="options" />
+
+                <fieldset>
+                    <legend>Other Class Names:</legend>
+                    <label>
+                        <span>Wrapper:</span>
+                        <input
+                            className="value"
+                            value={data.classNames.wrapper || ''}
+                            onChange={({ target: { value } }) => dp({ classNames: { wrapper: value } })
+                            }
+                        />
+                    </label>
+                    <label>
+                        <span>Label:</span>
+                        <input
+                            className="value"
+                            value={data.classNames.label || ''}
+                            onChange={({ target: { value } }) => dp({ classNames: { label: value } })
+                            }
+                        />
+                    </label>
+                    <label>
+                        <span>Input:</span>
+                        <input
+                            className="value"
+                            value={data.classNames.input || ''}
+                            onChange={({ target: { value } }) => dp({ classNames: { input: value } })
+                            }
+                        />
+                    </label>
+                </fieldset>
 
 
-            <Options input={input} label="Attributes" nested="attributes" />
-
-        </div>
+                <Options input={input} label="Attributes" nested="attributes" />
+            </Scrolling>
+        </Values>
     )
 }
 
@@ -226,8 +230,8 @@ const ContainerEdit: FC<{ container: Container }> = ({ container }) => {
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: container, patch })
 
     return (
-        <div>
-            <h4 className="title">Edit {container.control.name} container</h4>
+        <Values className="container">
+            <Title>Edit {container.control.name} container</Title>
             <label>
                 <span>Class:</span>
                 <input
@@ -237,7 +241,7 @@ const ContainerEdit: FC<{ container: Container }> = ({ container }) => {
                 />
             </label>
 
-        </div>
+        </Values>
     )
 }
 
@@ -269,8 +273,8 @@ const TextEdit: FC<{ control: TextElement }> = ({ control }) => {
     const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: control, patch })
 
     return (
-        <div>
-            <h4 className="title">Edit text</h4>
+        <Values className="text">
+            <Title>Edit text</Title>
             <label>
                 <span>Text:</span>
 
@@ -294,7 +298,7 @@ const TextEdit: FC<{ control: TextElement }> = ({ control }) => {
                     onChange={({ target: { value } }) => dp({ className: value })}
                 />
             </label>
-        </div>
+        </Values>
     )
 }
 
@@ -313,21 +317,14 @@ const Edit: FC<{ target: Element }> = ({ target }) => {
 }
 
 
-const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
-    position: 'absolute',
+const EditPanelEl = styled.div({
     height: '100%',
-    width: '400px',
     background: 'white',
-    right: editing ? '0' : '-420px',
-    transition: 'right 0.3s ease-in-out',
     display: 'flex',
-    boxShadow: '-5px 0px 5px 0px rgba(50, 50, 50, 0.75)',
+    flexDirection: 'column',
+//    margin: '10px',
+    overflow: 'hidden',
 
-    '.title': {
-        margin: '15px 0',
-        borderBottom: '1px solid lightgray',
-        paddingBottom: '10px',
-    },
     '.edit-pane': {
         flex: 1,
         overflowY: 'auto',
@@ -395,13 +392,16 @@ const EditPanelEl = styled.div<{ editing: boolean }>(({ editing }) => ({
             },
         },
     },
-}))
+})
 
 export const EditPanel = () => {
     const sc = useStoreContext()
     const [canFocus, setCanFocus] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
     const { editing } = sc.store
+    useOnClickOutside(panelRef, () => {
+        useCallback(() => sc.dispatch({ type: 'HIDE_EDIT' }), [sc.dispatch])
+    })
     useEffect(() => {
         if (!editing) {
             setCanFocus(false)
@@ -418,20 +418,17 @@ export const EditPanel = () => {
             }, 250)
         }
     }, [editing])
+
+    if (!editing) {
+        return null
+    }
+
     return (
         <CanFocusContext.Provider value={canFocus}>
-            <EditPanelEl editing={!!editing}>
-                <div ref={panelRef} className='edit-pane'>
-                    {editing && <Edit target={editing} />}
-                </div>
-                <div className='footer'>
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => sc.dispatch({ type: 'HIDE_EDIT' })}
-                    >
-                        Done
-                    </button>
-                </div>
+            <EditPanelEl ref={panelRef} className="edit-panel">
+
+                {editing && <Edit target={editing} />}
+
             </EditPanelEl>
         </CanFocusContext.Provider>
     )

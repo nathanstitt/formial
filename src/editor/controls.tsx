@@ -4,6 +4,8 @@ import { useDrag } from 'react-dnd'
 import { useStore, ControlDefinition } from './store'
 import './default-controls'
 
+import { Title, Scrolling } from './components'
+
 const ControlLabelEl = styled.li({
     cursor: 'pointer',
     backgroundColor: 'white',
@@ -34,22 +36,30 @@ const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
     )
 }
 
-const ControlsListingEl = styled.div({
-    overflow: 'auto',
-    paddingRight: '10px',
-    ul: {
-        padding: 0,
-        margin: 0,
-    },
+
+const ControlsEl = styled.div({
+
+    // '.listing': {
+    //     flex: 1,
+    //     overflow: 'auto',
+    // },
 })
-export const ControlsListing:React.FC = () => {
-    const { controls } = useStore()
+
+export const Controls = () => {
+    const { editing, controls } = useStore()
+    if (editing) {
+        return null
+    }
     return (
-        <ControlsListingEl className="controls-listing">
-            <ul>
-                {Array.from(controls.values()).map(definition => (
-                    <ControlLabel key={definition.id} {...definition} />))}
-            </ul>
-        </ControlsListingEl>
+        <ControlsEl>
+            <Title>Elements</Title>
+            <Scrolling className="listing">
+                <ul>
+                    {Array.from(controls.values()).map(definition => (
+                        <ControlLabel key={definition.id} {...definition} />))}
+                </ul>
+            </Scrolling>
+        </ControlsEl>
     )
 }
+

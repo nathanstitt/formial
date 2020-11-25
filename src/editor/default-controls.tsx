@@ -27,17 +27,6 @@ const renderOptions = (el: InputElement, rend: RenderT) => {
 
 
 defaultControls.register([
-    new RowControl({
-        id: 'row',
-        name: 'Row',
-        icon: <GripLines />,
-    }),
-    new ColumnControl({
-        id: 'col',
-        name: 'Column',
-        icon: <GripLinesVertical />,
-    }),
-
     new TextControl({
         id: 'heading',
         name: 'Heading',
@@ -103,5 +92,15 @@ defaultControls.register([
                 </select>
             )
         },
+    }),
+    new RowControl({
+        id: 'row',
+        name: 'Row',
+        icon: <GripLines />,
+    }),
+    new ColumnControl({
+        id: 'col',
+        name: 'Column',
+        icon: <GripLinesVertical />,
     }),
 ])

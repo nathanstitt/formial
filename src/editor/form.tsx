@@ -6,7 +6,7 @@ import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { EditableText } from './editable-text'
-
+import { Scrolling } from './components'
 import {
     useStore,
     Element,
@@ -76,7 +76,8 @@ const ElementPreviewEl = styled.div({
     color: '#0c0c0c',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    minHeight: '40px',
+    //minHeight: '40px',
+    minHeight: 'fit-content',
 
     '&.input .label, &.textarea .label': {
         marginBottom: '-20px',
@@ -264,7 +265,7 @@ const TextPreview: React.FC<{
 
 const ContainerPreviewEl = styled(ElementPreviewEl)({
     border: '1px dashed gray',
-    minHeight: '40px',
+//    minHeight: '40px',
     borderRadius: '5px',
     padding: '0',
     alignItems: 'stretch',
@@ -308,12 +309,12 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
         },
     },
     '&.container-column': {
+
         '> .container.controls': {
             top: 'calc(50% - 40px)',
             left: '-25px',
             right: 'auto',
             display: 'flex',
-
             width: '30px',
             borderRadius: '5px',
             alignItems: 'center',
@@ -403,7 +404,7 @@ const ElementPreview:React.FC<{
 }
 
 
-const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
+const FormElementsEl = styled(Scrolling)<{editing: boolean}>(({ editing }) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
@@ -416,6 +417,7 @@ const FormElementsEl = styled.div<{editing: boolean}>(({ editing }) => ({
     transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
+
 
     '.drop': {
         transition: 'all 0.3s ease-in-out',
@@ -461,6 +463,7 @@ export const FormElements = () => {
             editing={!!editing}
             className={cn('form-elements', { isHovered })}
         >
+
             <FormDrop container={form} index={0} />
             {form.children.map((e, i) => (
                 <React.Fragment key={i}>
@@ -468,6 +471,7 @@ export const FormElements = () => {
                     <FormDrop container={form} index={i + 1} />
                 </React.Fragment>
             ))}
+
         </FormElementsEl>
     )
 }
