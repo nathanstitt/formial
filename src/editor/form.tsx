@@ -104,6 +104,16 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     alignItems: 'flex-start',
     minHeight: 'fit-content',
     boxShadow: editing ? '0 3px 5px 3px rgba(0,0,0,0.35)' : 'none',
+    cursor: 'pointer',
+
+    'input, textarea, select': {
+        cursor: 'pointer',
+        '&:focus': {
+            outline: 'none',
+            borderColor: 'inherit',
+            boxShadow: 'none',
+        },
+    },
 
     '&.input .label, &.textarea .label': {
         marginBottom: '-20px',
@@ -200,7 +210,7 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
 const Controls:React.FC<{
     target: Element | Container
     container: Container,
-    drag: DragElementWrapper<DragSourceOptions>,
+    drag?: DragElementWrapper<DragSourceOptions>,
 }> = ({
     target, container, drag,
 }) => {
@@ -217,9 +227,10 @@ const Controls:React.FC<{
             <button onClick={() => sc.dispatch({ type: 'EDIT', target })}>
                 <Edit />
             </button>
-            <button className='move' ref={drag}>
-                <GripHorizontal />
-            </button>
+            {drag && (
+                <button className='move' ref={drag}>
+                    <GripHorizontal />
+                </button>)}
         </div>
     )
 }
@@ -239,7 +250,7 @@ const InputPreview: React.FC<{
 }> = ({
     index, input, container,
 }) => {
-    const [{ opacity }, drag, preview] = useDrag({
+    const [{ opacity }, drag] = useDrag({
         item: { id: input.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,
@@ -249,12 +260,12 @@ const InputPreview: React.FC<{
 
     return (
         <ElementPreviewEl
-            ref={preview}
+            ref={drag}
             style={{ opacity }}
             editing={sc.store.editing === input}
             className={cn('element-preview', input.control.id)}
         >
-            <Controls target={input} container={container} drag={drag} />
+            <Controls target={input} container={container} />
             <ControlPreview
                 onClick={() => {
                     console.log("CLICK")
@@ -276,7 +287,7 @@ const TextPreview: React.FC<{
     index, control, container,
 }) => {
     const sc = useStoreContext()
-    const [{ opacity }, drag, preview] = useDrag({
+    const [{ opacity }, drag] = useDrag({
         item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,
@@ -286,12 +297,12 @@ const TextPreview: React.FC<{
 
     return (
         <ElementPreviewEl
-            ref={preview}
             editing={sc.store.editing === control}
             style={{ opacity }}
+            ref={drag}
             className={cn('element-preview', control.control.id)}
         >
-            <Controls target={control} container={container} drag={drag} />
+            <Controls target={control} container={container} />
             <div className='control-preview'>
                 <EditableText
                     onTextSaved={(updated) => {
@@ -307,12 +318,13 @@ const TextPreview: React.FC<{
 
 const ContainerPreviewEl = styled(ElementPreviewEl)({
     border: '1px dashed gray',
-    padding: '0',
     alignItems: 'stretch',
+    padding: '5px',
+
     '> .container.controls': {
         background: 'white',
         border: '1px dashed gray',
-        flexDirection: 'row-reverse',
+
         width: 'fit-content',
         '> *': {
             margin: '0 5px',
@@ -353,6 +365,7 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
             right: 'auto',
             display: 'flex',
             width: '30px',
+            flexDirection: 'row-reverse',
             borderRadius: '5px',
             alignItems: 'center',
             writingMode: 'vertical-rl',
