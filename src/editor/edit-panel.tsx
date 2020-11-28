@@ -5,6 +5,7 @@ import { useOnClickOutside } from '../hooks/use-click-outside'
 import {
     useStoreContext, InputElement, Element, Container, isContainer, isInput, isText, TextElement,
 } from './store'
+import { capitalize } from '../lib'
 import { useKeyPress } from '../hooks/use-key-press'
 import { Title, Scrolling, Values } from './components'
 
@@ -113,17 +114,27 @@ const Attribute: FC<{
     return <EditAttribute nested={nested} attributeName={attributeName} input={input} />
 }
 
-
 const Options: FC<{
-    label: string, input: InputElement, nested: string,
-}> = ({ label, input, nested }) => {
+    label: string,
+    input: InputElement,
+    nested: string,
+    ignore?: Array<string>
+}> = ({
+    label,
+    input,
+    nested,
+    ignore = [],
+}) => {
     const sc = useStoreContext()
+    const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
     const options = input.data[nested]
     if (!options) {
         return null
     }
-    const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
-    const optionNames = Object.keys(options)
+    const names = Object
+        .keys(input.data[nested] || {})
+        .filter(name => !ignore.includes(name))
+
     return (
         <fieldset className='options'>
             <legend>{label}:</legend>
@@ -132,12 +143,12 @@ const Options: FC<{
                     +
                 </button>
             </div>
-            {optionNames.length > 0 && (
+            {names.length > 0 && (
                 <div className="heading">
                     <span>ID</span>
                     <span>Value</span>
                 </div>)}
-            {optionNames.map(attrName => (
+            {names.map(attrName => (
                 <Attribute
                     key={attrName}
                     nested={nested}
@@ -148,6 +159,57 @@ const Options: FC<{
         </fieldset>
     )
 }
+
+const REQUIRED_TYPES = ['input', 'textarea', 'radio']
+
+const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
+    const sc = useStoreContext()
+    if (!REQUIRED_TYPES.includes(input.control.id)){
+        return null
+    }
+    return (
+        <label>
+            <span>Required?</span>
+            <input
+                type="checkbox"
+                className="value"
+                checked={input.data.attributes?.required === "true" || false}
+                onChange={({ target: { checked } }) =>
+                    sc.dispatch({
+                        type: 'UPDATE', target: input,
+                        patch: {
+                            attributes: { required: String(checked) }
+                        }
+                })}
+        />
+        </label>
+    )
+}
+
+const InputType: FC<{ input: InputElement }> = ({ input }) => {
+    const sc = useStoreContext()
+    if (input.control.id !== 'input'){
+        return null
+    }
+    return (
+        <label>
+            <span>Type:</span>
+            <select
+                name="type"
+                className="value"
+                value={input.data.attributes?.type || 'text'}
+                onChange={({ target: { value } }) => sc.dispatch({
+                    type: 'UPDATE', target: input,
+                    patch: { attributes: { type: value } }
+                })}
+            >
+                {['text', 'number', 'email', 'date'].map(
+                    t => <option key={t} value={t}>{capitalize(t)}</option>)}
+            </select>
+        </label>
+    )
+}
+
 
 const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
@@ -174,6 +236,9 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         onChange={({ target: { value } }) => dp({ name: value })}
                     />
                 </label>
+                <InputType input={input} />
+                <RequiredCheckmark input={input} />
+                <Options input={input} label="Options" nested="options" />
                 <label>
                     <span>Class:</span>
 
@@ -183,9 +248,6 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         onChange={({ target: { value } }) => dp({ className: value })}
                     />
                 </label>
-
-                <Options input={input} label="Options" nested="options" />
-
                 <fieldset>
                     <legend>Other Class Names:</legend>
                     <label>
@@ -193,7 +255,8 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.wrapper || ''}
-                            onChange={({ target: { value } }) => dp({ classNames: { wrapper: value } })
+                            onChange={
+                            ({ target: { value } }) => dp({ classNames: { wrapper: value } })
                             }
                         />
                     </label>
@@ -202,7 +265,8 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.label || ''}
-                            onChange={({ target: { value } }) => dp({ classNames: { label: value } })
+                            onChange={
+                            ({ target: { value } }) => dp({ classNames: { label: value } })
                             }
                         />
                     </label>
@@ -211,14 +275,18 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.input || ''}
-                            onChange={({ target: { value } }) => dp({ classNames: { input: value } })
+                            onChange={
+                            ({ target: { value } }) => dp({ classNames: { input: value } })
                             }
                         />
                     </label>
                 </fieldset>
-
-
-                <Options input={input} label="Attributes" nested="attributes" />
+                <Options
+                    input={input}
+                    label="Attributes"
+                    nested="attributes"
+                    ignore={['required', 'type']}
+                />
             </Scrolling>
         </Values>
     )
@@ -344,6 +412,7 @@ const EditPanelEl = styled.div({
     },
     'label, .heading': {
         display: 'flex',
+        alignItems: 'center',
         marginBottom: '5px',
         '> *:first-child': {
             width: '125px',

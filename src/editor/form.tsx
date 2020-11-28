@@ -103,7 +103,9 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     minHeight: 'fit-content',
-    boxShadow: editing ? '0 3px 5px 3px rgba(0,0,0,0.35)' : 'none',
+    borderWidth: '2px',
+    borderColor: editing ? '#a5a500;' : 'transparent',
+    borderStyle: 'dashed',
     cursor: 'pointer',
 
     'input, textarea, select': {
@@ -264,14 +266,10 @@ const InputPreview: React.FC<{
             style={{ opacity }}
             editing={sc.store.editing === input}
             className={cn('element-preview', input.control.id)}
+            onClick={() => sc.dispatch({ type: 'EDIT', target: input })}
         >
             <Controls target={input} container={container} />
-            <ControlPreview
-                onClick={() => {
-                    console.log("CLICK")
-                    sc.dispatch({ type: 'EDIT', target: input })
-                }}
-            >
+            <ControlPreview>
                 <span className="label">{input.data.label}</span>
                 {input.placeholder}
             </ControlPreview>

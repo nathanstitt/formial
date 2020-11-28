@@ -163,8 +163,13 @@ class InputElement extends Element {
         label.innerText = this.data.label
         this.setAttributes({
             for: this.data.id,
-
         }, label)
+        if (this.data.attributes?.required === 'true') {
+            const asterisk = document.createElement('span')
+            asterisk.innerText = '✱'
+            this.setAttributes({ class: 'required-indicator' }, asterisk)
+            label.appendChild(asterisk)
+        }
         float.appendChild(label)
 
         return float
