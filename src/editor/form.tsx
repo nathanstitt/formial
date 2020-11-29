@@ -212,9 +212,10 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
 const Controls:React.FC<{
     target: Element | Container
     container: Container,
+    displayEdit: boolean,
     drag?: DragElementWrapper<DragSourceOptions>,
 }> = ({
-    target, container, drag,
+    target, container, drag, displayEdit,
 }) => {
     const sc = useStoreContext()
 
@@ -226,9 +227,10 @@ const Controls:React.FC<{
             })}>
                 <TrashAlt />
             </button>
-            <button onClick={() => sc.dispatch({ type: 'EDIT', target })}>
-                <Edit />
-            </button>
+            {displayEdit && (
+                <button onClick={() => sc.dispatch({ type: 'EDIT', target })}>
+                    <Edit />
+                </button>)}
             {drag && (
                 <button className='move' ref={drag}>
                     <GripHorizontal />
@@ -266,7 +268,7 @@ const InputPreview: React.FC<{
             className={cn('element-preview', input.control.id)}
             onClick={() => sc.dispatch({ type: 'EDIT', target: input })}
         >
-            <Controls target={input} container={container} />
+            <Controls displayEdit={false} target={input} container={container} />
             <ControlPreview>
                 <span className="label">{input.data.label}</span>
                 {input.placeholder}
@@ -298,7 +300,7 @@ const TextPreview: React.FC<{
             ref={drag}
             className={cn('element-preview', control.control.id)}
         >
-            <Controls target={control} container={container} />
+            <Controls displayEdit={false} target={control} container={container} />
             <div className='control-preview'>
                 <EditableText
                     onTextSaved={(updated) => {
@@ -401,7 +403,7 @@ const ContainerPreview:React.FC<{
             })}
         >
             <Drop container={container} index={0} />
-            <Controls target={container} container={parent} drag={drag} />
+            <Controls displayEdit target={container} container={parent} drag={drag} />
             {container.children.map((el, i) => (
                 <React.Fragment key={i}>
                     <ElementPreview index={i} container={container} el={el} />
