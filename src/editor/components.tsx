@@ -4,7 +4,7 @@ export const Title = styled.h4.attrs({
     className: 'title',
 })({
     borderBottom: '1px solid lightgray',
-    padding: '5px 0',
+    padding: '5px',
 })
 
 export const Scrolling = styled.div({

@@ -104,6 +104,7 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     alignItems: 'flex-start',
     minHeight: 'fit-content',
     borderWidth: '2px',
+    background: editing ? '#ffffed' : 'white',
     borderColor: editing ? '#a5a500;' : 'transparent',
     borderStyle: 'dashed',
     cursor: 'pointer',
@@ -134,7 +135,6 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     },
 
     '&:hover': {
-        backgroundColor: 'white',
         '> .controls': {
             opacity: 1,
         },
@@ -167,9 +167,9 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
     },
 
     '>.controls': {
-        background: 'white',
-        right: 0,
+        background: editing ? '#ffffed' : 'white',
         top: 0,
+        right: 0,
         padding: '5px',
         borderBottomLeftRadius: '5px',
         position: 'absolute',
