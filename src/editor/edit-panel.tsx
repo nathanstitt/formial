@@ -140,7 +140,7 @@ const Options: FC<{
             <legend>{label}:</legend>
             <div className='controls'>
                 <button onClick={addAttribute} className='add-attr'>
-                    +
+                    ➕
                 </button>
             </div>
             {names.length > 0 && (
@@ -240,7 +240,6 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                 </label>
                 <InputType input={input} />
                 <RequiredCheckmark input={input} />
-                <Options input={input} label="Options" nested="options" />
                 <label>
                     <span>Class:</span>
 
@@ -250,6 +249,7 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         onChange={({ target: { value } }) => dp({ className: value })}
                     />
                 </label>
+                <Options input={input} label="Options" nested="options" />
                 <fieldset>
                     <legend>Other Class Names:</legend>
                     <label>

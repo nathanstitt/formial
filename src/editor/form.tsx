@@ -5,7 +5,6 @@ import { useDrop, useDrag, DragElementWrapper, DragSourceOptions } from 'react-d
 import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import { EditableText } from './editable-text'
 import { Scrolling } from './components'
 import {
     useStore,
@@ -298,16 +297,12 @@ const TextPreview: React.FC<{
             editing={sc.store.editing === control}
             style={{ opacity }}
             ref={drag}
+            onClick={() => sc.dispatch({ type: 'EDIT', target: control })}
             className={cn('element-preview', control.control.id)}
         >
-            <Controls displayEdit={false} target={control} container={container} />
+            <Controls displayEdit target={control} container={container} />
             <div className='control-preview'>
-                <EditableText
-                    onTextSaved={(updated) => {
-                        sc.dispatch({ type: 'UPDATE', target: control, patch: { text: updated } })
-                    }}
-                    textValue={control.data.text}
-                >{text}</EditableText>
+                {text}
             </div>
         </ElementPreviewEl>
     )

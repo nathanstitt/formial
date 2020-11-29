@@ -69,13 +69,13 @@ export const EditableText:React.FC<EditableTextProps> = (props) => {
     )
 
     const handleSpanClick = useCallback(() => {
+        let editPosition = inputValue.length
         const s = window.getSelection()
-        if (!s) {
-            return
+        if (s && s.rangeCount) {
+            editPosition = s.getRangeAt(0).startOffset
         }
-        const range = s.getRangeAt(0)
         setIsInputActive({
-            position: range.startOffset,
+            position: editPosition,
         })
     }, [setIsInputActive])
     return (
