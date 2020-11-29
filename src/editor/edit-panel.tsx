@@ -213,6 +213,29 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
 }
 
 
+const OptionLayout: FC<{ input: InputElement }> = ({ input }) => {
+    const sc = useStoreContext()
+    if (!input.control.hasOptions) { return null }
+    return (
+        <label>
+            <span>Choices Layout:</span>
+            <select
+                value={input.data.choicesLayout}
+                onChange={({ target: { value } }) => sc.dispatch({
+                    type: 'UPDATE',
+                    target: input,
+                    patch: { choicesLayout: value },
+                })}
+            >
+                <option value="vertical">Vertical</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="two_column">Two Column</option>
+                <option value="three_column">Three Column</option>
+            </select>
+        </label>
+    )
+}
+
 const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
     const { data } = input
@@ -249,6 +272,7 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         onChange={({ target: { value } }) => dp({ className: value })}
                     />
                 </label>
+                <OptionLayout input={input} />
                 <Options input={input} label="Options" nested="options" />
                 <fieldset>
                     <legend>Other Class Names:</legend>

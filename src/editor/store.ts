@@ -146,6 +146,8 @@ export class TextElement extends Element {
 
 }
 
+export type ChoicesLayoutTypes = 'vertical' | 'horizontal' | 'two_column' | 'three_column'
+
 export interface InputData extends ElementData {
     label: string
     name: string
@@ -157,6 +159,7 @@ export interface InputData extends ElementData {
     options?: {
         [value: string]: string
     }
+    choicesLayout?: ChoicesLayoutTypes
 }
 
 
@@ -179,6 +182,7 @@ export class InputElement extends Element {
         }, data)
         if (control.hasOptions && !this.data.options) {
             this.data.options = {}
+            this.data.choicesLayout = 'vertical'
         }
     }
 

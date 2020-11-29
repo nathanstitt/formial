@@ -1,4 +1,5 @@
 import * as React from 'react'
+import styled, { CSSObject } from 'styled-components'
 import { CaretSquareDown } from '@styled-icons/fa-regular/CaretSquareDown'
 import { Font } from '@styled-icons/fa-solid/Font'
 import { GripLines } from '@styled-icons/fa-solid/GripLines'
@@ -10,19 +11,48 @@ import { DotCircle } from '@styled-icons/fa-solid/DotCircle'
 import { CheckSquare } from '@styled-icons/fa-solid/CheckSquare'
 
 import {
-    Control, RowControl, ColumnControl, InputElement, TextControl, TextElement, defaultControls,
+    ChoicesLayoutTypes, Control, RowControl, ColumnControl,
+    InputElement, TextControl, TextElement, defaultControls,
 } from './store'
 
 type RenderT = (key: string, value: string) => React.ReactNode
+
+
+const Choices = styled.div<{ layout?: ChoicesLayoutTypes }>(({ layout }) => {
+    const style:CSSObject = {
+        display: 'flex',
+        width: '100%',
+        flexWrap: 'wrap',
+        flexDirection: 'column',
+    }
+    if (layout && layout !== 'vertical') {
+        style.flexDirection = 'row'
+        const label:CSSObject = {
+            paddingRight: '5px',
+
+        }
+        if (layout === 'two_column') {
+            label.width = '50%'
+        }
+        if (layout === 'three_column') {
+            label.width = '33%'
+        }
+        style['> label'] = label
+    }
+    return style
+})
 
 const renderOptions = (el: InputElement, rend: RenderT) => {
     const options = el.optionPairs
     if (options.length === 0) {
         return rend('', '')
     }
-    return options.map(([name, label]) => (
+    const choices = options.map(([name, label]) => (
         <label key={name}>{rend(name, label)}<span>{label}</span></label>
     ))
+    return (
+        <Choices layout={el.data.choices_layout}>{choices}</Choices>
+    )
 }
 
 
