@@ -218,7 +218,7 @@ export class InputElement extends Element {
 }
 
 
-export class Control implements ControlDefinition {
+export class Control {
 
     id: string
     name: string
@@ -371,6 +371,7 @@ const unserialize = (cm: ControlsMap, data: ElementSerialization):Element|null =
 
 type Action =
     | { type: 'REPLACE', form?: SerializedForm }
+    | { type: 'APPEND_ELEMENT', control: Control }
     | { type: 'ADD_ELEMENT', id: string,
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
@@ -386,6 +387,10 @@ const storeReducer = (st:Store, action: Action): Store => {
     switch (action.type) {
         case 'ADD_ELEMENT': {
             return addElement(st, action)
+        }
+        case 'APPEND_ELEMENT': {
+            st.form.children.push(action.control.createElement())
+            return { ...st }
         }
         case 'REPLACE': {
             if (action.form) {

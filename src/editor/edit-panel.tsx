@@ -164,7 +164,7 @@ const REQUIRED_TYPES = ['input', 'textarea', 'radio']
 
 const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
-    if (!REQUIRED_TYPES.includes(input.control.id)){
+    if (!REQUIRED_TYPES.includes(input.control.id)) {
         return null
     }
     return (
@@ -173,22 +173,22 @@ const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
             <input
                 type="checkbox"
                 className="value"
-                checked={input.data.attributes?.required === "true" || false}
-                onChange={({ target: { checked } }) =>
+                checked={input.data.attributes?.required === 'true' || false}
+                onChange={({ target: { checked } }) => {
                     sc.dispatch({
-                        type: 'UPDATE', target: input,
-                        patch: {
-                            attributes: { required: String(checked) }
-                        }
-                })}
-        />
+                        type: 'UPDATE',
+                        target: input,
+                        patch: { attributes: { required: String(checked) } },
+                    })
+                }}
+            />
         </label>
     )
 }
 
 const InputType: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
-    if (input.control.id !== 'input'){
+    if (input.control.id !== 'input') {
         return null
     }
     return (
@@ -199,12 +199,14 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
                 className="value"
                 value={input.data.attributes?.type || 'text'}
                 onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE', target: input,
-                    patch: { attributes: { type: value } }
+                    type: 'UPDATE',
+                    target: input,
+                    patch: { attributes: { type: value } },
                 })}
             >
                 {['text', 'number', 'email', 'date'].map(
-                    t => <option key={t} value={t}>{capitalize(t)}</option>)}
+                    t => <option key={t} value={t}>{capitalize(t)}</option>,
+                )}
             </select>
         </label>
     )
@@ -255,9 +257,9 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.wrapper || ''}
-                            onChange={
-                            ({ target: { value } }) => dp({ classNames: { wrapper: value } })
-                            }
+                            onChange={({ target: { value } }) => {
+                                dp({ classNames: { wrapper: value } })
+                            }}
                         />
                     </label>
                     <label>
@@ -265,9 +267,9 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.label || ''}
-                            onChange={
-                            ({ target: { value } }) => dp({ classNames: { label: value } })
-                            }
+                            onChange={({ target: { value } }) => {
+                                dp({ classNames: { label: value } })
+                            }}
                         />
                     </label>
                     <label>
@@ -275,9 +277,9 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         <input
                             className="value"
                             value={data.classNames.input || ''}
-                            onChange={
-                            ({ target: { value } }) => dp({ classNames: { input: value } })
-                            }
+                            onChange={({ target: { value } }) => {
+                                dp({ classNames: { input: value } })
+                            }}
                         />
                     </label>
                 </fieldset>
@@ -390,7 +392,6 @@ const EditPanelEl = styled.div({
     background: 'white',
     display: 'flex',
     flexDirection: 'column',
-//    margin: '10px',
     overflow: 'hidden',
 
     '.edit-pane': {

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { useDrag } from 'react-dnd'
-import { useStore, ControlDefinition } from './store'
+import { useStore, useStoreContext, Control } from './store'
 import './default-controls'
 
 import { Title, Scrolling } from './components'
@@ -20,7 +20,10 @@ const ControlLabelEl = styled.li({
     },
 })
 
-const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
+const ControlLabel:React.FC<{ control: Control }> = ({ control }) => {
+    const { id, name, icon } = control
+    const { dispatch } = useStoreContext()
+
     const [{ opacity }, drag] = useDrag({
         item: { id, type: 'control' },
         collect: monitor => ({
@@ -29,20 +32,21 @@ const ControlLabel:React.FC<ControlDefinition> = ({ id, name, icon }) => {
     })
 
     return (
-        <ControlLabelEl ref={drag} style={{ opacity }}>
+        <ControlLabelEl
+            ref={drag}
+            style={{ opacity }}
+            onClick={() => {
+                dispatch({ type: 'APPEND_ELEMENT', control })
+            }}
+        >
             {icon}
             <span>{name}</span>
         </ControlLabelEl>
     )
 }
 
-
 const ControlsEl = styled.div({
 
-    // '.listing': {
-    //     flex: 1,
-    //     overflow: 'auto',
-    // },
 })
 
 export const Controls = () => {
@@ -55,11 +59,10 @@ export const Controls = () => {
             <Title>Elements</Title>
             <Scrolling className="listing">
                 <ul>
-                    {Array.from(controls.values()).map(definition => (
-                        <ControlLabel key={definition.id} {...definition} />))}
+                    {Array.from(controls.values()).map(c => (
+                        <ControlLabel key={c.id} control={c} />))}
                 </ul>
             </Scrolling>
         </ControlsEl>
     )
 }
-

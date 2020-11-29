@@ -1,5 +1,4 @@
 import styled from 'styled-components'
-//import * as React from 'react'
 
 export const Title = styled.h4.attrs({
     className: 'title',

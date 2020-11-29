@@ -5,7 +5,6 @@ import { Controls } from './controls'
 import { EditPanel } from './edit-panel'
 
 const SidebarEl = styled.div({
-//    paddingRight: '10px',
     overflow: 'hidden',
     display: 'flex',
     '> *': {
@@ -13,18 +12,16 @@ const SidebarEl = styled.div({
         flexDirection: 'column',
         flex: 1,
         flexGrow: 1,
-        minHeight: 0,         /* for Firefox */
+        minHeight: 0, /* for Firefox */
     },
     ul: {
         padding: 0,
         margin: 0,
     },
 })
-export const Sidebar:React.FC = () => {
-    return (
-        <SidebarEl className="sidebar">
-            <Controls />
-            <EditPanel />
-        </SidebarEl>
-    )
-}
+export const Sidebar:React.FC = () => (
+    <SidebarEl className="sidebar">
+        <Controls />
+        <EditPanel />
+    </SidebarEl>
+)

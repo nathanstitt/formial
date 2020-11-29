@@ -239,9 +239,7 @@ const Controls:React.FC<{
 
 const ControlPreview = styled.div.attrs({
     className: 'control-preview',
-
 })({
-   // boxShadow: '0 10px 9px rgba(0,0,0,0.35)',
     padding: '10px',
 })
 
@@ -442,7 +440,6 @@ const FormElementsEl = styled(Scrolling)({
     padding: '20px',
     boxSizing: 'border-box',
     boxShadow: '0 0 2px 1px rgba(0, 0, 0, 0.1)',
-    //opacity: editing ? '0.3' : '1',
     transition: 'all 0.3s ease-in-out',
     width: 'fit-content',
     minWidth: '100%',
