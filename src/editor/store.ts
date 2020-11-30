@@ -7,6 +7,7 @@ import {
     SerializedContainer,
     SerializedTextElement,
     SerializedInputElement,
+    ChoicesLayoutTypes,
     isSerializedText,
     isSerializedContainer,
     isSerializedInput,
@@ -18,7 +19,8 @@ export interface ControlDefinition {
     icon: React.ReactNode
     name: string
     placeholder?(element: Element): React.ReactNode
-    hasOptions?: boolean
+    hasOptions?: boolean,
+    defaultValues?: any,
 }
 
 type ControlsMap = Map<string, Control>
@@ -44,9 +46,7 @@ export class Element {
     constructor(control: Control, data:any = {}) {
         this.control = control
         this.id = data.id || uuidv4()
-        this.data = deepmerge({
-            className: '',
-        }, data)
+        this.data = deepmerge(control.defaultValues, data)
     }
 
     serialize(): SerializedElement {
@@ -76,13 +76,13 @@ export interface ContainerOptions {
 type ContainerChild = Element|TextElement|Container|InputElement
 
 export class Container extends Element {
-
     direction: string // 'row' | 'column'
     children: Array<ContainerChild>
-    constructor(control:Control, options: ContainerOptions) {
+
+    constructor(control:Control, options: ContainerOptions = control.defaultValues) {
         super(control, options)
-        this.direction = options.direction || 'row'
-        this.children = options.children || []
+        this.direction = options.direction || control.defaultValues.direction
+        this.children = options.children || control.defaultValues.children
     }
 
     get isRow(): boolean {
@@ -129,11 +129,7 @@ export class TextElement extends Element {
 
     constructor(control:Control, data = {}) {
         super(control, data)
-        this.data = deepmerge.all([{
-            tag: control.id === 'para' ? 'p' : 'h3',
-            text: 'Some text…',
-            className: '',
-        }, data]) as TextData
+        this.data = deepmerge(control.defaultValues, data) as TextData
     }
 
     serialize(): SerializedTextElement {
@@ -146,7 +142,7 @@ export class TextElement extends Element {
 
 }
 
-export type ChoicesLayoutTypes = 'vertical' | 'horizontal' | 'two_column' | 'three_column'
+
 
 export interface InputData extends ElementData {
     label: string
@@ -169,32 +165,7 @@ export class InputElement extends Element {
 
     constructor(control: Control, data = {}) {
         super(control, data)
-        this.data = deepmerge({
-            label: `${this.control.name} label`,
-            className: 'mb-2',
-            name: `${this.control.id}-${Math.round(Math.random() * 9999) + 1000}`,
-            classNames: {
-                wrapper: this.wrapperClassName,
-                label: '',
-                input: 'form-control',
-            },
-            attributes: {},
-        }, data)
-        if (control.hasOptions && !this.data.options) {
-            this.data.options = {}
-            this.data.choicesLayout = 'vertical'
-        }
-    }
-
-    get wrapperClassName() {
-        switch (this.control.id) {
-            case 'input':
-            case 'textarea':
-            case 'select': {
-                return 'form-floating'
-            }
-        }
-        return 'form-control'
+        this.data = deepmerge(control.defaultValues, data)
     }
 
     get placeholder(): React.ReactNode {
@@ -227,7 +198,7 @@ export class Control {
     id: string
     name: string
     icon: React.ReactNode
-
+    _defaultValues: any
     hasOptions?: boolean
     placeholder?: (element: Element) => React.ReactNode
 
@@ -237,13 +208,20 @@ export class Control {
         this.icon = definition.icon
         this.placeholder = definition.placeholder
         this.hasOptions = definition.hasOptions
+        this._defaultValues = deepmerge(this.defaultValues || {}, definition.defaultValues || {})
+    }
+
+    get defaultValues(): any {
+        return deepmerge(this._defaultValues, {
+            name: `${this.id}-${Math.round(Math.random() * 9999) + 1000}`,
+        })
     }
 
     createElement(): Element {
         return new InputElement(this)
     }
-
 }
+
 
 export function isContainer(
     toBeDetermined: any,
@@ -263,29 +241,69 @@ export function isText(
     return (toBeDetermined instanceof TextElement)
 }
 
-export class RowControl extends Control {
+export class ContainerControl extends Control {
+
+    constructor(definition: ControlDefinition) {
+        super(definition)
+        this._defaultValues = deepmerge((this._defaultValues || {}), {
+            children: [],
+        })
+    }
 
     createElement(): Element {
-        return new Container(this, { direction: 'row' })
+        return new Container(this)
+    }
+}
+
+export class InputControl extends Control {
+    constructor(definition: ControlDefinition) {
+        super(definition)
+        this._defaultValues = deepmerge((this._defaultValues || {}), {
+            label: `${definition.name} label`,
+            className: 'mb-2',
+            classNames: {
+                wrapper: this.wrapperClassName,
+                label: '',
+                input: 'form-control',
+            },
+            attributes: {},
+        })
+    }
+
+    get wrapperClassName() {
+        switch (this.id) {
+            case 'input':
+            case 'textarea':
+            case 'select': {
+                return 'form-floating'
+            }
+        }
+        return 'form-control'
     }
 
 }
 
+// export class ColumnControl extends Control {
+//     createElement(): Element {
+//         return new Container(this, { direction: 'column' })
+//     }
+// }
+
 export class TextControl extends Control {
+    constructor(definition: ControlDefinition) {
+        super(definition)
+        this._defaultValues = deepmerge((this._defaultValues || {}), {
+            tag: this.id === 'para' ? 'p' : 'h3',
+            text: 'Some text…',
+            className: '',
+        })
+    }
 
     createElement(): Element {
         return new TextElement(this)
     }
-
 }
 
-export class ColumnControl extends Control {
-
-    createElement(): Element {
-        return new Container(this, { direction: 'column' })
-    }
-
-}
 
 export const defaultControls = {
     registered: new Map<string, Control>(),
@@ -409,7 +427,7 @@ const storeReducer = (st:Store, action: Action): Store => {
             action.container.children = [
                 ...action.container.children.filter(e => e.id !== action.target.id),
             ]
-            return { ...st }
+            return { ...st, editing: undefined }
         }
         case 'UPDATE': {
             action.target.data = deepmerge(action.target.data as any, action.patch)
@@ -441,6 +459,7 @@ const storeReducer = (st:Store, action: Action): Store => {
 export const initStore = (defaultValue?: SerializedForm):Store => {
     const store = Object.create(null)
     store.controls = new Map(defaultControls.registered)
+
     store.form = defaultValue ? unserialize(store.controls, defaultValue)
         : new Form(store.controls, defaultValue)
 

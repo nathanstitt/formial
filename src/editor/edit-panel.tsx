@@ -215,7 +215,7 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
 
 const OptionLayout: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
-    if (!input.control.hasOptions) { return null }
+    if (!input.data.choicesLayout) { return null }
     return (
         <label>
             <span>Choices Layout:</span>
@@ -447,7 +447,7 @@ const EditPanelEl = styled.div({
         fontWeight: 'bold',
     },
     '.value': {
-        minWidth: '150px',
+//        minWidth: '150px',
         flex: 1,
     },
     button: {

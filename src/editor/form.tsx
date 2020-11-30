@@ -26,8 +26,10 @@ const DropEl = styled.div({
 
 const HorizontalDropEl = styled(DropEl)({
     height: '15px',
+    minHeight: '15px',
     '&.isHovered': {
         height: '100px',
+        minHeight: '100px',
         background: revealColor,
     },
     '&:last-child': {
@@ -217,13 +219,16 @@ const Controls:React.FC<{
     target, container, drag, displayEdit,
 }) => {
     const sc = useStoreContext()
-
+    const onDelete = (ev:React.MouseEvent<HTMLButtonElement>) => {
+        ev.stopPropagation()
+        sc.dispatch({
+            type: 'DELETE', target, container,
+        })
+    }
     return (
         <div className={cn('controls', { container: isContainer(target) })}>
             <span>{target.control.name}</span>
-            <button className='trash' onClick={() => sc.dispatch({
-                type: 'DELETE', target, container,
-            })}>
+            <button className='trash' onClick={onDelete}>
                 <TrashAlt />
             </button>
             {displayEdit && (
@@ -258,7 +263,6 @@ const InputPreview: React.FC<{
         }),
     })
     const sc = useStoreContext()
-
     return (
         <ElementPreviewEl
             ref={drag}
@@ -326,7 +330,8 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
     '&.container-row': {
         flexDirection: 'column',
         justifyContent: 'flex-start',
-        minHeight: '80px',
+        minHeight: 'fit-content',
+
         '> .container-drop': {
             width: '100%',
         },
@@ -346,12 +351,14 @@ const ContainerPreviewEl = styled(ElementPreviewEl)({
     '> .container-preview': {
         flex: 1,
     },
-
     '&.empty': {
         alignItems: 'stretch',
+        '> .drop': {
+            minHeight: '80px',
+            flex: 1,
+        },
     },
     '&.container-column': {
-
         '> .container.controls': {
             top: 'calc(50% - 40px)',
             left: '-25px',

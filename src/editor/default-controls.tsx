@@ -9,9 +9,9 @@ import { Paragraph } from '@styled-icons/fa-solid/Paragraph'
 import { GripLinesVertical } from '@styled-icons/fa-solid/GripLinesVertical'
 import { DotCircle } from '@styled-icons/fa-solid/DotCircle'
 import { CheckSquare } from '@styled-icons/fa-solid/CheckSquare'
-
+import { ChoicesLayoutTypes } from '../data'
 import {
-    ChoicesLayoutTypes, Control, RowControl, ColumnControl,
+    InputControl, ContainerControl,
     InputElement, TextControl, TextElement, defaultControls,
 } from './store'
 
@@ -51,7 +51,7 @@ const renderOptions = (el: InputElement, rend: RenderT) => {
         <label key={name}>{rend(name, label)}<span>{label}</span></label>
     ))
     return (
-        <Choices layout={el.data.choices_layout}>{choices}</Choices>
+        <Choices layout={el.data.choicesLayout}>{choices}</Choices>
     )
 }
 
@@ -71,51 +71,62 @@ defaultControls.register([
         placeholder(para:TextElement) { return <p>{para.data.text}</p> },
     }),
 
-    new Control({
+    new InputControl({
         id: 'input',
         name: 'Text Input',
         icon: <Font />,
         placeholder() { return <input type='text' className='form-control' readOnly /> },
     }),
 
-    new Control({
+    new InputControl({
         id: 'textarea',
         name: 'Text Area',
         icon: <Square />,
         placeholder() { return <textarea className='form-control' readOnly /> },
     }),
 
-    new Control({
+    new InputControl({
         id: 'checkbox',
         name: 'Checkboxes',
         icon: <CheckSquare />,
         hasOptions: true,
+        defaultValues: {
+            options: {},
+            choicesLayout: 'vertical',
+        },
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input type="checkbox" name={n} readOnly />
+                <input type="checkbox" name={`pv-${n}`} readOnly />
             ))
         },
     }),
-    new Control({
+    new InputControl({
         id: 'radio',
         name: 'Radio Input',
         hasOptions: true,
         icon: <DotCircle />,
+        defaultValues: {
+            options: {},
+            choicesLayout: 'vertical',
+        },
         placeholder(el: InputElement) {
             return renderOptions(el, (n: string) => (
-                <input key={n} type="radio" name={el.data.name} readOnly />
+                <input key={n} type="radio" name={`pv-${el.data.name}`} readOnly />
             ))
         },
     }),
-    new Control({
+    new InputControl({
         id: 'select',
         name: 'Select',
         hasOptions: true,
         icon: <CaretSquareDown />,
+        defaultValues: {
+            options: {},
+        },
         placeholder(el: InputElement) {
             const options = el.optionPairs
             return (
-                <select name={el.data.name}>
+                <select name={`pv-${el.data.name}`}>
                     {options.map(([v, l]) => (
                         <option key={v} value={v}>{l}</option>
                     ))}
@@ -123,14 +134,20 @@ defaultControls.register([
             )
         },
     }),
-    new RowControl({
+    new ContainerControl({
         id: 'row',
         name: 'Row',
         icon: <GripLines />,
+        defaultValues: {
+            direction: 'row',
+        },
     }),
-    new ColumnControl({
+    new ContainerControl({
         id: 'col',
         name: 'Column',
         icon: <GripLinesVertical />,
+        defaultValues: {
+            direction: 'column',
+        },
     }),
 ])

@@ -1,4 +1,4 @@
-import cx from 'classnames'
+import cn from 'classnames'
 import {
     SerializedForm,
     isSerializedText,
@@ -46,7 +46,7 @@ class Element {
         this.setAttributes({
             'data-control': this.data.type,
             'data-id': this.data.id,
-            class: cx(this.data.className, {
+            class: cn(this.data.className, {
                 [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth !== 0,
             }),
         })
@@ -115,7 +115,7 @@ class InputElement extends Element {
 
         this.setAttributes({
             'data-type': this.data.control,
-            class: cx(this.data.className, {
+            class: cn(this.data.className, {
                 [`col-sm-${this.columnSmWidth}`]: this.columnSmWidth !== 0,
             }),
         })
@@ -171,7 +171,6 @@ class InputElement extends Element {
             label.appendChild(asterisk)
         }
         float.appendChild(label)
-
         return float
     }
 
@@ -188,16 +187,33 @@ class InputElement extends Element {
         this.setAttributes(this.data.attributes, wrapper)
         wrapper.className = this.data.classNames.wrapper
 
-        const labelTitle = document.createElement('label')
+        const labelTitle = document.createElement('div')
         labelTitle.innerText = this.data.label
         wrapper.appendChild(labelTitle)
+
+        const layout = this.data.choicesLayout
+        const isVertical = Boolean(!layout || layout == 'vertical')
+        const optionsWrapper = document.createElement('div')
+        optionsWrapper.className = cn('d-flex', 'flex-wrap', {
+            'flex-column': isVertical,
+            'ml-2': !isVertical,
+        })
 
         this.optionPairs.forEach(([optId, optValue]) => {
             const { id, inputType, name, value, label } = cb(optId, optValue)
             const inputId = `${id}-${this.data.id}`
 
             const option = document.createElement('label')
-            this.setAttributes({ class: 'form-check' }, option)
+
+            this.setAttributes({
+                class: cn('form-check', {
+                    'ml-2': isVertical,
+                    'pr-2': !isVertical,
+                    'col-4':  layout === 'three_column',
+                    'col-6': layout === 'two_column',
+                })
+            }, option)
+            optionsWrapper
 
             const input = document.createElement('input')
             this.setAttributes({
@@ -217,8 +233,10 @@ class InputElement extends Element {
             labelEl.innerText = label
             option.appendChild(labelEl)
 
-            wrapper.appendChild(option)
+            optionsWrapper.appendChild(option)
         })
+        wrapper.appendChild(optionsWrapper)
+
         return wrapper
     }
 
@@ -297,7 +315,7 @@ class Container extends Element {
     render(root:HTMLElement) {
         super.render(root)
 
-        this.el!.className = cx(this.el?.className, {
+        this.el!.className = cn(this.el?.className, {
             row: this.isBSRow, // a bootstrap row lays out in columns
             'd-flex flex-column': !this.isBSRow,
             'formial-form': this.data.type == 'FORM'
