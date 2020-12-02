@@ -91,7 +91,7 @@ defaultControls.register([
         icon: <CheckSquare />,
         hasOptions: true,
         defaultValues: {
-            options: {},
+            options: [],
             choicesLayout: 'vertical',
         },
         placeholder(el: InputElement) {
@@ -106,7 +106,7 @@ defaultControls.register([
         hasOptions: true,
         icon: <DotCircle />,
         defaultValues: {
-            options: {},
+            options: [],
             choicesLayout: 'vertical',
         },
         placeholder(el: InputElement) {
@@ -121,7 +121,7 @@ defaultControls.register([
         hasOptions: true,
         icon: <CaretSquareDown />,
         defaultValues: {
-            options: {},
+            options: [],
         },
         placeholder(el: InputElement) {
             const options = el.optionPairs

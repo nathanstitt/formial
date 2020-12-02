@@ -2,8 +2,10 @@ import React, { useContext, createContext, FC, useState, useRef, useEffect } fro
 import styled from 'styled-components'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { useOnClickOutside } from '../hooks/use-click-outside'
+import { SerializedOption } from '../data'
 import {
-    useStoreContext, InputElement, Element, Container, isContainer, isInput, isText, TextElement,
+    NestedType, useStoreContext, InputElement, Element,
+    Container, isContainer, isInput, isText, TextElement,
 } from './store'
 import { capitalize } from '../lib'
 import { useKeyPress } from '../hooks/use-key-press'
@@ -13,26 +15,43 @@ const CanFocusContext = createContext<boolean>(false)
 CanFocusContext.displayName = 'FocusContext'
 
 
-const NewAttribute: FC<{ input: InputElement; nested: string }> = ({
+const NewOption: FC<{
+    input: InputElement
+    nested: NestedType
+    onComplete: (id: string | typeof DELETE) => void
+}> = ({
     input,
     nested,
+    onComplete,
 }) => {
     const sc = useStoreContext()
     const canFocus = useContext(CanFocusContext)
     const inputRef = useRef<HTMLInputElement>(null)
-    const saveValue = () => sc.dispatch({
-        type: 'REPLACE_NEW_ATTRIBUTE', nested, input, name: inputRef.current!.value,
-    })
-    const deleteAttr = () => sc.dispatch({ type: 'DELETE_ATTRIBUTE', input, nested, name: '' })
+    const saveValue = () => {
+        const id = inputRef.current!.value
+        sc.dispatch({ type: 'UPSERT_OPTION', nested, input, id })
+        onComplete(id)
+    }
 
-    useKeyPress(['Enter', 'Escape'], (ev) => {
+    const deleteAttr = () => {
+        sc.dispatch({ type: 'DELETE_OPTION', input, nested, id: '' })
+        onComplete(DELETE)
+    }
+
+    useKeyPress(['Enter', 'Escape', 'Tab'], (ev) => {
         switch (ev.key) {
+            case 'Tab': {
+                ev.preventDefault()
+                saveValue()
+                break
+            }
             case 'Enter': {
                 saveValue()
                 break
             }
             case 'Escape': {
                 deleteAttr()
+                onComplete(DELETE)
                 break
             }
         }
@@ -49,7 +68,6 @@ const NewAttribute: FC<{ input: InputElement; nested: string }> = ({
             <input
                 ref={inputRef}
                 defaultValue=''
-                onBlur={saveValue}
             />
             <span className="value" />
             <button onClick={deleteAttr} className='del-attr'>
@@ -59,41 +77,46 @@ const NewAttribute: FC<{ input: InputElement; nested: string }> = ({
     )
 }
 
+const NEW = Symbol('new')
+const DELETE = Symbol('delete')
 
-const EditAttribute: FC<{
+const EditOption:FC<{
     input: InputElement
-    nested: string
-    attributeName: string
-}> = ({ input, nested, attributeName }) => {
+    nested: NestedType
+    focused: boolean
+    option: SerializedOption,
+    onComplete: (id: string | typeof NEW | typeof DELETE) => void
+}> = ({ input, nested, focused, onComplete, option }) => {
     const sc = useStoreContext()
     const canFocus = useContext(CanFocusContext)
     const inputRef = useRef<HTMLInputElement>(null)
+
     useKeyPress(['Enter', 'Tab'], (ev) => {
         ev.preventDefault()
-        sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
+        sc.dispatch({ type: 'UPDATE_OPTION', option, value: inputRef.current!.value })
+        onComplete(option.id)
     }, { target: inputRef })
+
     useEffect(() => {
-        const attrs = Object.keys(input.data[nested])
-        if (canFocus && attributeName === attrs[attrs.length - 1]) {
+        if (canFocus && focused) {
             inputRef.current!.focus()
         }
-    }, [canFocus])
+    }, [canFocus, focused])
     return (
         <label>
-            <span>{attributeName}:</span>
+            <span>{option.id}:</span>
             <input
                 ref={inputRef}
                 className="value"
-                value={input.data[nested][attributeName] || ''}
+                value={option.value || ''}
                 onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE',
-                    target: input,
-                    patch: { [nested]: { [attributeName]: value } },
+                    type: 'UPDATE_OPTION', option, value,
                 })}
             />
             <button
                 onClick={() => {
-                    sc.dispatch({ type: 'DELETE_ATTRIBUTE', input, nested, name: attributeName })
+                    sc.dispatch({ type: 'DELETE_OPTION', id: option.id, input, nested })
+                    onComplete(DELETE)
                 }}
                 className='del-attr'
             >
@@ -103,21 +126,11 @@ const EditAttribute: FC<{
     )
 }
 
-const Attribute: FC<{
-    input: InputElement
-    nested: string
-    attributeName: string,
-}> = ({ input, nested, attributeName }) => {
-    if ('' === attributeName) {
-        return <NewAttribute nested={nested} input={input} />
-    }
-    return <EditAttribute nested={nested} attributeName={attributeName} input={input} />
-}
 
 const Options: FC<{
-    label: string,
-    input: InputElement,
-    nested: string,
+    label: string
+    input: InputElement
+    nested: NestedType
     ignore?: Array<string>
 }> = ({
     label,
@@ -125,37 +138,57 @@ const Options: FC<{
     nested,
     ignore = [],
 }) => {
-    const sc = useStoreContext()
-    const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
-    const options = input.data[nested]
+    const [editingOption, setEditing] = useState<string | typeof NEW>('')
+
+    // const [Option, setAdding] = useState(false)
+    // const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
+    let options = input.data[nested]
     if (!options) {
         return null
     }
-    const names = Object
-        .keys(input.data[nested] || {})
-        .filter(name => !ignore.includes(name))
+    options = options.filter(opt => !ignore.includes(opt.id))
 
     return (
         <fieldset className='options'>
             <legend>{label}:</legend>
             <div className='controls'>
-                <button onClick={addAttribute} className='add-attr'>
+                <button onClick={() => setEditing(NEW)} className='add-attr'>
                     ➕
                 </button>
             </div>
-            {names.length > 0 && (
+            {options.length ? (
                 <div className="heading">
                     <span>ID</span>
                     <span>Value</span>
-                </div>)}
-            {names.map(attrName => (
-                <Attribute
-                    key={attrName}
+                </div>) : null}
+            {options.map((option, i) => (
+                <EditOption
+                    key={i}
+                    focused={editingOption === option.id}
                     nested={nested}
+                    option={option}
                     input={input}
-                    attributeName={attrName}
+                    onComplete={(id) => {
+                        if (id === DELETE) {
+                            setEditing('')
+                        } else if (i === options.length - 1) {
+                            setEditing(NEW)
+                        }
+                    }}
                 />
             ))}
+            {editingOption === NEW && (
+                <NewOption
+                    nested={nested}
+                    input={input}
+                    onComplete={(id) => {
+                        if (id === DELETE) {
+                            setEditing('')
+                        } else {
+                            setEditing(id)
+                        }
+                    }}
+                />)}
         </fieldset>
     )
 }
@@ -173,13 +206,9 @@ const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
             <input
                 type="checkbox"
                 className="value"
-                checked={input.data.attributes?.required === 'true' || false}
+                checked={input.nested('attributes', 'required')?.value === 'true' || false}
                 onChange={({ target: { checked } }) => {
-                    sc.dispatch({
-                        type: 'UPDATE',
-                        target: input,
-                        patch: { attributes: { required: String(checked) } },
-                    })
+                    sc.dispatch({ type: 'UPSERT_OPTION', input, nested: 'attributes', id: 'required', value: String(checked) })
                 }}
             />
         </label>
@@ -197,11 +226,13 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
             <select
                 name="type"
                 className="value"
-                value={input.data.attributes?.type || 'text'}
+                value={input.nested('attributes', 'type')?.value || 'text'}
                 onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE',
-                    target: input,
-                    patch: { attributes: { type: value } },
+                    type: 'UPSERT_OPTION',
+                    input,
+                    id: 'type',
+                    nested: 'attributes',
+                    value,
                 })}
             >
                 {['text', 'number', 'email', 'date'].map(
@@ -447,7 +478,6 @@ const EditPanelEl = styled.div({
         fontWeight: 'bold',
     },
     '.value': {
-//        minWidth: '150px',
         flex: 1,
     },
     button: {

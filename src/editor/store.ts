@@ -3,6 +3,7 @@ import deepmerge from 'deepmerge'
 import { uuidv4 } from '../lib'
 import {
     SerializedForm,
+    SerializedOption,
     SerializedElement,
     SerializedContainer,
     SerializedTextElement,
@@ -25,6 +26,8 @@ export interface ControlDefinition {
 
 type ControlsMap = Map<string, Control>
 
+export type NestedType = 'options' | 'attributes'
+
 export interface Store {
     controls: ControlsMap,
     form: Form
@@ -33,9 +36,7 @@ export interface Store {
 
 export interface ElementData {
     className: string
-    attributes?: {
-        [value: string]: string
-    }
+    attributes: Array<SerializedOption>
 }
 
 export class Element {
@@ -83,6 +84,11 @@ export class Container extends Element {
         super(control, options)
         this.direction = options.direction || control.defaultValues.direction
         this.children = options.children || control.defaultValues.children
+        this.data = deepmerge(this.data, {
+            ...options,
+            className: '',
+            attributes: [],
+        })
     }
 
     get isRow(): boolean {
@@ -107,6 +113,7 @@ export class Form extends Container {
         const col = cm.get('col')
         if (!col) { throw new Error("Column control doesn't exist?") }
         super(col, { ...options, direction: 'row' })
+        this.data.className = 'formial-form'
     }
 
     serialize(): SerializedForm {
@@ -152,9 +159,7 @@ export interface InputData extends ElementData {
         label: string
         input: string
     }
-    options?: {
-        [value: string]: string
-    }
+    options: Array<SerializedOption>
     choicesLayout?: ChoicesLayoutTypes
 }
 
@@ -166,7 +171,20 @@ export class InputElement extends Element {
     constructor(control: Control, data = {}) {
         super(control, data)
         this.data = deepmerge(control.defaultValues, data)
+        //this.data.attributes = (this.data.attributes || [])
+        if (this.control.hasOptions) {
+            this.data.options = (this.data.options || [])
+        }
     }
+
+    nested(nested: NestedType, id: string): SerializedOption | undefined {
+        return this.data[nested].find(a => a.id == id)
+    }
+
+    // attrVal(value: string): string | undefined {
+    //     this.attr()
+    //     return this.data.attributes.find(a => a.value === value)
+    // }
 
     get placeholder(): React.ReactNode {
         return (this.control.placeholder && this.control.placeholder(this)) || null
@@ -175,8 +193,8 @@ export class InputElement extends Element {
     get optionPairs(): Array<[string, string]> {
         const { options } = this.data
         if (options) {
-            return Object.keys(options).map(key => (
-                [key, options[key]]
+            return options.map(opt => (
+                [opt.id, opt.value]
             ))
         }
         return []
@@ -266,7 +284,7 @@ export class InputControl extends Control {
                 label: '',
                 input: 'form-control',
             },
-            attributes: {},
+            attributes: [],
         })
     }
 
@@ -373,7 +391,6 @@ const unserialize = (cm: ControlsMap, data: ElementSerialization):Element|null =
         return new InputElement(control, data)
     }
 
-
     const children:Array<ContainerChild> = []
     const dataChildren = (data as any).children
     if (dataChildren) {
@@ -399,10 +416,12 @@ type Action =
         fromIndex?: number, fromContainer?: Container }
     | { type: 'DELETE', target: Element, container: Container }
     | { type: 'UPDATE', target: Element, patch: any }
+    | { type: 'UPSERT_OPTION', input: InputElement, nested: NestedType, id: string, value?: string }
+    | { type: 'UPDATE_OPTION', option: SerializedOption, value: string }
     | { type: 'EDIT', target: Element }
     | { type: 'HIDE_EDIT' }
-    | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: string }
-    | { type: 'DELETE_ATTRIBUTE', input: InputElement, nested: string, name: string }
+    | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: NestedType }
+    | { type: 'DELETE_OPTION', input: InputElement, nested: NestedType, id: string }
     | { type: 'REPLACE_NEW_ATTRIBUTE', input: InputElement, nested: string, name: string, }
 
 const storeReducer = (st:Store, action: Action): Store => {
@@ -429,6 +448,20 @@ const storeReducer = (st:Store, action: Action): Store => {
             ]
             return { ...st, editing: undefined }
         }
+        case 'UPSERT_OPTION': {
+            const option = action.input.nested(action.nested, action.id)
+            if (option) {
+                option.value = action.value || ''
+            } else {
+                action.input.data[action.nested]
+                    .push({ id: action.id, value: action.value || '' })
+            }
+            return { ...st }
+        }
+        case 'UPDATE_OPTION': {
+            action.option.value = action.value
+            return { ...st }
+        }
         case 'UPDATE': {
             action.target.data = deepmerge(action.target.data as any, action.patch)
             return { ...st }
@@ -440,7 +473,7 @@ const storeReducer = (st:Store, action: Action): Store => {
             return { ...st, editing: undefined }
         }
         case 'ADD_ATTRIBUTE': {
-            action.input.data[action.nested][''] = ''
+            action.input.data[action.nested].push({ id: '', value: '' })
             return { ...st }
         }
         case 'REPLACE_NEW_ATTRIBUTE': {
@@ -448,8 +481,14 @@ const storeReducer = (st:Store, action: Action): Store => {
             action.input.data[action.nested][action.name] = ''
             return { ...st }
         }
-        case 'DELETE_ATTRIBUTE': {
-            delete action.input.data[action.nested][action.name]
+        case 'DELETE_OPTION': {
+            const option = action.input.nested(action.nested, action.id)
+            if (option) {
+                const index = action.input.data[action.nested].indexOf(option)
+                if (index != -1) {
+                    action.input.data[action.nested].splice(index, 1)
+                }
+            }
             return { ...st }
         }
     }

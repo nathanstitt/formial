@@ -46,7 +46,10 @@ const ControlLabel:React.FC<{ control: Control }> = ({ control }) => {
 }
 
 const ControlsEl = styled.div({
-
+    ul: {
+        padding: 0,
+        margin: 0,
+    },
 })
 
 export const Controls = () => {

@@ -1,13 +1,17 @@
 export type ChoicesLayoutTypes = 'vertical' | 'horizontal' | 'two_column' | 'three_column'
 
+
+export interface SerializedOption {
+    id: string
+    value: string
+}
+
 export interface SerializedElement {
     type: string
     id: string
     control: string
-    className: string
-    attributes?: {
-        [value: string]: string
-    }
+    className?: string
+    attributes?: Array<SerializedOption>
 }
 
 export interface SerializedInputElement extends SerializedElement {
@@ -20,9 +24,7 @@ export interface SerializedInputElement extends SerializedElement {
         input: string
     }
     choicesLayout?: ChoicesLayoutTypes,
-    options?: {
-        [value: string]: string
-    }
+    options: Array<SerializedOption>
 }
 
 export interface SerializedTextElement extends SerializedElement {

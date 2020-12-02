@@ -7,16 +7,13 @@ import { EditPanel } from './edit-panel'
 const SidebarEl = styled.div({
     overflow: 'hidden',
     display: 'flex',
+    paddingBottom: '20px',
     '> *': {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
         flexGrow: 1,
         minHeight: 0, /* for Firefox */
-    },
-    ul: {
-        padding: 0,
-        margin: 0,
     },
 })
 export const Sidebar:React.FC = () => (

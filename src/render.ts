@@ -16,6 +16,10 @@ interface UnserializeOptions {
     parent?: Container
 }
 
+interface ObjectAttributes {
+    [key: string]: string
+}
+
 class Element {
 
     data: SerializedElement
@@ -52,7 +56,7 @@ class Element {
         })
 
         if (!skipAttributes) {
-            this.setAttributes()
+            this.setDataAttributes()
         }
 
         if (this.el.parentElement !== root) {
@@ -61,8 +65,22 @@ class Element {
         return this
     }
 
+    setDataAttributes(
+        el:HTMLElement|undefined = this.el,
+    ) {
+        if (!el || !this.data.attributes) {
+            return
+        }
+        this.data.attributes.forEach((a) => {
+            if (a.id) {
+                el.setAttribute(a.id, String(a.value))
+            }
+        })
+    }
+
+
     setAttributes(
-        attrs = this.data.attributes,
+        attrs: ObjectAttributes,
         el:HTMLElement|undefined = this.el,
     ) {
         if (!el || !attrs) {
@@ -136,9 +154,7 @@ class InputElement extends Element {
     get optionPairs(): Array<[string, string]> {
         const { options } = this.data
         if (options) {
-            return Object.keys(options).map(key => (
-                [key, options[key]]
-            ))
+            return options.map(opt => [opt.id, opt.value])
         }
         return []
     }
@@ -148,13 +164,12 @@ class InputElement extends Element {
         float.className = this.data.classNames.wrapper
 
         const input = document.createElement(tag)
-
+        this.setDataAttributes()
         this.setAttributes({
             name: this.data.name,
             id: this.data.id,
             class: 'form-control',
             placeholder: this.data.label,
-            ...this.data.attributes,
         }, input)
 
         float.appendChild(input)
@@ -164,7 +179,9 @@ class InputElement extends Element {
         this.setAttributes({
             for: this.data.id,
         }, label)
-        if (this.data.attributes?.required === 'true') {
+
+        const req = this.data.attributes && this.data.attributes.find(a => a.id =='required')
+        if (req && req.value === 'true') {
             const asterisk = document.createElement('span')
             asterisk.innerText = '✱'
             this.setAttributes({ class: 'required-indicator' }, asterisk)
@@ -184,7 +201,7 @@ class InputElement extends Element {
 
     renderOptions(cb: (a:string, b:string) => { [k:string]: string }) {
         const wrapper = document.createElement('div')
-        this.setAttributes(this.data.attributes, wrapper)
+        this.setDataAttributes(wrapper)
         wrapper.className = this.data.classNames.wrapper
 
         const labelTitle = document.createElement('div')
