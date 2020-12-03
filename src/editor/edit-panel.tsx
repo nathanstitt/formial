@@ -1,197 +1,13 @@
-import React, { useContext, createContext, FC, useState, useRef, useEffect } from 'react'
+import React, { FC, useRef } from 'react'
 import styled from 'styled-components'
-import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { useOnClickOutside } from '../hooks/use-click-outside'
-import { SerializedOption } from '../data'
 import {
-    NestedType, useStoreContext, InputElement, Element,
+    useStoreContext, InputElement, Element,
     Container, isContainer, isInput, isText, TextElement,
 } from './store'
 import { capitalize } from '../lib'
-import { useKeyPress } from '../hooks/use-key-press'
 import { Title, Scrolling, Values } from './components'
-
-const CanFocusContext = createContext<boolean>(false)
-CanFocusContext.displayName = 'FocusContext'
-
-
-const NewOption: FC<{
-    input: InputElement
-    nested: NestedType
-    onComplete: (id: string | typeof DELETE) => void
-}> = ({
-    input,
-    nested,
-    onComplete,
-}) => {
-    const sc = useStoreContext()
-    const canFocus = useContext(CanFocusContext)
-    const inputRef = useRef<HTMLInputElement>(null)
-    const saveValue = () => {
-        const id = inputRef.current!.value
-        sc.dispatch({ type: 'UPSERT_OPTION', nested, input, id })
-        onComplete(id)
-    }
-
-    const deleteAttr = () => {
-        sc.dispatch({ type: 'DELETE_OPTION', input, nested, id: '' })
-        onComplete(DELETE)
-    }
-
-    useKeyPress(['Enter', 'Escape', 'Tab'], (ev) => {
-        switch (ev.key) {
-            case 'Tab': {
-                ev.preventDefault()
-                saveValue()
-                break
-            }
-            case 'Enter': {
-                saveValue()
-                break
-            }
-            case 'Escape': {
-                deleteAttr()
-                onComplete(DELETE)
-                break
-            }
-        }
-    }, { target: inputRef })
-
-    useEffect(() => {
-        if (canFocus) {
-            inputRef.current!.focus()
-        }
-    }, [canFocus])
-
-    return (
-        <label>
-            <input
-                ref={inputRef}
-                defaultValue=''
-            />
-            <span className="value" />
-            <button onClick={deleteAttr} className='del-attr'>
-                <TrashAlt />
-            </button>
-        </label>
-    )
-}
-
-const NEW = Symbol('new')
-const DELETE = Symbol('delete')
-
-const EditOption:FC<{
-    input: InputElement
-    nested: NestedType
-    focused: boolean
-    option: SerializedOption,
-    onComplete: (id: string | typeof NEW | typeof DELETE) => void
-}> = ({ input, nested, focused, onComplete, option }) => {
-    const sc = useStoreContext()
-    const canFocus = useContext(CanFocusContext)
-    const inputRef = useRef<HTMLInputElement>(null)
-
-    useKeyPress(['Enter', 'Tab'], (ev) => {
-        ev.preventDefault()
-        sc.dispatch({ type: 'UPDATE_OPTION', option, value: inputRef.current!.value })
-        onComplete(option.id)
-    }, { target: inputRef })
-
-    useEffect(() => {
-        if (canFocus && focused) {
-            inputRef.current!.focus()
-        }
-    }, [canFocus, focused])
-    return (
-        <label>
-            <span>{option.id}:</span>
-            <input
-                ref={inputRef}
-                className="value"
-                value={option.value || ''}
-                onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE_OPTION', option, value,
-                })}
-            />
-            <button
-                onClick={() => {
-                    sc.dispatch({ type: 'DELETE_OPTION', id: option.id, input, nested })
-                    onComplete(DELETE)
-                }}
-                className='del-attr'
-            >
-                <TrashAlt />
-            </button>
-        </label>
-    )
-}
-
-
-const Options: FC<{
-    label: string
-    input: InputElement
-    nested: NestedType
-    ignore?: Array<string>
-}> = ({
-    label,
-    input,
-    nested,
-    ignore = [],
-}) => {
-    const [editingOption, setEditing] = useState<string | typeof NEW>('')
-
-    // const [Option, setAdding] = useState(false)
-    // const addAttribute = () => sc.dispatch({ type: 'ADD_ATTRIBUTE', nested, input })
-    let options = input.data[nested]
-    if (!options) {
-        return null
-    }
-    options = options.filter(opt => !ignore.includes(opt.id))
-
-    return (
-        <fieldset className='options'>
-            <legend>{label}:</legend>
-            <div className='controls'>
-                <button onClick={() => setEditing(NEW)} className='add-attr'>
-                    ➕
-                </button>
-            </div>
-            {options.length ? (
-                <div className="heading">
-                    <span>ID</span>
-                    <span>Value</span>
-                </div>) : null}
-            {options.map((option, i) => (
-                <EditOption
-                    key={i}
-                    focused={editingOption === option.id}
-                    nested={nested}
-                    option={option}
-                    input={input}
-                    onComplete={(id) => {
-                        if (id === DELETE) {
-                            setEditing('')
-                        } else if (i === options.length - 1) {
-                            setEditing(NEW)
-                        }
-                    }}
-                />
-            ))}
-            {editingOption === NEW && (
-                <NewOption
-                    nested={nested}
-                    input={input}
-                    onComplete={(id) => {
-                        if (id === DELETE) {
-                            setEditing('')
-                        } else {
-                            setEditing(id)
-                        }
-                    }}
-                />)}
-        </fieldset>
-    )
-}
+import { InputOptions } from './input-options'
 
 const REQUIRED_TYPES = ['input', 'textarea', 'radio']
 
@@ -252,6 +68,7 @@ const OptionLayout: FC<{ input: InputElement }> = ({ input }) => {
             <span>Choices Layout:</span>
             <select
                 value={input.data.choicesLayout}
+                className="value"
                 onChange={({ target: { value } }) => sc.dispatch({
                     type: 'UPDATE',
                     target: input,
@@ -304,7 +121,7 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                     />
                 </label>
                 <OptionLayout input={input} />
-                <Options input={input} label="Options" nested="options" />
+                <InputOptions input={input} label="Options" nested="options" />
                 <fieldset>
                     <legend>Other Class Names:</legend>
                     <label>
@@ -338,7 +155,7 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
                         />
                     </label>
                 </fieldset>
-                <Options
+                <InputOptions
                     input={input}
                     label="Attributes"
                     nested="attributes"
@@ -469,7 +286,9 @@ const EditPanelEl = styled.div({
     'label, .heading': {
         display: 'flex',
         alignItems: 'center',
-        marginBottom: '5px',
+        '&:not(.draggable)': {
+            marginBottom: '5px',
+        },
         '> *:first-child': {
             width: '125px',
         },
@@ -479,9 +298,10 @@ const EditPanelEl = styled.div({
     },
     '.value': {
         flex: 1,
+        width: '125px',
     },
     button: {
-        marginLeft: '1rem',
+        marginLeft: '5px',
         svg: {
             height: '18px',
         },
@@ -520,38 +340,19 @@ const EditPanelEl = styled.div({
 
 export const EditPanel = () => {
     const sc = useStoreContext()
-    const [canFocus, setCanFocus] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
     const { editing } = sc.store
-    useOnClickOutside(panelRef, () => sc.dispatch({ type: 'HIDE_EDIT' }))
-    useEffect(() => {
-        if (!editing) {
-            setCanFocus(false)
-        }
-        if (editing) {
-            setTimeout(() => { // setTimeout to focus after animation completes
-                if (panelRef.current) {
-                    setCanFocus(true)
-                    const firstInput = panelRef.current.querySelector('input,textarea')
-                    if (firstInput) {
-                        (firstInput as HTMLInputElement).focus()
-                    }
-                }
-            }, 250)
-        }
-    }, [editing])
+    useOnClickOutside(panelRef, () => {
+        sc.dispatch({ type: 'HIDE_EDIT' })
+    })
 
     if (!editing) {
         return null
     }
 
     return (
-        <CanFocusContext.Provider value={canFocus}>
-            <EditPanelEl ref={panelRef} className="edit-panel">
-
-                {editing && <Edit target={editing} />}
-
-            </EditPanelEl>
-        </CanFocusContext.Provider>
+        <EditPanelEl ref={panelRef} className="edit-panel">
+            <Edit target={editing} />
+        </EditPanelEl>
     )
 }

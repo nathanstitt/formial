@@ -22,3 +22,5 @@ export const Values = styled.div({
     minHeight: 0,
     overflow: 'hidden',
 })
+
+export const DropRevealColor = '#e8e8e8'

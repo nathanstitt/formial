@@ -5,7 +5,7 @@ import { useDrop, useDrag, DragElementWrapper, DragSourceOptions } from 'react-d
 import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import { Scrolling } from './components'
+import { Scrolling, DropRevealColor } from './components'
 import {
     useStore,
     Element,
@@ -18,8 +18,6 @@ import {
     Container,
 } from './store'
 
-const revealColor = '#e8e8e8'
-
 const DropEl = styled.div({
     transition: 'all 0.3s ease-in-out',
 })
@@ -30,7 +28,7 @@ const HorizontalDropEl = styled(DropEl)({
     '&.isHovered': {
         height: '100px',
         minHeight: '100px',
-        background: revealColor,
+        background: DropRevealColor,
     },
     '&:last-child': {
         flex: 1,
@@ -79,8 +77,7 @@ const VerticalDropEl = styled(DropEl)({
     minWidth: '20px',
     '&.isHovered': {
         flex: 1,
-        // width: '100px',
-        background: revealColor,
+        background: DropRevealColor,
     },
 })
 

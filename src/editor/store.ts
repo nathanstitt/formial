@@ -420,6 +420,7 @@ type Action =
     | { type: 'UPDATE_OPTION', option: SerializedOption, value: string }
     | { type: 'EDIT', target: Element }
     | { type: 'HIDE_EDIT' }
+    | { type: 'REORDER_OPTION', input: InputElement, id: string, index: number, nested: NestedType }
     | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: NestedType }
     | { type: 'DELETE_OPTION', input: InputElement, nested: NestedType, id: string }
     | { type: 'REPLACE_NEW_ATTRIBUTE', input: InputElement, nested: string, name: string, }
@@ -471,6 +472,19 @@ const storeReducer = (st:Store, action: Action): Store => {
         }
         case 'HIDE_EDIT': {
             return { ...st, editing: undefined }
+        }
+        case 'REORDER_OPTION': {
+            const options = action.input.data[action.nested]
+            const currentIndex = options.findIndex(o => o.id === action.id)
+
+            const option = options[currentIndex]
+            action.input.data[action.nested].splice(currentIndex, 1)
+
+            if (action.index > currentIndex) {
+                action.index -= 1
+            }
+            action.input.data[action.nested].splice(action.index, 0, option)
+            return { ...st }
         }
         case 'ADD_ATTRIBUTE': {
             action.input.data[action.nested].push({ id: '', value: '' })
