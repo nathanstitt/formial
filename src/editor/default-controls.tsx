@@ -11,12 +11,10 @@ import { DotCircle } from '@styled-icons/fa-solid/DotCircle'
 import { CheckSquare } from '@styled-icons/fa-solid/CheckSquare'
 import { ChoicesLayoutTypes } from '../data'
 import {
-    InputControl, ContainerControl,
-    InputElement, TextControl, TextElement, defaultControls,
-} from './store'
+    InputControl, ContainerControl, InputElement, TextControl, TextElement, defaultControls,
+} from './models'
 
 type RenderT = (key: string, value: string) => React.ReactNode
-
 
 const Choices = styled.div<{ layout?: ChoicesLayoutTypes }>(({ layout }) => {
     const style:CSSObject = {

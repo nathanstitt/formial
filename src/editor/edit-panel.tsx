@@ -2,9 +2,12 @@ import React, { FC, useRef } from 'react'
 import styled from 'styled-components'
 import { useOnClickOutside } from '../hooks/use-click-outside'
 import {
-    useStoreContext, InputElement, Element,
-    Container, isContainer, isInput, isText, TextElement,
+    useStoreContext,
 } from './store'
+import {
+    InputElement, FormElement,
+    Container, isContainer, isInput, isText, TextElement,
+} from './models'
 import { capitalize } from '../lib'
 import { Title, Scrolling, Values } from './components'
 import { InputOptions } from './input-options'
@@ -245,7 +248,7 @@ const TextEdit: FC<{ control: TextElement }> = ({ control }) => {
 }
 
 
-const Edit: FC<{ target: Element }> = ({ target }) => {
+const Edit: FC<{ target: FormElement }> = ({ target }) => {
     if (isContainer(target)) {
         return <ContainerEdit container={target} />
     }

@@ -8,15 +8,17 @@ import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
 import { Scrolling, DropRevealColor } from './components'
 import {
     useStore,
-    Element,
-    isContainer,
-    isText,
+    useStoreContext,
+} from './store'
+import {
     isInput,
     InputElement,
     TextElement,
-    useStoreContext,
     Container,
-} from './store'
+    isText,
+    isContainer,
+    FormElement,
+} from './models'
 
 const DropEl = styled.div({
     transition: 'all 0.3s ease-in-out',
@@ -208,7 +210,7 @@ const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
 }))
 
 const Controls:React.FC<{
-    target: Element | Container
+    target: FormElement | Container
     container: Container,
     displayEdit: boolean,
     drag?: DragElementWrapper<DragSourceOptions>,
@@ -415,7 +417,7 @@ const ContainerPreview:React.FC<{
 
 
 const ElementPreview:React.FC<{
-    el: Element|Container,
+    el: FormElement|Container,
     index: number,
     container: Container,
 }> = ({ el, index, container }) => {

@@ -6,9 +6,8 @@ import { useDrop, useDrag } from 'react-dnd'
 import { SerializedOption } from '../data'
 import { DropRevealColor } from './components'
 import { useKeyPress } from '../hooks/use-key-press'
-import {
-    NestedType, useStoreContext, InputElement,
-} from './store'
+import { NestedType, InputElement } from './models'
+import { useStoreContext } from './store'
 
 interface DropProps {
     input: InputElement

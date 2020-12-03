@@ -1,341 +1,45 @@
 import * as React from 'react'
 import deepmerge from 'deepmerge'
-import { uuidv4 } from '../lib'
+import {
+    Container,
+    FormElement,
+    Control,
+    InputElement,
+    NestedType,
+    ControlsMap,
+    Form,
+    defaultControls,
+    unserialize,
+} from './models'
+
 import {
     SerializedForm,
     SerializedOption,
-    SerializedElement,
-    SerializedContainer,
-    SerializedTextElement,
-    SerializedInputElement,
-    ChoicesLayoutTypes,
-    isSerializedText,
-    isSerializedContainer,
-    isSerializedInput,
-    ElementSerialization,
 } from '../data'
-
-export interface ControlDefinition {
-    id: string
-    icon: React.ReactNode
-    name: string
-    placeholder?(element: Element): React.ReactNode
-    hasOptions?: boolean,
-    defaultValues?: any,
-}
-
-type ControlsMap = Map<string, Control>
-
-export type NestedType = 'options' | 'attributes'
 
 export interface Store {
     controls: ControlsMap,
     form: Form
-    editing?: Element
+    editing?: FormElement
 }
 
-export interface ElementData {
-    className: string
-    attributes: Array<SerializedOption>
+export const useStore = ():Store => useStoreContext().store
+
+interface StoreContext {
+    store: Store
+    dispatch: React.Dispatch<Action> //  (patch:any): void
 }
 
-export class Element {
-
-    id: string
-    control: Control
-    data: ElementData
-    constructor(control: Control, data:any = {}) {
-        this.control = control
-        this.id = data.id || uuidv4()
-        this.data = deepmerge(control.defaultValues, data)
-    }
-
-    serialize(): SerializedElement {
-        return {
-            id: this.id,
-            type: 'element',
-            control: this.control.id,
-            ...this.data,
-        }
-    }
-
-}
-
-
-interface ContainerData extends ElementData {
-    children: Array<Element>
-}
-
-
-export interface ContainerOptions {
-    id?: string
-    direction: string // 'row' | 'column'
-    data?: ContainerData
-    children?: Array<Element>
-}
-
-type ContainerChild = Element|TextElement|Container|InputElement
-
-export class Container extends Element {
-    direction: string // 'row' | 'column'
-    children: Array<ContainerChild>
-
-    constructor(control:Control, options: ContainerOptions = control.defaultValues) {
-        super(control, options)
-        this.direction = options.direction || control.defaultValues.direction
-        this.children = options.children || control.defaultValues.children || []
-        this.data = deepmerge(this.data, {
-            ...options,
-            className: '',
-            attributes: [],
-        })
-    }
-
-    get isRow(): boolean {
-        return this.direction === 'row'
-    }
-
-    serialize(): SerializedContainer {
-        return {
-            ...super.serialize(),
-            ...this.data,
-            children: this.children.map(c => c.serialize()),
-            direction: this.direction,
-            type: 'CONTAINER',
-        }
-    }
-
-}
-
-export class Form extends Container {
-
-    constructor(cm: ControlsMap, options?: ContainerOptions) {
-        const col = cm.get('col')
-        if (!col) { throw new Error("Column control doesn't exist?") }
-        super(col, { ...options, direction: 'row' })
-        this.data.className = 'formial-form'
-    }
-
-    serialize(): SerializedForm {
-        return {
-            ...super.serialize(),
-            type: 'FORM',
-        }
-    }
-
-}
-
-interface TextData extends ElementData {
-    tag: string
-    text: string
-}
-
-export class TextElement extends Element {
-
-    data: TextData
-
-    constructor(control:Control, data = {}) {
-        super(control, data)
-        this.data = deepmerge(control.defaultValues, data) as TextData
-    }
-
-    serialize(): SerializedTextElement {
-        return {
-            ...super.serialize(),
-            ...this.data,
-            type: 'TEXT',
-        }
-    }
-
-}
-
-
-
-export interface InputData extends ElementData {
-    label: string
-    name: string
-    classNames: {
-        wrapper: string
-        label: string
-        input: string
-    }
-    options: Array<SerializedOption>
-    choicesLayout?: ChoicesLayoutTypes
-}
-
-
-export class InputElement extends Element {
-
-    data: InputData
-
-    constructor(control: Control, data = {}) {
-        super(control, data)
-        this.data = deepmerge(control.defaultValues, data)
-        //this.data.attributes = (this.data.attributes || [])
-        if (this.control.hasOptions) {
-            this.data.options = (this.data.options || [])
-        }
-    }
-
-    nested(nested: NestedType, id: string): SerializedOption | undefined {
-        return this.data[nested].find(a => a.id == id)
-    }
-
-    // attrVal(value: string): string | undefined {
-    //     this.attr()
-    //     return this.data.attributes.find(a => a.value === value)
-    // }
-
-    get placeholder(): React.ReactNode {
-        return (this.control.placeholder && this.control.placeholder(this)) || null
-    }
-
-    get optionPairs(): Array<[string, string]> {
-        const { options } = this.data
-        if (options) {
-            return options.map(opt => (
-                [opt.id, opt.value]
-            ))
-        }
-        return []
-    }
-
-    serialize(): SerializedInputElement {
-        return {
-            ...super.serialize(),
-            ...this.data,
-            type: 'INPUT',
-        }
-    }
-
-}
-
-
-export class Control {
-
-    id: string
-    name: string
-    icon: React.ReactNode
-    _defaultValues: any
-    hasOptions?: boolean
-    placeholder?: (element: Element) => React.ReactNode
-
-    constructor(definition: ControlDefinition) {
-        this.name = definition.name
-        this.id = definition.id
-        this.icon = definition.icon
-        this.placeholder = definition.placeholder
-        this.hasOptions = definition.hasOptions
-        this._defaultValues = deepmerge(this.defaultValues || {}, definition.defaultValues || {})
-    }
-
-    get defaultValues(): any {
-        return deepmerge(this._defaultValues, {
-            name: `${this.id}-${Math.round(Math.random() * 9999) + 1000}`,
-        })
-    }
-
-    createElement(): Element {
-        return new InputElement(this)
-    }
-}
-
-
-export function isContainer(
-    toBeDetermined: any,
-): toBeDetermined is Container {
-    return (toBeDetermined instanceof Container)
-}
-
-export function isInput(
-    toBeDetermined: any,
-): toBeDetermined is InputElement {
-    return (toBeDetermined instanceof InputElement)
-}
-
-export function isText(
-    toBeDetermined: any,
-): toBeDetermined is TextElement {
-    return (toBeDetermined instanceof TextElement)
-}
-
-export class ContainerControl extends Control {
-
-    constructor(definition: ControlDefinition) {
-        super(definition)
-        this._defaultValues = deepmerge((this._defaultValues || {}), {
-            children: [],
-        })
-    }
-
-    createElement(): Element {
-        return new Container(this)
-    }
-}
-
-export class InputControl extends Control {
-    constructor(definition: ControlDefinition) {
-        super(definition)
-        this._defaultValues = deepmerge((this._defaultValues || {}), {
-            label: `${definition.name} label`,
-            className: 'mb-2',
-            classNames: {
-                wrapper: this.wrapperClassName,
-                label: '',
-                input: 'form-control',
-            },
-            attributes: [],
-        })
-    }
-
-    get wrapperClassName() {
-        switch (this.id) {
-            case 'input':
-            case 'textarea':
-            case 'select': {
-                return 'form-floating'
-            }
-        }
-        return 'form-control'
-    }
-
-}
-
-// export class ColumnControl extends Control {
-//     createElement(): Element {
-//         return new Container(this, { direction: 'column' })
-//     }
-// }
-
-export class TextControl extends Control {
-    constructor(definition: ControlDefinition) {
-        super(definition)
-        this._defaultValues = deepmerge((this._defaultValues || {}), {
-            tag: this.id === 'para' ? 'p' : 'h3',
-            text: 'Some text…',
-            className: '',
-        })
-    }
-
-    createElement(): Element {
-        return new TextElement(this)
-    }
-}
-
-
-export const defaultControls = {
-    registered: new Map<string, Control>(),
-
-    register(controls: Array<Control>) {
-        controls.forEach(c => this.registered.set(c.id, c))
-    },
-}
+const sc = React.createContext(null as any as StoreContext)
+sc.displayName = 'StoreContext'
+export const useStoreContext = ():StoreContext => React.useContext(sc)
 
 interface InsertElementOptions {
     id: string,
     container: Container, destIndex: number,
     fromIndex?: number, fromContainer?: Container
 }
+
 export function addElement(
     store: Store,
     {
@@ -343,7 +47,7 @@ export function addElement(
     }: InsertElementOptions,
 ): Store {
     let cntrl: Control | undefined
-    let element: Element | undefined
+    let element: FormElement | undefined
 
     if (fromIndex != null && fromContainer) {
         element = fromContainer.children[fromIndex]
@@ -368,57 +72,17 @@ export function addElement(
     return { ...store }
 }
 
-interface StoreContext {
-    store: Store
-    dispatch: React.Dispatch<Action> //  (patch:any): void
-}
-
-const sc = React.createContext(null as any as StoreContext)
-sc.displayName = 'StoreContext'
-export const useStoreContext = ():StoreContext => React.useContext(sc)
-
-export const useStore = ():Store => useStoreContext().store
-
-const unserialize = (cm: ControlsMap, data: ElementSerialization):Element|null => {
-    const control = cm.get(data.control)
-    if (!control) { return null }
-
-    if (isSerializedText(data)) {
-        return new TextElement(control, data)
-    }
-
-    if (isSerializedInput(data)) {
-        return new InputElement(control, data)
-    }
-
-    const children:Array<ContainerChild> = []
-    const dataChildren = (data as any).children
-    if (dataChildren) {
-        dataChildren.forEach((c:ElementSerialization) => {
-            const child = unserialize(cm, c)
-            if (child) children.push(child)
-        })
-    }
-
-    if (isSerializedContainer(data)) {
-        return new Container(control, { ...data, children })
-    }
-
-    // if all else fails attempt to create a form and unserialize it
-    return new Form(cm, { ...data, children } as any as ContainerOptions)
-}
-
 type Action =
     | { type: 'REPLACE', form?: SerializedForm }
     | { type: 'APPEND_ELEMENT', control: Control }
     | { type: 'ADD_ELEMENT', id: string,
         container: Container, destIndex: number,
         fromIndex?: number, fromContainer?: Container }
-    | { type: 'DELETE', target: Element, container: Container }
-    | { type: 'UPDATE', target: Element, patch: any }
+    | { type: 'DELETE', target: FormElement, container: Container }
+    | { type: 'UPDATE', target: FormElement, patch: any }
     | { type: 'UPSERT_OPTION', input: InputElement, nested: NestedType, id: string, value?: string }
     | { type: 'UPDATE_OPTION', option: SerializedOption, value: string }
-    | { type: 'EDIT', target: Element }
+    | { type: 'EDIT', target: FormElement }
     | { type: 'HIDE_EDIT' }
     | { type: 'REORDER_OPTION', input: InputElement, id: string, index: number, nested: NestedType }
     | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: NestedType }

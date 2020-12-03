@@ -4,7 +4,8 @@ import cn from 'classnames'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
 import { Sidebar } from './editor/sidebar'
-import { useProvidedStoreContext, StoreContext, Form } from './editor/store'
+import { useProvidedStoreContext, StoreContext } from './editor/store'
+import { Form } from './editor/models'
 import { FormElements } from './editor/form'
 import { SerializedForm } from './data'
 
@@ -28,11 +29,6 @@ const EditorEl = styled.div({
     height: '100%',
     gap: '10px',
     position: 'relative',
-
-    // '> *': {
-    //     display: 'flex',
-    //     flexDirection: 'column',
-    // },
 })
 
 export interface EditorProps {

@@ -1,7 +1,8 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import { useDrag } from 'react-dnd'
-import { useStore, useStoreContext, Control } from './store'
+import { useStore, useStoreContext } from './store'
+import { Control } from './models'
 import './default-controls'
 
 import { Title, Scrolling } from './components'
