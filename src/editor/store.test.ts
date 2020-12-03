@@ -10,11 +10,16 @@ class TestElement extends Element {
 
 }
 
-
 class TestControl extends Control {
 
     createElement(): Element {
         return new TestElement(this)
+    }
+
+    get defaultValues(): any {
+        return {
+            testingElement: true,
+        }
     }
 
 }
@@ -110,9 +115,11 @@ describe('merging', () => {
                 id: '1234',
                 type: 'FORM',
                 control: 'test',
-                className: 'testcls',
+                className: 'formial-form',
+                testingElement: true,
                 children: [],
                 direction: 'row',
+                attributes: [],
             }
             const el = unserialize(store.controls, obj) as Element
             expect(el).not.toBeNull()
@@ -120,7 +127,7 @@ describe('merging', () => {
             expect(el).toMatchObject({
                 id: '1234',
                 data: {
-                    className: 'testcls',
+                    className: 'formial-form',
                 },
             })
             expect(el.serialize()).toEqual(obj)
@@ -163,6 +170,7 @@ describe('merging', () => {
                 control: 'col',
                 className: 'testcls',
                 tag: 'p',
+                testingElement: true,
                 text: 'hello world',
             }
             const el = unserialize(store.controls, obj) as TextElement
@@ -185,18 +193,19 @@ describe('merging', () => {
                 className: 'testcls',
                 label: 'My Input',
                 name: 'input-test',
+                testingElement: true,
                 classNames: {
                     wrapper: 'input-group',
                     label: '',
                     input: '',
                 },
-                attributes: {
-                    'data-test': 'true',
-                },
-                options: {
-                    one: 'One',
-                    two: 'Two',
-                },
+                attributes: [
+                    { id: 'data-test', value: 'true' },
+                ],
+                options: [
+                    { id: 'one', value: 'One' },
+                    { id: 'two', value: 'Two' },
+                ],
             }
             const el = unserialize(store.controls, obj) as InputElement
             expect(el).not.toBeNull()
@@ -206,6 +215,7 @@ describe('merging', () => {
                 data: {
                     label: 'My Input',
                     className: 'testcls',
+                    testingElement: true,
                 },
             })
             expect(el.serialize()).toEqual(obj)

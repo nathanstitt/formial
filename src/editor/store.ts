@@ -83,7 +83,7 @@ export class Container extends Element {
     constructor(control:Control, options: ContainerOptions = control.defaultValues) {
         super(control, options)
         this.direction = options.direction || control.defaultValues.direction
-        this.children = options.children || control.defaultValues.children
+        this.children = options.children || control.defaultValues.children || []
         this.data = deepmerge(this.data, {
             ...options,
             className: '',
