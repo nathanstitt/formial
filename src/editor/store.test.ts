@@ -6,7 +6,7 @@ import {
     FormElement, unserialize, TextElement, InputElement, defaultControls,
 } from './models'
 import {
-    SerializedInputElement, SerializedContainer,
+    SerializedContainer,
 } from '../data'
 
 class TestElement extends FormElement {
@@ -52,7 +52,7 @@ describe('merging', () => {
                 id: 'test', containerId: store.form.id, destIndex: 0,
             })
             expect(store.form.children).toHaveLength(1)
-            expect((store.form.children[0] as Element).control.id).toEqual('col')
+            expect((store.form.children[0] as InputElement).control.id).toEqual('col')
         })
 
         test('moving forward', () => {
@@ -124,7 +124,7 @@ describe('merging', () => {
                 direction: 'row',
                 attributes: [],
             }
-            const el = unserialize(store.controls, obj) as Element
+            const el = unserialize(store.controls, obj) as InputElement
             expect(el).not.toBeNull()
             expect(el).toBeInstanceOf(FormElement)
             expect(el).toMatchObject({
@@ -189,19 +189,19 @@ describe('merging', () => {
             expect(el.serialize()).toEqual(obj)
         })
         test('input', () => {
-            const obj: SerializedInputElement = {
+            const obj: any = {
                 id: '1234',
                 type: 'INPUT',
                 control: 'test',
                 className: 'testcls',
                 label: 'My Input',
                 name: 'input-test',
-                testingElement: true,
                 classNames: {
                     wrapper: 'input-group',
                     label: '',
                     input: '',
                 },
+                testingElement: true,
                 attributes: [
                     { id: 'data-test', value: 'true' },
                 ],
