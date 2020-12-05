@@ -61,7 +61,7 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
                     value,
                 })}
             >
-                {['text', 'number', 'email', 'date'].map(
+                {['text', 'number', 'email', 'tel', 'date'].map(
                     t => <option key={t} value={t}>{capitalize(t)}</option>,
                 )}
             </select>
