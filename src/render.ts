@@ -162,6 +162,7 @@ class InputElement extends Element {
     createInput(tag: string) {
         const float = document.createElement('div')
         float.className = this.data.classNames.wrapper
+        const req = this.data.attributes && this.data.attributes.find(a => a.id =='required')
 
         const input = document.createElement(tag)
         this.setDataAttributes()
@@ -171,6 +172,10 @@ class InputElement extends Element {
             class: 'form-control',
             placeholder: this.data.label,
         }, input)
+        if (req) {
+            input.setAttribute('required', 'true')
+        }
+
 
         float.appendChild(input)
 
@@ -180,7 +185,6 @@ class InputElement extends Element {
             for: this.data.id,
         }, label)
 
-        const req = this.data.attributes && this.data.attributes.find(a => a.id =='required')
         if (req && req.value === 'true') {
             const asterisk = document.createElement('span')
             asterisk.innerText = '✱'
