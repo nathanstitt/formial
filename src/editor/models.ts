@@ -227,9 +227,7 @@ export class Control {
     }
 
     get defaultValues(): any {
-        return deepmerge(this._defaultValues, {
-            name: `${this.id}-${Math.round(Math.random() * 9999) + 1000}`,
-        })
+        return { ...this._defaultValues }
     }
 
     createElement(): FormElement {
@@ -301,6 +299,12 @@ export class InputControl extends Control {
             }
         }
         return 'form-control'
+    }
+
+    get defaultValues(): any {
+        return deepmerge(this._defaultValues, {
+            name: `${this.id}-${Math.round(Math.random() * 9999) + 1000}`,
+        })
     }
 
 }
