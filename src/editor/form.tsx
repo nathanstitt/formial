@@ -61,9 +61,9 @@ const useFormDrop = ({ index, container }: DropProps) => {
                 type: 'ADD_ELEMENT',
                 id,
                 destIndex: index,
-                container,
+                containerId: container.id,
                 fromIndex,
-                fromContainer,
+                fromContainerId: fromContainer?.id,
             })
         },
     })
@@ -221,7 +221,7 @@ const Controls:React.FC<{
     const onDelete = (ev:React.MouseEvent<HTMLButtonElement>) => {
         ev.stopPropagation()
         sc.dispatch({
-            type: 'DELETE', target, container,
+            type: 'DELETE_ELEMENT', elementId: target.id, containerId: container.id,
         })
     }
     return (
@@ -231,7 +231,7 @@ const Controls:React.FC<{
                 <TrashAlt />
             </button>
             {displayEdit && (
-                <button onClick={() => sc.dispatch({ type: 'EDIT', target })}>
+                <button onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: target.id })}>
                     <Edit />
                 </button>)}
             {drag && (
@@ -266,9 +266,9 @@ const InputPreview: React.FC<{
         <ElementPreviewEl
             ref={drag}
             style={{ opacity }}
-            editing={sc.store.editing === input}
+            editing={sc.store.editingId === input.id}
             className={cn('element-preview', input.control.id)}
-            onClick={() => sc.dispatch({ type: 'EDIT', target: input })}
+            onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
         >
             <Controls displayEdit={false} target={input} container={container} />
             <ControlPreview>
@@ -297,10 +297,10 @@ const TextPreview: React.FC<{
 
     return (
         <ElementPreviewEl
-            editing={sc.store.editing === control}
+            editing={sc.store.editingId === control.id}
             style={{ opacity }}
             ref={drag}
-            onClick={() => sc.dispatch({ type: 'EDIT', target: control })}
+            onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
             className={cn('element-preview', control.control.id)}
         >
             <Controls displayEdit target={control} container={container} />

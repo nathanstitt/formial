@@ -54,8 +54,8 @@ const ControlsEl = styled.div({
 })
 
 export const Controls = () => {
-    const { editing, controls } = useStore()
-    if (editing) {
+    const { editingId, controls } = useStore()
+    if (editingId) {
         return null
     }
     return (
@@ -63,7 +63,7 @@ export const Controls = () => {
             <Title>Elements</Title>
             <Scrolling className="listing">
                 <ul>
-                    {Array.from(controls.values()).map(c => (
+                    {Object.values(controls).map(c => (
                         <ControlLabel key={c.id} control={c} />))}
                 </ul>
             </Scrolling>

@@ -42,8 +42,11 @@ export const Editor:React.FC<EditorProps> = ({
     className, onChange, value, defaultValue,
 }) => {
     const ctx = useProvidedStoreContext(defaultValue)
+
     React.useEffect(() => {
-        ctx.dispatch({ type: 'REPLACE', form: value })
+        if (value) {
+            ctx.dispatch({ type: 'REPLACE_FORM', form: value, controls: ctx.store.controls })
+        }
     }, [value])
     React.useEffect(() => {
         if (onChange) { onChange(ctx.store.form) }

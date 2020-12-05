@@ -37,12 +37,12 @@ const NewOption: FC<{
     const inputRef = useRef<HTMLInputElement>(null)
     const saveValue = () => {
         const id = inputRef.current!.value
-        sc.dispatch({ type: 'UPSERT_OPTION', nested, input, id })
+        sc.dispatch({ type: 'UPSERT_OPTION', nested, inputId: input.id, optionId: id })
         onComplete(id)
     }
 
     const deleteAttr = () => {
-        sc.dispatch({ type: 'DELETE_OPTION', input, nested, id: '' })
+        sc.dispatch({ type: 'DELETE_OPTION', inputId: input.id, nested, id: '' })
         onComplete(DELETE)
     }
 
@@ -111,9 +111,14 @@ const Option:FC<{
             opacity: monitor.isDragging() ? 0.4 : 1,
         }),
     })
+    const updateOption = () => {
+        sc.dispatch({
+            type: 'UPSERT_OPTION', inputId: input.id, nested, optionId: option.id, value: inputRef.current!.value,
+        })
+    }
     useKeyPress(['Enter', 'Tab'], (ev) => {
         ev.preventDefault()
-        sc.dispatch({ type: 'UPDATE_OPTION', option, value: inputRef.current!.value })
+        updateOption()
         onComplete(option.id)
     }, { target: inputRef })
 
@@ -133,13 +138,11 @@ const Option:FC<{
                 ref={inputRef}
                 className="value"
                 value={option.value || ''}
-                onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE_OPTION', option, value,
-                })}
+                onChange={updateOption}
             />
             <DeleteBtn
                 onClick={() => {
-                    sc.dispatch({ type: 'DELETE_OPTION', id: option.id, input, nested })
+                    sc.dispatch({ type: 'DELETE_OPTION', id: option.id, inputId: input.id, nested })
                     onComplete(DELETE)
                 }}
             >
@@ -173,7 +176,7 @@ export const Drop: React.FC<DropProps> = ({ input, nested, index }) => {
         },
         drop: (item) => {
             const { id } = (item as any as DropItem)
-            sc.dispatch({ type: 'REORDER_OPTION', nested, input, id, index })
+            sc.dispatch({ type: 'REORDER_OPTION', nested, inputId: input.id, optionId: id, index })
         },
     })
     return <DropEl ref={dropRef} className={cn('drop', { isHovered })} />

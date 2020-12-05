@@ -1,4 +1,5 @@
 export * from './editor'
 export * from './editor/store'
+export * from './editor/models'
 export * from './data'
 export * from './render'

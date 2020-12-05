@@ -1,66 +1,102 @@
+/* eslint-disable consistent-return */
 import * as React from 'react'
-import deepmerge from 'deepmerge'
+
+import produce, { Draft } from 'immer'
 import {
     Container,
     FormElement,
     Control,
-    InputElement,
     NestedType,
     ControlsMap,
     Form,
+    isInput,
     defaultControls,
     unserialize,
+    isContainer,
 } from './models'
 
 import {
     SerializedForm,
-    SerializedOption,
 } from '../data'
 
 export interface Store {
     controls: ControlsMap,
     form: Form
-    editing?: FormElement
+    editingId?: string
 }
 
 export const useStore = ():Store => useStoreContext().store
 
-interface StoreContext {
+interface StoreContextI {
     store: Store
     dispatch: React.Dispatch<Action> //  (patch:any): void
 }
 
-const sc = React.createContext(null as any as StoreContext)
-sc.displayName = 'StoreContext'
-export const useStoreContext = ():StoreContext => React.useContext(sc)
+export const StoreContext = React.createContext(null as any as StoreContextI)
+StoreContext.displayName = 'StoreContext'
+export const useStoreContext = ():StoreContextI => React.useContext(StoreContext)
+
 
 interface InsertElementOptions {
     id: string,
-    container: Container, destIndex: number,
-    fromIndex?: number, fromContainer?: Container
+    containerId: string, destIndex: number,
+    fromIndex?: number, fromContainerId?: string
 }
 
+export const useEditingElement = () => {
+    const sc = useStore()
+    if (sc.editingId) {
+        return findElement(sc.form, sc.editingId)[0]
+    }
+    return undefined
+}
+
+export const findElement = (el: FormElement, id: string): Array<FormElement> => {
+    if (el.id === id) {
+        return [el]
+    }
+    if (isContainer(el)) {
+        for (let i = 0; i < el.children.length; i++) {
+            const child = el.children[i]
+            const match = findElement(child, id)
+            if (match.length) {
+                return match.concat(el)
+            }
+        }
+    }
+    return []
+}
+
+
 export function addElement(
-    store: Store,
+    store: Draft<Store>,
     {
-        id, container, destIndex, fromIndex, fromContainer,
+        id, containerId, destIndex, fromIndex, fromContainerId,
     }: InsertElementOptions,
-): Store {
+): void {
     let cntrl: Control | undefined
     let element: FormElement | undefined
+    const container = findElement(store.form, containerId)[0]
+    if (!isContainer(container)) {
+        return
+    }
 
-    if (fromIndex != null && fromContainer) {
+    if (fromIndex != null && fromContainerId) {
+        const fromContainer = findElement(store.form, fromContainerId)[0]
+        if (!isContainer(fromContainer)) {
+            return
+        }
         element = fromContainer.children[fromIndex]
         fromContainer.children.splice(fromIndex, 1)
         if (fromContainer === container && fromIndex < destIndex) {
             destIndex -= 1 // eslint-disable-line no-param-reassign
         }
     } else {
-        cntrl = store.controls.get(id)
+        cntrl = store.controls[id]
         if (!cntrl) {
             // eslint-disable-next-line no-console
             console.warn(`attempted to drop id ${id} but no control exists`)
-            return store
+            return
         }
     }
     if (!element && cntrl) {
@@ -69,118 +105,119 @@ export function addElement(
     if (element) {
         container.children.splice(destIndex, 0, element)
     }
-    return { ...store }
 }
 
+
 type Action =
-    | { type: 'REPLACE', form?: SerializedForm }
+    | { type: 'REPLACE_FORM', controls: ControlsMap, form: SerializedForm }
     | { type: 'APPEND_ELEMENT', control: Control }
     | { type: 'ADD_ELEMENT', id: string,
-        container: Container, destIndex: number,
-        fromIndex?: number, fromContainer?: Container }
-    | { type: 'DELETE', target: FormElement, container: Container }
-    | { type: 'UPDATE', target: FormElement, patch: any }
-    | { type: 'UPSERT_OPTION', input: InputElement, nested: NestedType, id: string, value?: string }
-    | { type: 'UPDATE_OPTION', option: SerializedOption, value: string }
-    | { type: 'EDIT', target: FormElement }
+        containerId: string, destIndex: number,
+        fromIndex?: number, fromContainerId?: string }
+    | { type: 'DELETE_ELEMENT', elementId: string, containerId: string }
+    | { type: 'UPDATE_ELEMENT', elementId: string, patch: any }
+    | { type: 'UPSERT_OPTION', inputId: string, nested: NestedType, optionId: string, value?: string }
+    | { type: 'EDIT_ELEMENT', elementId: string }
     | { type: 'HIDE_EDIT' }
-    | { type: 'REORDER_OPTION', input: InputElement, id: string, index: number, nested: NestedType }
-    | { type: 'ADD_ATTRIBUTE', input: InputElement, nested: NestedType }
-    | { type: 'DELETE_OPTION', input: InputElement, nested: NestedType, id: string }
-    | { type: 'REPLACE_NEW_ATTRIBUTE', input: InputElement, nested: string, name: string, }
+    | { type: 'REORDER_OPTION', inputId: string, optionId: string, index: number, nested: NestedType }
+    | { type: 'DELETE_OPTION', inputId: string, nested: NestedType, id: string }
 
-const storeReducer = (st:Store, action: Action): Store => {
+
+const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, action: Action) => {
     switch (action.type) {
         case 'ADD_ELEMENT': {
-            return addElement(st, action)
+            return addElement(draft, action)
         }
+
         case 'APPEND_ELEMENT': {
-            st.form.children.push(action.control.createElement())
-            return { ...st }
+            draft.form.children.push(action.control.createElement())
+            return
         }
-        case 'REPLACE': {
-            if (action.form) {
-                const form = unserialize(st.controls, action.form)
-                if (form && form instanceof Form) {
-                    return { ...st, form }
-                }
+
+        case 'REPLACE_FORM': {
+            const form = unserialize(action.controls, action.form)
+            if (form && form instanceof Form) {
+                draft.form = form
             }
-            return st
+            return
         }
-        case 'DELETE': {
-            action.container.children = [
-                ...action.container.children.filter(e => e.id !== action.target.id),
-            ]
-            return { ...st, editing: undefined }
+
+        case 'DELETE_ELEMENT': {
+            const el = findElement(draft.form, action.elementId)
+            const parent = el[1] as Container
+            parent.children.splice(parent.children.indexOf(el[0]), 1)
+            return
         }
+
         case 'UPSERT_OPTION': {
-            const option = action.input.nested(action.nested, action.id)
+            const input = findElement(draft.form, action.inputId)[0]
+            if (!isInput(input)) { return }
+            const option = input.data[action.nested].find(o => o.id === action.optionId)
             if (option) {
                 option.value = action.value || ''
             } else {
-                action.input.data[action.nested]
-                    .push({ id: action.id, value: action.value || '' })
+                input.data[action.nested].push({ id: action.optionId, value: action.value || '' })
             }
-            return { ...st }
+            return
         }
-        case 'UPDATE_OPTION': {
-            action.option.value = action.value
-            return { ...st }
+
+        case 'UPDATE_ELEMENT': {
+            const input = findElement(draft.form, action.elementId)[0]
+            Object.assign(input.data, action.patch)
+            return
         }
-        case 'UPDATE': {
-            action.target.data = deepmerge(action.target.data as any, action.patch)
-            return { ...st }
+
+        case 'EDIT_ELEMENT': {
+            const input = findElement(draft.form, action.elementId)
+            draft.editingId = input[0].id
+            return
         }
-        case 'EDIT': {
-            return { ...st, editing: action.target }
-        }
+
         case 'HIDE_EDIT': {
-            return { ...st, editing: undefined }
+            draft.editingId = undefined
+            return
         }
+
         case 'REORDER_OPTION': {
-            const options = action.input.data[action.nested]
-            const currentIndex = options.findIndex(o => o.id === action.id)
-
+            const input = findElement(draft.form, action.inputId)[0]
+            if (!isInput(input)) {
+                return
+            }
+            const options = input.data[action.nested]
+            const currentIndex = options.findIndex(o => o.id === action.optionId)
             const option = options[currentIndex]
-            action.input.data[action.nested].splice(currentIndex, 1)
-
+            input.data[action.nested].splice(currentIndex, 1)
             if (action.index > currentIndex) {
                 action.index -= 1
             }
-            action.input.data[action.nested].splice(action.index, 0, option)
-            return { ...st }
+            input.data[action.nested].splice(action.index, 0, option)
+            return
         }
-        case 'ADD_ATTRIBUTE': {
-            action.input.data[action.nested].push({ id: '', value: '' })
-            return { ...st }
-        }
-        case 'REPLACE_NEW_ATTRIBUTE': {
-            delete action.input.data[action.nested]['']
-            action.input.data[action.nested][action.name] = ''
-            return { ...st }
-        }
+
         case 'DELETE_OPTION': {
-            const option = action.input.nested(action.nested, action.id)
+            const input = findElement(draft.form, action.inputId)[0]
+            if (!isInput(input)) {
+                return
+            }
+            const option = input.nested(action.nested, action.id)
             if (option) {
-                const index = action.input.data[action.nested].indexOf(option)
-                if (index != -1) {
-                    action.input.data[action.nested].splice(index, 1)
+                const index = input.data[action.nested].indexOf(option)
+                if (index !== -1) {
+                    input.data[action.nested].splice(index, 1)
                 }
             }
-            return { ...st }
         }
     }
-    return st
-}
+})
 
 export const initStore = (defaultValue?: SerializedForm):Store => {
     const store = Object.create(null)
-    store.controls = new Map(defaultControls.registered)
+    store.controls = { ...defaultControls.registered }
 
     store.form = defaultValue ? unserialize(store.controls, defaultValue)
         : new Form(store.controls, defaultValue)
 
-    // store.elements.push(store.controls.get('select')!.createElement());
+    // store.elements.push(store.controls['select']!.createElement());
     // [store.editing] = store.elements
 
     return store
@@ -190,10 +227,7 @@ export const useStoreReducer = (defaultValue?: SerializedForm) => (
     React.useReducer(storeReducer, defaultValue, initStore)
 )
 
-export const useProvidedStoreContext = (defaultValue?: SerializedForm):StoreContext => {
+export const useProvidedStoreContext = (defaultValue?: SerializedForm):StoreContextI => {
     const [store, dispatch] = useStoreReducer(defaultValue)
-
-    return React.useMemo<StoreContext>(() => ({ store, dispatch }), [store])
+    return React.useMemo<StoreContextI>(() => ({ store, dispatch }), [store])
 }
-
-export { sc as StoreContext, unserialize }

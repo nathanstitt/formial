@@ -1,18 +1,21 @@
 import {
-    Control, Store, Form, initStore, addElement, Container,
-    Element, unserialize, TextElement, InputElement, defaultControls,
+    Store, initStore, addElement,
 } from './store'
+import {
+    Control, Form, Container,
+    FormElement, unserialize, TextElement, InputElement, defaultControls,
+} from './models'
 import {
     SerializedInputElement, SerializedContainer,
 } from '../data'
 
-class TestElement extends Element {
+class TestElement extends FormElement {
 
 }
 
 class TestControl extends Control {
 
-    createElement(): Element {
+    createElement(): FormElement {
         return new TestElement(this)
     }
 
@@ -34,22 +37,22 @@ describe('merging', () => {
     let store:Store
     beforeEach(() => {
         store = initStore()
-        store.controls.set('test', testCntrl)
+        store.controls.test = testCntrl
     })
 
     const addStoreElement = (form:Form = store.form) => {
-        store = addElement(store, {
-            id: 'test', container: form, destIndex: 0,
+        addElement(store, {
+            id: 'test', containerId: form.id, destIndex: 0,
         })
     }
 
     describe('add element', () => {
         test('plain adding', () => {
-            const st = addElement(store, {
-                id: 'test', container: store.form, destIndex: 0,
+            addElement(store, {
+                id: 'test', containerId: store.form.id, destIndex: 0,
             })
-            expect(st.form.children).toHaveLength(1)
-            expect((st.form.children[0] as Element).control.id).toEqual('col')
+            expect(store.form.children).toHaveLength(1)
+            expect((store.form.children[0] as Element).control.id).toEqual('col')
         })
 
         test('moving forward', () => {
@@ -57,13 +60,13 @@ describe('merging', () => {
             addStoreElement()
             expect(store.form.children).toHaveLength(2)
             const ids = store.form.children.map(c => c.id)
-            const st = addElement(store, { id: 'test',
-                container: store.form,
+            addElement(store, { id: 'test',
+                containerId: store.form.id,
                 destIndex: 2,
                 fromIndex: 0,
-                fromContainer: store.form })
+                fromContainerId: store.form.id })
             expect(
-                st.form.children.map(c => c.id),
+                store.form.children.map(c => c.id),
             ).toEqual(ids.reverse())
         })
 
@@ -71,13 +74,13 @@ describe('merging', () => {
             addStoreElement()
             addStoreElement()
             const ids = store.form.children.map(c => c.id)
-            const st = addElement(store, { id: 'test',
-                container: store.form,
+            addElement(store, { id: 'test',
+                containerId: store.form.id,
                 destIndex: 0,
                 fromIndex: 1,
-                fromContainer: store.form })
+                fromContainerId: store.form.id })
             expect(
-                st.form.children.map(c => c.id),
+                store.form.children.map(c => c.id),
             ).toEqual(ids.reverse())
         })
 
@@ -92,19 +95,19 @@ describe('merging', () => {
             addStoreElement(store.form.children[0] as Form)
             addStoreElement(store.form.children[1] as Container)
 
-            const st = addElement(store, {
+            addElement(store, {
                 id: 'test',
-                container: store.form.children[0] as Container,
+                containerId: store.form.children[0].id,
                 destIndex: 1,
                 fromIndex: 0,
-                fromContainer: store.form.children[1] as Container,
+                fromContainerId: store.form.children[1].id,
             })
 
             expect(
-                (st.form.children[0] as Container).children,
+                (store.form.children[0] as Container).children,
             ).toHaveLength(2)
             expect(
-                (st.form.children[1] as Container).children,
+                (store.form.children[1] as Container).children,
             ).toHaveLength(0)
         })
     })
@@ -123,7 +126,7 @@ describe('merging', () => {
             }
             const el = unserialize(store.controls, obj) as Element
             expect(el).not.toBeNull()
-            expect(el).toBeInstanceOf(Element)
+            expect(el).toBeInstanceOf(FormElement)
             expect(el).toMatchObject({
                 id: '1234',
                 data: {
@@ -156,7 +159,7 @@ describe('merging', () => {
                 direction: 'column',
                 id: '1234-col',
             })
-            expect(ct.children[0]).toBeInstanceOf(Element)
+            expect(ct.children[0]).toBeInstanceOf(FormElement)
             expect(ct.children[0].serialize()).toMatchObject({
                 id: '12345',
                 type: 'FORM',

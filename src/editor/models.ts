@@ -1,4 +1,5 @@
 import deepmerge from 'deepmerge'
+import { immerable } from 'immer'
 import { uuidv4 } from '../lib'
 import {
     SerializedForm,
@@ -23,7 +24,9 @@ export interface ControlDefinition {
     defaultValues?: any,
 }
 
-export type ControlsMap = Map<string, Control>
+export type ControlsMap = {
+    [key: string]: Control
+}
 
 export type NestedType = 'options' | 'attributes'
 
@@ -33,6 +36,8 @@ export interface ElementData {
 }
 
 export class FormElement {
+
+    [immerable] = true
 
     id: string
     control: Control
@@ -68,6 +73,9 @@ export interface ContainerOptions {
 type ContainerChild = FormElement|TextElement|Container|InputElement
 
 export class Container extends FormElement {
+
+    [immerable] = true
+
     direction: string // 'row' | 'column'
     children: Array<ContainerChild>
 
@@ -101,9 +109,10 @@ export class Container extends FormElement {
 export class Form extends Container {
 
     constructor(cm: ControlsMap, options?: ContainerOptions) {
-        const col = cm.get('col')
+        const { col } = cm
         if (!col) { throw new Error("Column control doesn't exist?") }
         super(col, { ...options, direction: 'row' })
+        this[immerable] = true
         this.data.className = 'formial-form'
     }
 
@@ -123,6 +132,7 @@ interface TextData extends ElementData {
 
 export class TextElement extends FormElement {
 
+    [immerable] = true
     data: TextData
 
     constructor(control:Control, data = {}) {
@@ -141,7 +151,6 @@ export class TextElement extends FormElement {
 }
 
 
-
 export interface InputData extends ElementData {
     label: string
     name: string
@@ -157,19 +166,20 @@ export interface InputData extends ElementData {
 
 export class InputElement extends FormElement {
 
+    [immerable] = true
     data: InputData
 
     constructor(control: Control, data = {}) {
         super(control, data)
         this.data = deepmerge(control.defaultValues, data)
-        //this.data.attributes = (this.data.attributes || [])
+        // this.data.attributes = (this.data.attributes || [])
         if (this.control.hasOptions) {
             this.data.options = (this.data.options || [])
         }
     }
 
     nested(nested: NestedType, id: string): SerializedOption | undefined {
-        return this.data[nested].find(a => a.id == id)
+        return this.data[nested].find(a => a.id === id)
     }
 
     get placeholder(): React.ReactNode {
@@ -198,6 +208,8 @@ export class InputElement extends FormElement {
 
 
 export class Control {
+
+    [immerable] = true
     id: string
     name: string
     icon: React.ReactNode
@@ -223,6 +235,7 @@ export class Control {
     createElement(): FormElement {
         return new InputElement(this)
     }
+
 }
 
 
@@ -246,6 +259,8 @@ export function isText(
 
 export class ContainerControl extends Control {
 
+    [immerable] = true
+
     constructor(definition: ControlDefinition) {
         super(definition)
         this._defaultValues = deepmerge((this._defaultValues || {}), {
@@ -256,9 +271,13 @@ export class ContainerControl extends Control {
     createElement(): FormElement {
         return new Container(this)
     }
+
 }
 
 export class InputControl extends Control {
+
+    [immerable] = true
+
     constructor(definition: ControlDefinition) {
         super(definition)
         this._defaultValues = deepmerge((this._defaultValues || {}), {
@@ -287,6 +306,9 @@ export class InputControl extends Control {
 }
 
 export class TextControl extends Control {
+
+    [immerable] = true
+
     constructor(definition: ControlDefinition) {
         super(definition)
         this._defaultValues = deepmerge((this._defaultValues || {}), {
@@ -299,18 +321,21 @@ export class TextControl extends Control {
     createElement(): FormElement {
         return new TextElement(this)
     }
+
 }
 
 export const defaultControls = {
-    registered: new Map<string, Control>(),
+    registered: Object.create(null),
 
     register(controls: Array<Control>) {
-        controls.forEach(c => this.registered.set(c.id, c))
+        controls.forEach((c) => {
+            this.registered[c.id] = c
+        })
     },
 }
 
 export const unserialize = (cm: ControlsMap, data: ElementSerialization):FormElement|null => {
-    const control = cm.get(data.control)
+    const control = cm[data.control]
     if (!control) { return null }
 
     if (isSerializedText(data)) {

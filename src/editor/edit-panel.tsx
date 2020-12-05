@@ -2,7 +2,7 @@ import React, { FC, useRef } from 'react'
 import styled from 'styled-components'
 import { useOnClickOutside } from '../hooks/use-click-outside'
 import {
-    useStoreContext,
+    useStoreContext, useEditingElement,
 } from './store'
 import {
     InputElement, FormElement,
@@ -19,6 +19,7 @@ const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
     if (!REQUIRED_TYPES.includes(input.control.id)) {
         return null
     }
+
     return (
         <label>
             <span>Required?</span>
@@ -27,7 +28,13 @@ const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
                 className="value"
                 checked={input.nested('attributes', 'required')?.value === 'true' || false}
                 onChange={({ target: { checked } }) => {
-                    sc.dispatch({ type: 'UPSERT_OPTION', input, nested: 'attributes', id: 'required', value: String(checked) })
+                    sc.dispatch({
+                        type: 'UPSERT_OPTION',
+                        inputId: input.id,
+                        nested: 'attributes',
+                        optionId: 'required',
+                        value: String(checked),
+                    })
                 }}
             />
         </label>
@@ -48,8 +55,8 @@ const InputType: FC<{ input: InputElement }> = ({ input }) => {
                 value={input.nested('attributes', 'type')?.value || 'text'}
                 onChange={({ target: { value } }) => sc.dispatch({
                     type: 'UPSERT_OPTION',
-                    input,
-                    id: 'type',
+                    inputId: input.id,
+                    optionId: 'type',
                     nested: 'attributes',
                     value,
                 })}
@@ -73,8 +80,8 @@ const OptionLayout: FC<{ input: InputElement }> = ({ input }) => {
                 value={input.data.choicesLayout}
                 className="value"
                 onChange={({ target: { value } }) => sc.dispatch({
-                    type: 'UPDATE',
-                    target: input,
+                    type: 'UPDATE_ELEMENT',
+                    elementId: input.id,
                     patch: { choicesLayout: value },
                 })}
             >
@@ -90,7 +97,7 @@ const OptionLayout: FC<{ input: InputElement }> = ({ input }) => {
 const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
     const sc = useStoreContext()
     const { data } = input
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: input, patch })
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_ELEMENT', elementId: input.id, patch })
 
     return (
         <Values className="input">
@@ -172,7 +179,7 @@ const InputEdit: FC<{ input: InputElement }> = ({ input }) => {
 const ContainerEdit: FC<{ container: Container }> = ({ container }) => {
     const sc = useStoreContext()
     const { data } = container
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: container, patch })
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_ELEMENT', elementId: container.id, patch })
 
     return (
         <Values className="container">
@@ -215,7 +222,7 @@ const TextHeadingSize: FC<{
 const TextEdit: FC<{ control: TextElement }> = ({ control }) => {
     const sc = useStoreContext()
     const { data } = control
-    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE', target: control, patch })
+    const dp = (patch: any) => sc.dispatch({ type: 'UPDATE_ELEMENT', elementId: control.id, patch })
 
     return (
         <Values className="text">
@@ -342,9 +349,10 @@ const EditPanelEl = styled.div({
 })
 
 export const EditPanel = () => {
+    const editing = useEditingElement()
     const sc = useStoreContext()
     const panelRef = useRef<HTMLDivElement>(null)
-    const { editing } = sc.store
+
     useOnClickOutside(panelRef, () => {
         sc.dispatch({ type: 'HIDE_EDIT' })
     })
