@@ -162,20 +162,23 @@ class InputElement extends Element {
     createInput(tag: string) {
         const float = document.createElement('div')
         float.className = this.data.classNames.wrapper
-        const req = this.data.attributes && this.data.attributes.find(a => a.id =='required')
+        const attributes = {}
+        const attrs = this.data.attributes || []
+        for (let i = 0; i < attrs.length; i++){
+            attributes[attrs[i].id] = attrs[i].value
+        }
 
         const input = document.createElement(tag)
         this.setDataAttributes()
+
         this.setAttributes({
             name: this.data.name,
             id: this.data.id,
             class: 'form-control',
+            type: this.data.type,
             placeholder: this.data.label,
+            ...attributes,
         }, input)
-        if (req) {
-            input.setAttribute('required', 'true')
-        }
-
 
         float.appendChild(input)
 
@@ -185,7 +188,7 @@ class InputElement extends Element {
             for: this.data.id,
         }, label)
 
-        if (req && req.value === 'true') {
+        if (String(attributes['required']) === 'true') {
             const asterisk = document.createElement('span')
             asterisk.innerText = '✱'
             this.setAttributes({ class: 'required-indicator' }, asterisk)
