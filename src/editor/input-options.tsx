@@ -9,6 +9,9 @@ import { useKeyPress } from '../hooks/use-key-press'
 import { NestedType, InputElement } from './models'
 import { useStoreContext } from './store'
 
+const NEW = Symbol('new')
+const DELETE = Symbol('delete')
+
 interface DropProps {
     input: InputElement
     index: number
@@ -23,11 +26,13 @@ const DeleteBtn = styled.button({
     border: 0,
 })
 
-const NewOption: FC<{
+interface OptionProps {
     input: InputElement
     nested: NestedType
     onComplete: (id: string | typeof DELETE) => void
-}> = ({
+}
+
+const NewOption: FC<OptionProps> = ({
     input,
     nested,
     onComplete,
@@ -35,13 +40,15 @@ const NewOption: FC<{
     const sc = useStoreContext()
 
     const inputRef = useRef<HTMLInputElement>(null)
-    const saveValue = () => {
-        const id = inputRef.current!.value
-        sc.dispatch({ type: 'UPSERT_OPTION', nested, inputId: input.id, optionId: id })
-        onComplete(id)
+    const saveValue = ():void => {
+        const id = inputRef.current?.value
+        if (id) {
+            sc.dispatch({ type: 'UPSERT_OPTION', nested, inputId: input.id, optionId: id })
+            onComplete(id)
+        }
     }
 
-    const deleteAttr = () => {
+    const deleteAttr = ():void => {
         sc.dispatch({ type: 'DELETE_OPTION', inputId: input.id, nested, id: '' })
         onComplete(DELETE)
     }
@@ -66,7 +73,7 @@ const NewOption: FC<{
     }, { target: inputRef })
 
     useEffect(() => {
-        inputRef.current!.focus()
+        inputRef.current?.focus()
     }, [])
 
     return (
@@ -82,9 +89,6 @@ const NewOption: FC<{
         </label>
     )
 }
-
-const NEW = Symbol('new')
-const DELETE = Symbol('delete')
 
 const OptionEl = styled.label({
     padding: '2px 0 2px 5px',
@@ -111,9 +115,9 @@ const Option:FC<{
             opacity: monitor.isDragging() ? 0.4 : 1,
         }),
     })
-    const updateOption = () => {
+    const updateOption = ():void => {
         sc.dispatch({
-            type: 'UPSERT_OPTION', inputId: input.id, nested, optionId: option.id, value: inputRef.current!.value,
+            type: 'UPSERT_OPTION', inputId: input.id, nested, optionId: option.id, value: inputRef.current?.value,
         })
     }
     useKeyPress(['Enter', 'Tab'], (ev) => {
@@ -124,7 +128,7 @@ const Option:FC<{
 
     useEffect(() => {
         if (focused) {
-            inputRef.current!.focus()
+            inputRef.current?.focus()
         }
     }, [focused])
     return (
@@ -141,7 +145,7 @@ const Option:FC<{
                 onChange={updateOption}
             />
             <DeleteBtn
-                onClick={() => {
+                onClick={():void => {
                     sc.dispatch({ type: 'DELETE_OPTION', id: option.id, inputId: input.id, nested })
                     onComplete(DELETE)
                 }}
@@ -205,7 +209,7 @@ export const InputOptions: FC<{
         <fieldset className='options'>
             <legend>{label}:</legend>
             <div className='controls'>
-                <button onClick={() => setEditing(NEW)} className='add-attr'>
+                <button onClick={():void => setEditing(NEW)} className='add-attr'>
                     ➕
                 </button>
             </div>
@@ -223,7 +227,7 @@ export const InputOptions: FC<{
                         option={option}
                         input={input}
                         index={i}
-                        onComplete={(id) => {
+                        onComplete={(id):void => {
                             if (id === DELETE) {
                                 setEditing('')
                             } else if (i === options.length - 1) {
@@ -238,7 +242,7 @@ export const InputOptions: FC<{
                 <NewOption
                     nested={nested}
                     input={input}
-                    onComplete={(id) => {
+                    onComplete={(id):void => {
                         if (id === DELETE) {
                             setEditing('')
                         } else {

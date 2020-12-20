@@ -29,10 +29,10 @@ const Choices = styled.div<{ layout?: ChoicesLayoutTypes }>(({ layout }) => {
             paddingRight: '5px',
 
         }
-        if (layout === 'two_column') {
+        if ('two_column' === layout) {
             label.width = '50%'
         }
-        if (layout === 'three_column') {
+        if ('three_column' === layout) {
             label.width = '33%'
         }
         style['> label'] = label
@@ -42,7 +42,7 @@ const Choices = styled.div<{ layout?: ChoicesLayoutTypes }>(({ layout }) => {
 
 const renderOptions = (el: InputElement, rend: RenderT) => {
     const options = el.optionPairs
-    if (options.length === 0) {
+    if (0 === options.length) {
         return rend('', '')
     }
     const choices = options.map(([name, label]) => (

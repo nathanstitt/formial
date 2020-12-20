@@ -26,7 +26,7 @@ const RequiredCheckmark: FC<{ input: InputElement }> = ({ input }) => {
             <input
                 type="checkbox"
                 className="value"
-                checked={input.nested('attributes', 'required')?.value === 'true' || false}
+                checked={'true' === input.nested('attributes', 'required')?.value || false}
                 onChange={({ target: { checked } }) => {
                     sc.dispatch({
                         type: 'UPSERT_OPTION',

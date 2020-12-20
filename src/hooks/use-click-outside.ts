@@ -10,10 +10,10 @@ import { useEffect } from 'react'
 type handlerT = (event: MouseEvent) => void // / MouseEventHandler<HTMLElement>
 type refT = { current?: HTMLElement | null }
 
-export function useOnClickOutside(ref: refT, handler:handlerT) {
+export function useOnClickOutside(ref: refT, handler:handlerT): void {
     useEffect(
         () => {
-            const listener = (event:MouseEvent) => {
+            const listener = (event:MouseEvent):void => {
                 // Do nothing if clicking ref's element or descendent elements
                 if (!ref.current || ref.current.contains(event.target as any)) {
                     return
@@ -25,7 +25,7 @@ export function useOnClickOutside(ref: refT, handler:handlerT) {
             document.addEventListener('mousedown', listener)
 
 
-            return () => {
+            return ():void => {
                 document.removeEventListener('mousedown', listener)
             }
         },

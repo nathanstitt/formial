@@ -40,7 +40,7 @@ describe('merging', () => {
         store.controls.test = testCntrl
     })
 
-    const addStoreElement = (form:Form = store.form) => {
+    const addStoreElement = (form:Form = store.form):void => {
         addElement(store, {
             id: 'test', containerId: form.id, destIndex: 0,
         })

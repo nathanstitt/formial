@@ -53,7 +53,7 @@ export function useKeyPress(
                 targetNode.addEventListener(EVENT_NAME, handle)
             }
 
-            return () => {
+            return ():void => {
                 if (targetNode) {
                     targetNode.removeEventListener(EVENT_NAME, handle)
                 }

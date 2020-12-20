@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styled from 'styled-components'
 import cn from 'classnames'
-import { useDrop, useDrag, DragElementWrapper, DragSourceOptions } from 'react-dnd'
+import { useDrop, useDrag, DragElementWrapper, DragSourceOptions, ConnectDropTarget } from 'react-dnd'
 import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
 import { Edit } from '@styled-icons/fa-solid/Edit'
 import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
@@ -48,7 +48,13 @@ interface DropItem {
     fromContainer?: Container
 }
 
-const useFormDrop = ({ index, container }: DropProps) => {
+type useFormDropReturn = {
+    dropRef: ConnectDropTarget
+    isHovered: boolean
+}
+
+
+const useFormDrop = ({ index, container }: DropProps):useFormDropReturn => {
     const sc = useStoreContext()
     const [{ isHovered }, dropRef] = useDrop({
         accept: 'control',
@@ -218,7 +224,7 @@ const Controls:React.FC<{
     target, container, drag, displayEdit,
 }) => {
     const sc = useStoreContext()
-    const onDelete = (ev:React.MouseEvent<HTMLButtonElement>) => {
+    const onDelete = (ev:React.MouseEvent<HTMLButtonElement>):void => {
         ev.stopPropagation()
         sc.dispatch({
             type: 'DELETE_ELEMENT', elementId: target.id, containerId: container.id,
@@ -231,7 +237,7 @@ const Controls:React.FC<{
                 <TrashAlt />
             </button>
             {displayEdit && (
-                <button onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: target.id })}>
+                <button onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: target.id })}>
                     <Edit />
                 </button>)}
             {drag && (
@@ -268,7 +274,7 @@ const InputPreview: React.FC<{
             style={{ opacity }}
             editing={sc.store.editingId === input.id}
             className={cn('element-preview', input.control.id)}
-            onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
+            onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
         >
             <Controls displayEdit={false} target={input} container={container} />
             <ControlPreview>
@@ -300,7 +306,7 @@ const TextPreview: React.FC<{
             editing={sc.store.editingId === control.id}
             style={{ opacity }}
             ref={drag}
-            onClick={() => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
+            onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
             className={cn('element-preview', control.control.id)}
         >
             <Controls displayEdit target={control} container={container} />
@@ -400,7 +406,7 @@ const ContainerPreview:React.FC<{
             ref={preview}
             style={{ opacity }}
             className={cn('container-preview', `container-${container.direction}`, {
-                empty: container.children.length === 0,
+                empty: 0 === container.children.length,
             })}
         >
             <Drop container={container} index={0} />
@@ -454,7 +460,8 @@ const FormElementsEl = styled(Scrolling)({
         margin: 0,
     },
 })
-export const FormElements = () => {
+
+export const FormElements:React.FC = () => {
     const { form } = useStore()
     const [{ isHovered }, drop] = useDrop({
         accept: 'control',

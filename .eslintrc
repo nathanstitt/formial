@@ -22,31 +22,8 @@
         }
     },
     "rules": {
-        "import/prefer-default-export": "off",
-        "default-case": 0,
-        "func-names:": 0,
-        "space-before-function-paren": 0,
-        "react/prop-types": 0,
-        "react/jsx-handler-names": 0,
-        "react/jsx-fragments": 0,
-        "react/no-unused-prop-types": 0,
-        "import/export": 0,
-        "no-unused-vars": "off",
-        "@typescript-eslint/no-use-before-define": "off",
-        "@typescript-eslint/no-unused-vars": ["error"],
-        "@typescript-eslint/no-non-null-assertion": 'off',
-        "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/explicit-function-return-type": "off",
-        yoda: 'off',
-        "comma-dangle": ["error", {
-            "arrays": "always-multiline",
-            "objects": "always-multiline",
-            "imports": "always-multiline",
-            "exports": "always-multiline",
-            "functions": "always-multiline"
-        }],
-        "lines-between-class-members": ["error", "always", { "exceptAfterSingleLine": true }],
-        "semi": ["error", "never"],
-        "indent": ["error", 4, {  "SwitchCase": 1 }],
+        'react/prop-types': 0,
+        'import/prefer-default-export': 0,
+        '@typescript-eslint/no-explicit-any': 0,
     }
 }

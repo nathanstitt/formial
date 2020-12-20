@@ -25,30 +25,22 @@ export interface Store {
     editingId?: string
 }
 
-export const useStore = ():Store => useStoreContext().store
-
 interface StoreContextI {
     store: Store
     dispatch: React.Dispatch<Action> //  (patch:any): void
 }
 
 export const StoreContext = React.createContext(null as any as StoreContextI)
-StoreContext.displayName = 'StoreContext'
 export const useStoreContext = ():StoreContextI => React.useContext(StoreContext)
+export const useStore = ():Store => useStoreContext().store
+
+StoreContext.displayName = 'StoreContext'
 
 
 interface InsertElementOptions {
     id: string,
     containerId: string, destIndex: number,
     fromIndex?: number, fromContainerId?: string
-}
-
-export const useEditingElement = () => {
-    const sc = useStore()
-    if (sc.editingId) {
-        return findElement(sc.form, sc.editingId)[0]
-    }
-    return undefined
 }
 
 export const findElement = (el: FormElement, id: string): Array<FormElement> => {
@@ -67,6 +59,13 @@ export const findElement = (el: FormElement, id: string): Array<FormElement> => 
     return []
 }
 
+export const useEditingElement = (): FormElement|undefined => {
+    const sc = useStore()
+    if (sc.editingId) {
+        return findElement(sc.form, sc.editingId)[0]
+    }
+    return undefined
+}
 
 export function addElement(
     store: Draft<Store>,

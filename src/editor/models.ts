@@ -40,8 +40,11 @@ export class FormElement {
     [immerable] = true
 
     id: string
+
     control: Control
+
     data: ElementData
+
     constructor(control: Control, data:any = {}) {
         this.control = control
         this.id = data.id || uuidv4()
@@ -77,6 +80,7 @@ export class Container extends FormElement {
     [immerable] = true
 
     direction: string // 'row' | 'column'
+
     children: Array<ContainerChild>
 
     constructor(control:Control, options: ContainerOptions = control.defaultValues) {
@@ -91,7 +95,7 @@ export class Container extends FormElement {
     }
 
     get isRow(): boolean {
-        return this.direction === 'row'
+        return 'row' === this.direction
     }
 
     serialize(): SerializedContainer {
@@ -133,6 +137,7 @@ interface TextData extends ElementData {
 export class TextElement extends FormElement {
 
     [immerable] = true
+
     data: TextData
 
     constructor(control:Control, data = {}) {
@@ -167,6 +172,7 @@ export interface InputData extends ElementData {
 export class InputElement extends FormElement {
 
     [immerable] = true
+
     data: InputData
 
     constructor(control: Control, data = {}) {
@@ -210,11 +216,17 @@ export class InputElement extends FormElement {
 export class Control {
 
     [immerable] = true
+
     id: string
+
     name: string
+
     icon: React.ReactNode
+
     _defaultValues: any
+
     hasOptions?: boolean
+
     placeholder?: (element: FormElement) => React.ReactNode
 
     constructor(definition: ControlDefinition) {
@@ -290,7 +302,7 @@ export class InputControl extends Control {
         })
     }
 
-    get wrapperClassName() {
+    get wrapperClassName(): string {
         switch (this.id) {
             case 'input':
             case 'textarea':
@@ -316,7 +328,7 @@ export class TextControl extends Control {
     constructor(definition: ControlDefinition) {
         super(definition)
         this._defaultValues = deepmerge((this._defaultValues || {}), {
-            tag: this.id === 'para' ? 'p' : 'h3',
+            tag: 'para' === this.id ? 'p' : 'h3',
             text: 'Some text…',
             className: '',
         })
@@ -331,7 +343,7 @@ export class TextControl extends Control {
 export const defaultControls = {
     registered: Object.create(null),
 
-    register(controls: Array<Control>) {
+    register(controls: Array<Control>):void {
         controls.forEach((c) => {
             this.registered[c.id] = c
         })

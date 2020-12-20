@@ -163,11 +163,13 @@ class InputElement extends Element {
         const float = document.createElement('div')
         float.className = this.data.classNames.wrapper
         const attributes = {}
+        if (this.data.type == 'INPUT') {
+            attributes['type'] = 'text';
+        }
         const attrs = this.data.attributes || []
         for (let i = 0; i < attrs.length; i++){
             attributes[attrs[i].id] = attrs[i].value
         }
-
         const input = document.createElement(tag)
         this.setDataAttributes()
 
@@ -175,7 +177,6 @@ class InputElement extends Element {
             name: this.data.name,
             id: this.data.id,
             class: 'form-control',
-            type: this.data.type,
             placeholder: this.data.label,
             ...attributes,
         }, input)
