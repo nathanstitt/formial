@@ -16,6 +16,7 @@ import {
 } from './models'
 
 import {
+    isSerializedForm,
     SerializedForm,
 } from '../data'
 
@@ -108,7 +109,7 @@ export function addElement(
 
 
 type Action =
-    | { type: 'REPLACE_FORM', controls: ControlsMap, form: SerializedForm }
+    | { type: 'REPLACE_FORM', controls: ControlsMap, form: SerializedForm|Form }
     | { type: 'APPEND_ELEMENT', control: Control }
     | { type: 'ADD_ELEMENT', id: string,
         containerId: string, destIndex: number,
@@ -134,7 +135,12 @@ const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, a
         }
 
         case 'REPLACE_FORM': {
-            const form = unserialize(action.controls, action.form)
+            let form: FormElement|null = null
+            if (isSerializedForm(action.form)) {
+                form = unserialize(action.controls, action.form)
+            } else if (action.form instanceof Form) {
+                form = action.form
+            }
             if (form && form instanceof Form) {
                 draft.form = form
             }
@@ -208,6 +214,7 @@ const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, a
         }
     }
 })
+
 
 export const initStore = (defaultValue?: SerializedForm):Store => {
     const store = Object.create(null)

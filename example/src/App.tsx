@@ -8,6 +8,8 @@ const DEFAULT = {"id":"48be90c9-3a9a-4fc6-9626-242a30febc05","type":"FORM","cont
 
 
 const App = () => {
+    const formRef = React.useRef<Form>(null)
+    console.log(formRef)
     const [value, setValue] = React.useState<Container>()
     const htmlRef = React.useRef(null)
 

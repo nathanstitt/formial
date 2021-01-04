@@ -14,7 +14,7 @@ const FormPanelEl = styled.div({
     width: '100%',
     overflow: 'hidden',
 })
-const FormPanel = () => {
+const FormPanel:React.FC = () => {
     return (
         <FormPanelEl>
             <FormElements />
@@ -35,8 +35,9 @@ export interface EditorProps {
     className?: string
     onChange?(form: Form): void
     defaultValue?: SerializedForm
-    value?: SerializedForm
+    value?: SerializedForm | Form
 }
+
 
 export const Editor:React.FC<EditorProps> = ({
     className, onChange, value, defaultValue,

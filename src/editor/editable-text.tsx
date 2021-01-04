@@ -53,7 +53,7 @@ export const EditableText:React.FC<EditableTextProps> = (props) => {
     useEffect(() => {
         if (isInputActive !== false) {
             const edit = isInputActive as EditingState
-            const input = inputRef.current!
+            const input = inputRef.current
             input.focus()
             input.setSelectionRange(edit.position, edit.position)
         }

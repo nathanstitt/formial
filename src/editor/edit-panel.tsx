@@ -348,7 +348,7 @@ const EditPanelEl = styled.div({
     },
 })
 
-export const EditPanel = () => {
+export const EditPanel:FC = () => {
     const editing = useEditingElement()
     const sc = useStoreContext()
     const panelRef = useRef<HTMLDivElement>(null)
