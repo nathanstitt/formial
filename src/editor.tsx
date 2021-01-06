@@ -14,7 +14,7 @@ const FormPanelEl = styled.div({
     width: '100%',
     overflow: 'hidden',
 })
-const FormPanel:React.FC = () => {
+const FormPanel: React.FC = () => {
     return (
         <FormPanelEl>
             <FormElements />
@@ -31,27 +31,39 @@ const EditorEl = styled.div({
     position: 'relative',
 })
 
-export interface EditorProps {
-    className?: string
-    onChange?(form: Form): void
-    defaultValue?: SerializedForm
-    value?: SerializedForm | Form
+export interface FormRefT {
+    readonly form: Form
+    clear(): void
+    update(form: SerializedForm): void
 }
 
+export interface EditorProps {
+    className?: string
+    defaultValue?: SerializedForm
+    formRef?: React.MutableRefObject<FormRefT | null>
+}
 
-export const Editor:React.FC<EditorProps> = ({
-    className, onChange, value, defaultValue,
+export const Editor: React.FC<EditorProps> = ({
+    className, formRef, defaultValue,
 }) => {
     const ctx = useProvidedStoreContext(defaultValue)
 
     React.useEffect(() => {
-        if (value) {
-            ctx.dispatch({ type: 'REPLACE_FORM', form: value, controls: ctx.store.controls })
+        if (formRef) {
+            formRef.current = {
+                get form() { return ctx.store.form },
+                clear() { ctx.dispatch({ type: 'CLEAR' }) },
+                update(form: SerializedForm) {
+                    ctx.dispatch({ type: 'REPLACE_FORM', form, controls: ctx.store.controls })
+                }
+            }
         }
-    }, [value])
-    React.useEffect(() => {
-        if (onChange) { onChange(ctx.store.form) }
-    }, [onChange, ctx.store])
+        return () => {
+            if (formRef) { formRef.current = null }
+        }
+
+    }, [formRef])
+
 
     return (
         <DndProvider backend={HTML5Backend}>

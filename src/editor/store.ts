@@ -32,8 +32,8 @@ interface StoreContextI {
 }
 
 export const StoreContext = React.createContext(null as any as StoreContextI)
-export const useStoreContext = ():StoreContextI => React.useContext(StoreContext)
-export const useStore = ():Store => useStoreContext().store
+export const useStoreContext = (): StoreContextI => React.useContext(StoreContext)
+export const useStore = (): Store => useStoreContext().store
 
 StoreContext.displayName = 'StoreContext'
 
@@ -60,7 +60,7 @@ export const findElement = (el: FormElement, id: string): Array<FormElement> => 
     return []
 }
 
-export const useEditingElement = (): FormElement|undefined => {
+export const useEditingElement = (): FormElement | undefined => {
     const sc = useStore()
     if (sc.editingId) {
         return findElement(sc.form, sc.editingId)[0]
@@ -109,21 +109,23 @@ export function addElement(
 
 
 type Action =
-    | { type: 'REPLACE_FORM', controls: ControlsMap, form: SerializedForm|Form }
+    { type: 'REPLACE_FORM', controls: ControlsMap, form: SerializedForm | Form }
     | { type: 'APPEND_ELEMENT', control: Control }
-    | { type: 'ADD_ELEMENT', id: string,
-        containerId: string, destIndex: number,
-        fromIndex?: number, fromContainerId?: string }
+    | {
+        type: 'ADD_ELEMENT', id: string, containerId: string, destIndex: number,
+        fromIndex?: number, fromContainerId?: string
+    }
     | { type: 'DELETE_ELEMENT', elementId: string, containerId: string }
     | { type: 'UPDATE_ELEMENT', elementId: string, patch: any }
     | { type: 'UPSERT_OPTION', inputId: string, nested: NestedType, optionId: string, value?: string }
     | { type: 'EDIT_ELEMENT', elementId: string }
     | { type: 'HIDE_EDIT' }
+    | { type: 'CLEAR' }
     | { type: 'REORDER_OPTION', inputId: string, optionId: string, index: number, nested: NestedType }
     | { type: 'DELETE_OPTION', inputId: string, nested: NestedType, id: string }
 
 
-const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, action: Action) => {
+const reducer: React.Reducer<Store, Action> = produce((draft: Draft<Store>, action: Action) => {
     switch (action.type) {
         case 'ADD_ELEMENT': {
             return addElement(draft, action)
@@ -134,8 +136,13 @@ const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, a
             return
         }
 
+        case 'CLEAR': {
+            draft.form = new Form(draft.controls)
+            return
+        }
+
         case 'REPLACE_FORM': {
-            let form: FormElement|null = null
+            let form: FormElement | null = null
             if (isSerializedForm(action.form)) {
                 form = unserialize(action.controls, action.form)
             } else if (action.form instanceof Form) {
@@ -216,24 +223,21 @@ const storeReducer:React.Reducer<Store, Action> = produce((draft:Draft<Store>, a
 })
 
 
-export const initStore = (defaultValue?: SerializedForm):Store => {
+export const initStore = (defaultValue?: SerializedForm): Store => {
     const store = Object.create(null)
     store.controls = { ...defaultControls.registered }
 
     store.form = defaultValue ? unserialize(store.controls, defaultValue)
         : new Form(store.controls, defaultValue)
 
-    // store.elements.push(store.controls['select']!.createElement());
-    // [store.editing] = store.elements
-
     return store
 }
 
 export const useStoreReducer = (defaultValue?: SerializedForm) => (
-    React.useReducer(storeReducer, defaultValue, initStore)
+    React.useReducer(reducer, defaultValue, initStore)
 )
 
-export const useProvidedStoreContext = (defaultValue?: SerializedForm):StoreContextI => {
+export const useProvidedStoreContext = (defaultValue?: SerializedForm): StoreContextI => {
     const [store, dispatch] = useStoreReducer(defaultValue)
     return React.useMemo<StoreContextI>(() => ({ store, dispatch }), [store])
 }

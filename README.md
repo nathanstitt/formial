@@ -31,22 +31,24 @@ import { Editor, Container, render } from 'formial'
 const DEFAULT = {"id":"4f78521b-59a8-4069-8ae8-8b0c793d9f5e","type":"FORM","control":"col","className":"","direction":"row","children":[{"id":"5421839e-6592-4c7b-aea6-72dd889f2354","type":"TEXT","control":"heading","tag":"h3","text":"Hello World!","className":""}]}
 
 const App = () => {
-    const [value, setValue] = React.useState<Container>()
+    const formRef = React.useRef<FormRefT>(null)
     const htmlRef = React.useRef(null)
 
-    const onChange = (container: Container) => setValue(container)
-
     const renderHTML = () => {
+        if (!formRef.current) return
         // json would normally be saved.
         // It's intended to be loading back into the editor or rendered to a form
-        const json = value!.serialize()
+        const json = formRef.current.form.serialize()
+
         console.log(JSON.stringify(json))
         render(htmlRef.current!, json)
+
+        formRef.current.clear()
     }
 
     return (
         <div id="example-builder">
-            <Editor onChange={onChange} defaultValue={DEFAULT}  />
+            <Editor formRef={formRef} defaultValue={DEFAULT}  />
             <hr />
             <div><button onClick={renderHTML}>Render</button></div>
             <hr />
@@ -66,13 +68,14 @@ export default App
 * onChange?(form: Form): void
   Called anytime the form is modified.  A form should not be saved as-is, but provides a "serialized()" method that can be called to obtain the "SerializedForm" structure that can be saved
 
-* defaultValue?: [SerializedForm](src/data.ts#L45)
+* defaultValue?: [SerializedForm](src/data.ts#L47)
   Initial state of form editor.
 
-* value?:[SerializedForm](src/data.ts#L45)
-  Form state will reset to this whenever value changes.  Note that setting "value" does
-  not exactly match the normal behavior of a controlled input.  The form state can still be
-  modified but will reset to value whenever it's changed.
+* formRef?: A React reference that will be set to an oject with methods for reading/updating the form. [FormRefT](src/editor.tsx#L34)
+  * form: a readonly property that returns the current form state.  Call `serialize()` on the form state to
+    obtain a storable JSON structure
+  * update(serializedForm): update form with the json obtained from calling serialize() above
+  * clear(): reset form to a blank state
 
 ## Styling
 
