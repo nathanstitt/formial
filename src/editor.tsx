@@ -31,7 +31,7 @@ const EditorEl = styled.div({
     position: 'relative',
 })
 
-export interface FormRefT {
+export interface FormRef {
     readonly form: Form
     clear(): void
     update(form: SerializedForm): void
@@ -40,7 +40,7 @@ export interface FormRefT {
 export interface EditorProps {
     className?: string
     defaultValue?: SerializedForm
-    formRef?: React.MutableRefObject<FormRefT | null>
+    formRef?: React.MutableRefObject<FormRef | null>
 }
 
 export const Editor: React.FC<EditorProps> = ({
@@ -62,7 +62,7 @@ export const Editor: React.FC<EditorProps> = ({
             if (formRef) { formRef.current = null }
         }
 
-    }, [formRef])
+    }, [formRef, ctx.store.form])
 
 
     return (
