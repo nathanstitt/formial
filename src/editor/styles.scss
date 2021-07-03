@@ -1,0 +1,433 @@
+$formial-drop-reveal-color: #e8e8e8 !default;;
+
+.formial-editor {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    grid-template-rows: 1fr;
+    height: 100%;
+    gap: 10px;
+    position: relative;
+
+    .drop {
+        transition: all 0.3s ease-in-out;
+        &.horizontal {
+            height: 15px;
+            min-height: 15px;
+            &.is-hovered {
+                height: 100px;
+                min-height: 100px;
+                background: $formial-drop-reveal-color;
+            }
+            &:last-child {
+                flex: 1;
+            }
+        }
+
+        &.vertical {
+            min-width: 20px;
+            &.is-hovered {
+                flex: 1;
+                background: $formial-drop-reveal-color;
+            }
+        }
+    }
+
+    .controls {
+        ul {
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+
+    .edit-panel {
+        height: 100%;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        .edit-pane {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .footer {
+            padding: 10px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid lightGrey;
+        }
+        legend {
+            background-color: #000;
+            color: #fff;
+            padding: 3px 6px;
+            font-size: 16px;
+        }
+        label,
+        .heading {
+            display: flex;
+            align-items: center;
+            &:not(.draggable) {
+                margin-bottom: 5px;
+            }
+            > *:first-child {
+                width: 125px;
+            }
+        }
+        .heading > * {
+            font-weight: bold;
+        }
+        .value {
+            flex: 1;
+            width: 125px;
+        }
+        button {
+            margin-left: 5px;
+            svg {
+                height: 18px;
+            }
+        }
+        fieldset {
+            margin-top: 1rem;
+            .controls {
+                display: flex;
+                justify-content: flex-end;
+                .add-attr {
+                    border: 0;
+                    padding: 0 5px;
+                }
+            }
+        }
+        textarea {
+            width: 100%;
+            min-height: 50px;
+            padding: 4px;
+        }
+        .widths {
+            .row {
+                display: flex;
+                justify-content: space-between;
+                span {
+                    flex: 1;
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-right: 10px;
+                    width: inherit;
+                }
+            }
+        }
+    }
+
+    .sidebar {
+        overflow: hidden;
+        display: flex;
+        padding-bottom: 20px;
+        > * {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            flex-grow: 1;
+            min-height: 0, /* for Firefox */
+        }
+    }
+
+    .title {
+        border-bottom: 1px solid lightgray;
+        padding: 5px;
+    }
+
+    .scrolling {
+        flex-grow: 1;
+        overflow: auto;
+        min-height: 0;
+        padding-right: 10px;
+    }
+
+
+    .delete-btn {
+        border: 0;
+    }
+
+
+    .input-option-label {
+        padding: 2px 0 2px 5px;
+        .label {
+            flex: 1;
+            cursor: grab;
+        }
+    }
+
+    .drop-target {
+        transition: all 0.3s ease-in-out;
+        height: 10px;
+        minHeight: 10px;
+        &.is-hovered {
+            height: 40px;
+            minHeight: 40px;
+            border: 1px dashed $formial-drop-reveal-color;
+        }
+        &:last-child {
+            flex: 1;
+        }
+    }
+
+    .choices {
+        display: flex;
+        width: 100%;
+        flex-wrap: wrap;
+        flex-direction: column;
+        &.horizontal {
+            flex-direction: row;
+
+            > label {
+                padding-right: 5px;
+            }
+            &.layout-two-column > label {
+                width: 50%;
+            }
+            &.layout-three-column > label {
+                width: 33%;
+            }
+        }
+    }
+
+    .values {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .control-preview {
+        padding: 10px;
+    }
+
+    .control-label {
+        cursor: pointer;
+        background-color: white;
+        list-style: none;
+        margin: 5px;
+        padding: 10px;
+        user-select: none;
+        border: 1px dashed #ddd;
+        svg {
+            height: 20px;
+            margin-right: 0.5rem;
+        }
+    }
+
+    .form-panel {
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .form-elements {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-items: flex-start;
+        background: #fafafa;
+        padding: 20px;
+        box-sizing: border-box;
+        box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease-in-out;
+        width: fit-content;
+        min-width: 100%;
+        > .container-preview {
+            margin: 0 2px;
+        }
+        p, h1, h2, h3, h4, h5, h6 {
+            padding: 0;
+            margin: 0;
+        }
+    }
+
+    .element-preview {
+        display: flex;
+        flex-direction: row;
+        position: relative;
+        padding: 10px;
+        color: #0c0c0c;
+        justify-content: space-between;
+        align-items: flex-start;
+        min-height: fit-content;
+        border-width: 2px;
+        background: white;
+        border-color: transparent;
+        .editing {
+            background: #ffffed;
+            border-color: #a5a500;
+        }
+
+
+        border-style: dashed;
+        cursor: pointer;
+        input, textarea, select {
+            cursor: pointer;
+            &:focus {
+                outline: none;
+                border-color: inherit;
+                box-shadow: none;
+            }
+        }
+        &.input .label, &.textarea .label {
+            margin-bottom: -20px;
+            z-index: 1;
+            font-size: 80%;
+            margin-left: 10px;
+        }
+        .control-type {
+            font-size: 0.8rem;
+            position: absolute;
+            top: 0;
+            right: 0;
+            border: 1px solid;
+            padding: 2px;
+            border-radius: 8px;
+        }
+        &:hover {
+            > .controls {
+                opacity: 1;
+            }
+        }
+        .controls {
+            opacity: 0;
+            position: absolute;
+            transition: opacity 0.3s ease-in-out;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            .move svg {
+                cursor: move;
+            }
+            button {
+                border: 0;
+                padding: 0;
+                cursor: pointer;
+                background-color: transparent;
+                &:hover {
+                    svg { color: #212121; }
+                }
+            }
+            svg {
+                height: 20px;
+                color: gray;
+                transition: opacity 0.3s ease-in-out;
+            }
+        }
+        > .controls {
+            background: white;
+            .editing {
+                background: #ffffed;
+            }
+            top: 0;
+            right: 0;
+            padding: 5px;
+            border-bottom-left-radius: 5px;
+            position: absolute;
+            width: fit-content;
+            > * {
+                margin: 0 5px;
+            }
+        }
+        .inline-text {
+            padding: 0;
+            border: 0;
+            font-size: inherit;
+            &:focus {
+                outline: none;
+            }
+        }
+
+        .label {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .control-preview {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            flex-direction: column;
+            justify-content: center;
+            &.row {
+                flex-direction: column;
+            }
+        }
+        input + span {
+            margin-left: 10px;
+        }
+
+
+        &.container {
+            border: 1px dashed gray;
+            align-items: stretch;
+            padding: 5px;
+
+            > .container.controls {
+                background: white;
+                border: 1px dashed gray;
+                width: fit-content;
+                > * {
+                    margin: 0 5px;
+                }
+            }
+            &.container-row {
+                flex-direction: column;
+                justify-content: flex-start;
+                min-height: fit-content;
+
+                > .container-drop {
+                    width: 100%;
+                }
+                > .container-column {
+                    margin: -1px;
+                    flex: 1;
+                }
+                > .container.controls {
+                    top: -27px;
+                    left: 0;
+                    padding: 2px 5px;
+                    border-top-right-radius: 5px;
+                    border-top-left-radius: 5px;
+                    border-bottom-width: 0;
+                }
+            }
+            > .container-preview {
+                flex: 1;
+            }
+            &.empty {
+                align-items: stretch;
+                > .drop {
+                    min-height: 80px;
+                    flex: 1;
+                }
+            }
+            &.container-column {
+                > .container.controls {
+                    top: calc(50% - 40px);
+                    left: -25px;
+                    right: auto;
+                    display: flex;
+                    width: 30px;
+                    flex-direction: row-reverse;
+                    border-radius: 5px;
+                    align-items: center;
+                    writing-mode: vertical-rl;
+                    text-orientation: upright;
+                    font-size: 80%;
+                    > * {
+                        margin: 5px 0;
+                    }
+                }
+                > .element-preview {
+                    flex: 1;
+                }
+            }
+        }
+    }
+}

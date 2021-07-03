@@ -1,5 +1,4 @@
 import React, { FC, useRef } from 'react'
-import styled from 'styled-components'
 import { useOnClickOutside } from '../hooks/use-click-outside'
 import {
     useStoreContext, useEditingElement,
@@ -269,85 +268,6 @@ const Edit: FC<{ target: FormElement }> = ({ target }) => {
 }
 
 
-const EditPanelEl = styled.div({
-    height: '100%',
-    background: 'white',
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-
-    '.edit-pane': {
-        flex: 1,
-        overflowY: 'auto',
-        padding: '10px',
-    },
-    '.footer': {
-        padding: '10px',
-        display: 'flex',
-        justifyContent: 'flex-end',
-        borderTop: '1px solid lightGrey',
-    },
-    legend: {
-        backgroundColor: '#000',
-        color: '#fff',
-        padding: '3px 6px',
-        fontSize: '16px',
-    },
-    'label, .heading': {
-        display: 'flex',
-        alignItems: 'center',
-        '&:not(.draggable)': {
-            marginBottom: '5px',
-        },
-        '> *:first-child': {
-            width: '125px',
-        },
-    },
-    '.heading > *': {
-        fontWeight: 'bold',
-    },
-    '.value': {
-        flex: 1,
-        width: '125px',
-    },
-    button: {
-        marginLeft: '5px',
-        svg: {
-            height: '18px',
-        },
-    },
-    fieldset: {
-        marginTop: '1rem',
-        '.controls': {
-            display: 'flex',
-
-            justifyContent: 'flex-end',
-            '.add-attr': {
-                border: 0,
-                padding: '0 5px',
-            },
-        },
-    },
-    textarea: {
-        width: '100%',
-        minHeight: '50px',
-        padding: '4px',
-    },
-    '.widths': {
-        '.row': {
-            display: 'flex',
-            justifyContent: 'space-between',
-            span: {
-                flex: 1,
-                display: 'flex',
-                justifyContent: 'flex-end',
-                marginRight: '10px',
-                width: 'inherit',
-            },
-        },
-    },
-})
-
 export const EditPanel:FC = () => {
     const editing = useEditingElement()
     const sc = useStoreContext()
@@ -362,8 +282,8 @@ export const EditPanel:FC = () => {
     }
 
     return (
-        <EditPanelEl ref={panelRef} className="edit-panel">
+        <div ref={panelRef} className="edit-panel">
             <Edit target={editing} />
-        </EditPanelEl>
+        </div>
     )
 }

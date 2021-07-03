@@ -1,5 +1,4 @@
 import * as React from 'react'
-import styled from 'styled-components'
 import cn from 'classnames'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { DndProvider } from 'react-dnd'
@@ -9,27 +8,14 @@ import { Form } from './editor/models'
 import { FormElements } from './editor/form'
 import { SerializedForm } from './data'
 
-const FormPanelEl = styled.div({
-    display: 'flex',
-    width: '100%',
-    overflow: 'hidden',
-})
 const FormPanel: React.FC = () => {
     return (
-        <FormPanelEl>
+        <div className="form-panel">
             <FormElements />
-        </FormPanelEl>
+        </div>
     )
 }
 
-const EditorEl = styled.div({
-    display: 'grid',
-    gridTemplateColumns: '1fr 300px',
-    gridTemplateRows: '1fr',
-    height: '100%',
-    gap: '10px',
-    position: 'relative',
-})
 
 export interface FormRef {
     readonly form: Form
@@ -55,23 +41,22 @@ export const Editor: React.FC<EditorProps> = ({
                 clear() { ctx.dispatch({ type: 'CLEAR' }) },
                 update(form: SerializedForm) {
                     ctx.dispatch({ type: 'REPLACE_FORM', form, controls: ctx.store.controls })
-                }
+                },
             }
         }
         return () => {
             if (formRef) { formRef.current = null }
         }
-
     }, [formRef, ctx.store.form])
 
 
     return (
         <DndProvider backend={HTML5Backend}>
             <StoreContext.Provider value={ctx}>
-                <EditorEl className={cn('formial-editor', className)}>
+                <div className={cn('formial-editor', className)}>
                     <FormPanel />
                     <Sidebar />
-                </EditorEl>
+                </div>
             </StoreContext.Provider>
         </DndProvider>
     )

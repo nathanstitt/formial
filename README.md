@@ -26,6 +26,7 @@ Example from [example/src/App.tsx](example/src/App.tsx)
 ```tsx
 import React, { Component } from 'react'
 import { Editor, Container, render } from 'formial'
+import 'formial/styles.css' // could also import .scss source into existing sass styles
 
  // this would normally be loaded from server
 const DEFAULT = {"id":"4f78521b-59a8-4069-8ae8-8b0c793d9f5e","type":"FORM","control":"col","className":"","direction":"row","children":[{"id":"5421839e-6592-4c7b-aea6-72dd889f2354","type":"TEXT","control":"heading","tag":"h3","text":"Hello World!","className":""}]}
@@ -79,9 +80,9 @@ export default App
 
 ## Styling
 
-The editor is styled using styled-components but also assigns class names to elements to they can be overridden. The controls on the editor default to assigning elements bootstrap classes.
+The editor is styled using scss and assigns class names to elements to they can be overridden. The controls on the editor default to assigning elements bootstrap classes.
 
-The form renderer does not include any styles by itself.  The demo loads the bootstrap 5 alpha styles on the page in order to show what's possible.
+The form renderer does not include any styles by itself.  The demo loads the bootstrap 5 styles on the page only in order to show what's possible.
 
 ## Raison d'être
 

@@ -1,25 +1,11 @@
 import * as React from 'react'
-import styled from 'styled-components'
 import { useDrag } from 'react-dnd'
+import cn from 'classnames'
 import { useStore, useStoreContext } from './store'
 import { Control } from './models'
 import './default-controls'
-
 import { Title, Scrolling } from './components'
 
-const ControlLabelEl = styled.li({
-    cursor: 'pointer',
-    backgroundColor: 'white',
-    listStyle: 'none',
-    margin: '5px',
-    padding: '10px',
-    userSelect: 'none',
-    border: '1px dashed #ddd',
-    svg: {
-        height: '20px',
-        marginRight: '0.5rem',
-    },
-})
 
 const ControlLabel:React.FC<{ control: Control }> = ({ control }) => {
     const { id, name, icon } = control
@@ -33,25 +19,20 @@ const ControlLabel:React.FC<{ control: Control }> = ({ control }) => {
     })
 
     return (
-        <ControlLabelEl
+        <div
             ref={drag}
             style={{ opacity }}
+            className={cn('control-label')}
             onClick={() => {
                 dispatch({ type: 'APPEND_ELEMENT', control })
             }}
         >
             {icon}
             <span>{name}</span>
-        </ControlLabelEl>
+        </div>
     )
 }
 
-const ControlsEl = styled.div({
-    ul: {
-        padding: 0,
-        margin: 0,
-    },
-})
 
 export const Controls = () => {
     const { editingId, controls } = useStore()
@@ -59,7 +40,9 @@ export const Controls = () => {
         return null
     }
     return (
-        <ControlsEl>
+        <div
+            className="controls"
+        >
             <Title>Elements</Title>
             <Scrolling className="listing">
                 <ul>
@@ -67,6 +50,6 @@ export const Controls = () => {
                         <ControlLabel key={c.id} control={c} />))}
                 </ul>
             </Scrolling>
-        </ControlsEl>
+        </div>
     )
 }

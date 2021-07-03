@@ -1,13 +1,12 @@
-import React, { FC, useState, useRef, useEffect } from 'react'
-import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import styled from 'styled-components'
+import React, { FC, useRef, useEffect, useState } from 'react'
+import { TrashAlt } from './icons'
 import cn from 'classnames'
 import { useDrop, useDrag } from 'react-dnd'
 import { SerializedOption } from '../data'
-import { DropRevealColor } from './components'
 import { useKeyPress } from '../hooks/use-key-press'
 import { NestedType, InputElement } from './models'
 import { useStoreContext } from './store'
+
 
 const NEW = Symbol('new')
 const DELETE = Symbol('delete')
@@ -22,9 +21,6 @@ interface DropItem {
     id: string
 }
 
-const DeleteBtn = styled.button({
-    border: 0,
-})
 
 interface OptionProps {
     input: InputElement
@@ -83,21 +79,12 @@ const NewOption: FC<OptionProps> = ({
                 defaultValue=''
             />
             <span className="value" />
-            <DeleteBtn onClick={deleteAttr}>
+            <button className="delete-btn" onClick={deleteAttr}>
                 <TrashAlt />
-            </DeleteBtn>
+            </button>
         </label>
     )
 }
-
-const OptionEl = styled.label({
-    padding: '2px 0 2px 5px',
-})
-
-const OptionLabel = styled.div({
-    flex: 1,
-    cursor: 'grab',
-})
 
 const Option:FC<{
     input: InputElement
@@ -132,43 +119,30 @@ const Option:FC<{
         }
     }, [focused])
     return (
-        <OptionEl
-            className="draggable"
+        <label
+            className="input-option-label draggable"
             style={{ opacity }}
             ref={drag}
         >
-            <OptionLabel>{option.id}:</OptionLabel>
+            <div className="label">{option.id}:</div>
             <input
                 ref={inputRef}
                 className="value"
                 value={option.value || ''}
                 onChange={updateOption}
             />
-            <DeleteBtn
+            <button
+                className="delete-btn"
                 onClick={():void => {
                     sc.dispatch({ type: 'DELETE_OPTION', id: option.id, inputId: input.id, nested })
                     onComplete(DELETE)
                 }}
             >
                 <TrashAlt />
-            </DeleteBtn>
-        </OptionEl>
+            </button>
+        </label>
     )
 }
-
-const DropEl = styled.div({
-    transition: 'all 0.3s ease-in-out',
-    height: '10px',
-    minHeight: '10px',
-    '&.isHovered': {
-        height: '40px',
-        minHeight: '40px',
-        border: `1px dashed ${DropRevealColor}`,
-    },
-    '&:last-child': {
-        flex: 1,
-    },
-})
 
 
 export const Drop: React.FC<DropProps> = ({ input, nested, index }) => {
@@ -183,7 +157,7 @@ export const Drop: React.FC<DropProps> = ({ input, nested, index }) => {
             sc.dispatch({ type: 'REORDER_OPTION', nested, inputId: input.id, optionId: id, index })
         },
     })
-    return <DropEl ref={dropRef} className={cn('drop', { isHovered })} />
+    return <div ref={dropRef} className={cn('drop', 'drop-target', { 'is-hovered': isHovered })} />
 }
 
 

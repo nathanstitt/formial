@@ -1,26 +1,26 @@
-import styled from 'styled-components'
+import * as React from 'react'
+import cn from 'classnames'
 
-export const Title = styled.h4.attrs({
-    className: 'title',
-})({
-    borderBottom: '1px solid lightgray',
-    padding: '5px',
-})
+interface SimpleComponentProps {
+    className?: string
+}
 
-export const Scrolling = styled.div({
-    flexGrow: 1,
-    overflow: 'auto',
-    minHeight: 0,
-    paddingRight: '10px',
-})
+export const Title:React.FC<SimpleComponentProps> = ({children}) => (
+    <h4 className="title">
+        {children}
+    </h4>
+)
 
-export const Values = styled.div({
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    flexGrow: 1,
-    minHeight: 0,
-    overflow: 'hidden',
-})
+export const Scrolling:React.FC<SimpleComponentProps> = ({children}) => (
+    <div className="scrolling">
+        {children}
+    </div>
+)
 
-export const DropRevealColor = '#e8e8e8'
+
+export const Values:React.FC<SimpleComponentProps> = ({children, className}) => (
+    <div className={cn('values', className)}>
+        {children}
+    </div>
+)
+

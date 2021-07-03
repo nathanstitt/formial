@@ -1,44 +1,17 @@
 import * as React from 'react'
-import styled, { CSSObject } from 'styled-components'
-import { CaretSquareDown } from '@styled-icons/fa-regular/CaretSquareDown'
-import { Font } from '@styled-icons/fa-solid/Font'
-import { GripLines } from '@styled-icons/fa-solid/GripLines'
-import { Square } from '@styled-icons/fa-regular/Square'
-import { Heading } from '@styled-icons/fa-solid/Heading'
-import { Paragraph } from '@styled-icons/fa-solid/Paragraph'
-import { GripLinesVertical } from '@styled-icons/fa-solid/GripLinesVertical'
-import { DotCircle } from '@styled-icons/fa-solid/DotCircle'
-import { CheckSquare } from '@styled-icons/fa-solid/CheckSquare'
-import { ChoicesLayoutTypes } from '../data'
+import cn from 'classnames'
+import {
+    CaretSquareDown, Font, GripLines, Square, Heading,
+    Paragraph, GripLinesVertical, DotCircle, CheckSquare
+} from './icons'
+
 import {
     InputControl, ContainerControl, InputElement, TextControl, TextElement, defaultControls,
 } from './models'
 
+
 type RenderT = (key: string, value: string) => React.ReactNode
 
-const Choices = styled.div<{ layout?: ChoicesLayoutTypes }>(({ layout }) => {
-    const style:CSSObject = {
-        display: 'flex',
-        width: '100%',
-        flexWrap: 'wrap',
-        flexDirection: 'column',
-    }
-    if (layout && layout !== 'vertical') {
-        style.flexDirection = 'row'
-        const label:CSSObject = {
-            paddingRight: '5px',
-
-        }
-        if ('two_column' === layout) {
-            label.width = '50%'
-        }
-        if ('three_column' === layout) {
-            label.width = '33%'
-        }
-        style['> label'] = label
-    }
-    return style
-})
 
 const renderOptions = (el: InputElement, rend: RenderT) => {
     const options = el.optionPairs
@@ -49,7 +22,7 @@ const renderOptions = (el: InputElement, rend: RenderT) => {
         <label key={name}>{rend(name, label)}<span>{label}</span></label>
     ))
     return (
-        <Choices layout={el.data.choicesLayout}>{choices}</Choices>
+        <div className={cn('choices', el.data.choicesLayout)}>{choices}</div>
     )
 }
 

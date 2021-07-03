@@ -1,11 +1,7 @@
 import * as React from 'react'
-import styled from 'styled-components'
 import cn from 'classnames'
 import { useDrop, useDrag, DragElementWrapper, DragSourceOptions, ConnectDropTarget } from 'react-dnd'
-import { GripHorizontal } from '@styled-icons/fa-solid/GripHorizontal'
-import { Edit } from '@styled-icons/fa-solid/Edit'
-import { TrashAlt } from '@styled-icons/fa-solid/TrashAlt'
-import { Scrolling, DropRevealColor } from './components'
+import { GripHorizontal, Edit, TrashAlt } from './icons'
 import {
     useStore,
     useStoreContext,
@@ -19,23 +15,6 @@ import {
     isContainer,
     FormElement,
 } from './models'
-
-const DropEl = styled.div({
-    transition: 'all 0.3s ease-in-out',
-})
-
-const HorizontalDropEl = styled(DropEl)({
-    height: '15px',
-    minHeight: '15px',
-    '&.isHovered': {
-        height: '100px',
-        minHeight: '100px',
-        background: DropRevealColor,
-    },
-    '&:last-child': {
-        flex: 1,
-    },
-})
 
 interface DropProps {
     index: number
@@ -78,142 +57,23 @@ const useFormDrop = ({ index, container }: DropProps):useFormDropReturn => {
 
 export const HorizonontalDrop: React.FC<DropProps> = (props) => {
     const { isHovered, dropRef } = useFormDrop(props)
-    return <HorizontalDropEl ref={dropRef} className={cn('drop', { isHovered })} />
+    return <div ref={dropRef} className={cn('drop', 'horizontal', { 'is-hovered': isHovered })} />
 }
 
-const VerticalDropEl = styled(DropEl)({
-    minWidth: '20px',
-    '&.isHovered': {
-        flex: 1,
-        background: DropRevealColor,
-    },
-})
 
 const VerticalDrop: React.FC<DropProps> = (props) => {
     const { isHovered, dropRef } = useFormDrop(props)
 
     return (
-        <VerticalDropEl
+        <div
             ref={dropRef}
-            className={cn('drop', 'container-drop', { isHovered })}
+            className={cn('drop', 'vertical', 'container-drop', { 'is-hovered': isHovered })}
         />
     )
 }
 
-const ElementPreviewEl = styled.div<{ editing?: boolean }>(({ editing }) => ({
-    display: 'flex',
-    flexDirection: 'row',
-    position: 'relative',
-    padding: '10px',
-    color: '#0c0c0c',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    minHeight: 'fit-content',
-    borderWidth: '2px',
-    background: editing ? '#ffffed' : 'white',
-    borderColor: editing ? '#a5a500;' : 'transparent',
-    borderStyle: 'dashed',
-    cursor: 'pointer',
 
-    'input, textarea, select': {
-        cursor: 'pointer',
-        '&:focus': {
-            outline: 'none',
-            borderColor: 'inherit',
-            boxShadow: 'none',
-        },
-    },
-
-    '&.input .label, &.textarea .label': {
-        marginBottom: '-20px',
-        zIndex: 1,
-        fontSize: '80%',
-        marginLeft: '10px',
-    },
-    '.control-type': {
-        fontSize: '0.8rem',
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        border: '1px solid',
-        padding: '2px',
-        borderRadius: '8px',
-    },
-
-    '&:hover': {
-        '> .controls': {
-            opacity: 1,
-        },
-    },
-
-    '.controls': {
-        opacity: 0,
-        position: 'absolute',
-        transition: 'opacity 0.3s ease-in-out',
-        display: 'flex',
-        justifyContent: 'space-around',
-        alignItems: 'flex-start',
-        '.move svg': {
-            cursor: 'move',
-        },
-        button: {
-            border: 0,
-            padding: 0,
-            cursor: 'pointer',
-            backgroundColor: 'transparent',
-            '&:hover': {
-                svg: { color: '#212121' },
-            },
-        },
-        svg: {
-            height: '20px',
-            color: 'gray',
-            transition: 'opacity 0.3s ease-in-out',
-        },
-    },
-
-    '>.controls': {
-        background: editing ? '#ffffed' : 'white',
-        top: 0,
-        right: 0,
-        padding: '5px',
-        borderBottomLeftRadius: '5px',
-        position: 'absolute',
-        width: 'fit-content',
-        '> *': {
-            margin: '0 5px',
-        },
-    },
-
-    '.inline-text': {
-        padding: 0,
-        border: 0,
-        fontSize: 'inherit',
-        '&:focus': {
-            outline: 'none',
-        },
-    },
-
-    '.label': {
-        fontSize: '20px',
-        marginBottom: '5px',
-    },
-
-    '.control-preview': {
-        flex: 1,
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'flex-start',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        '&.row': {
-            flexDirection: 'column',
-        },
-    },
-    'input + span': {
-        marginLeft: '10px',
-    },
-}))
+//`<{ editing?: boolean }>(({ editing }) => ({
 
 const Controls:React.FC<{
     target: FormElement | Container
@@ -248,11 +108,6 @@ const Controls:React.FC<{
     )
 }
 
-const ControlPreview = styled.div.attrs({
-    className: 'control-preview',
-})({
-    padding: '10px',
-})
 
 const InputPreview: React.FC<{
     index: number
@@ -269,19 +124,20 @@ const InputPreview: React.FC<{
     })
     const sc = useStoreContext()
     return (
-        <ElementPreviewEl
+        <div
             ref={drag}
             style={{ opacity }}
-            editing={sc.store.editingId === input.id}
-            className={cn('element-preview', input.control.id)}
+            className={cn('element-preview', input.control.id, {
+                'is-editing': sc.store.editingId === input.id,
+            })}
             onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
         >
             <Controls displayEdit={false} target={input} container={container} />
-            <ControlPreview>
+            <div className="control-preview">
                 <span className="label">{input.data.label}</span>
                 {input.placeholder}
-            </ControlPreview>
-        </ElementPreviewEl>
+            </div>
+        </div>
     )
 }
 
@@ -302,89 +158,21 @@ const TextPreview: React.FC<{
     const text = React.createElement(control.data.tag, {}, control.data.text)
 
     return (
-        <ElementPreviewEl
-            editing={sc.store.editingId === control.id}
+        <div
             style={{ opacity }}
             ref={drag}
             onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
-            className={cn('element-preview', control.control.id)}
+            className={cn('element-preview', control.control.id, {
+                'is-editing': sc.store.editingId === control.id,
+            })}
         >
             <Controls displayEdit target={control} container={container} />
             <div className='control-preview'>
                 {text}
             </div>
-        </ElementPreviewEl>
+        </div>
     )
 }
-
-
-const ContainerPreviewEl = styled(ElementPreviewEl)({
-    border: '1px dashed gray',
-    alignItems: 'stretch',
-    padding: '5px',
-
-    '> .container.controls': {
-        background: 'white',
-        border: '1px dashed gray',
-
-        width: 'fit-content',
-        '> *': {
-            margin: '0 5px',
-        },
-    },
-    '&.container-row': {
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        minHeight: 'fit-content',
-
-        '> .container-drop': {
-            width: '100%',
-        },
-        '> .container-column': {
-            margin: '-1px',
-            flex: 1,
-        },
-        '> .container.controls': {
-            top: '-27px',
-            left: 0,
-            padding: '2px 5px',
-            borderTopRightRadius: '5px',
-            borderTopLeftRadius: '5px',
-            borderBottomWidth: 0,
-        },
-    },
-    '> .container-preview': {
-        flex: 1,
-    },
-    '&.empty': {
-        alignItems: 'stretch',
-        '> .drop': {
-            minHeight: '80px',
-            flex: 1,
-        },
-    },
-    '&.container-column': {
-        '> .container.controls': {
-            top: 'calc(50% - 40px)',
-            left: '-25px',
-            right: 'auto',
-            display: 'flex',
-            width: '30px',
-            flexDirection: 'row-reverse',
-            borderRadius: '5px',
-            alignItems: 'center',
-            writingMode: 'vertical-rl',
-            textOrientation: 'upright',
-            fontSize: '80%',
-            '> *': {
-                margin: '5px 0',
-            },
-        },
-        '> .element-preview': {
-            flex: 1,
-        },
-    },
-})
 
 
 const ContainerPreview:React.FC<{
@@ -402,10 +190,10 @@ const ContainerPreview:React.FC<{
     const Drop = container.isRow ? HorizonontalDrop : VerticalDrop
 
     return (
-        <ContainerPreviewEl
+        <div
             ref={preview}
             style={{ opacity }}
-            className={cn('container-preview', `container-${container.direction}`, {
+            className={cn('element-preview', 'container', `container-${container.direction}`, {
                 empty: 0 === container.children.length,
             })}
         >
@@ -417,7 +205,7 @@ const ContainerPreview:React.FC<{
                     <Drop container={container} index={i + 1} />
                 </React.Fragment>
             ))}
-        </ContainerPreviewEl>
+        </div>
     )
 }
 
@@ -440,26 +228,6 @@ const ElementPreview:React.FC<{
 }
 
 
-const FormElementsEl = styled(Scrolling)({
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyItems: 'flex-start',
-    background: '#fafafa',
-    padding: '20px',
-    boxSizing: 'border-box',
-    boxShadow: '0 0 2px 1px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease-in-out',
-    width: 'fit-content',
-    minWidth: '100%',
-    '> .container-preview': {
-        margin: '0 2px',
-    },
-    'p, h1, h2, h3, h4, h5, h6': {
-        padding: 0,
-        margin: 0,
-    },
-})
 
 export const FormElements:React.FC = () => {
     const { form } = useStore()
@@ -472,7 +240,7 @@ export const FormElements:React.FC = () => {
     })
 
     return (
-        <FormElementsEl
+        <div
             ref={drop}
             className={cn('form-elements', { isHovered })}
         >
@@ -485,6 +253,6 @@ export const FormElements:React.FC = () => {
                 </React.Fragment>
             ))}
 
-        </FormElementsEl>
+        </div>
     )
 }
