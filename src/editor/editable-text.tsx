@@ -54,8 +54,8 @@ export const EditableText:React.FC<EditableTextProps> = (props) => {
         if (isInputActive !== false) {
             const edit = isInputActive as EditingState
             const input = inputRef.current
-            input.focus()
-            input.setSelectionRange(edit.position, edit.position)
+            input?.focus()
+            input?.setSelectionRange(edit.position, edit.position)
         }
     }, [isInputActive])
 

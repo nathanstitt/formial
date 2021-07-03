@@ -11,7 +11,5 @@ jobs:
       - uses: bahmutov/npm-install@v1
       - name: Lint JS
         run: yarn run lint:js
-      - name: Run Tests
-        run: yarn run test:unit
       - name: Build TS
-        run: yarn run build:tsc --noEmit
+        run: yarn run typecheck

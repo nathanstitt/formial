@@ -2,7 +2,7 @@ import * as React from 'react'
 import cn from 'classnames'
 import {
     CaretSquareDown, Font, GripLines, Square, Heading,
-    Paragraph, GripLinesVertical, DotCircle, CheckSquare
+    Paragraph, GripLinesVertical, DotCircle, CheckSquare,
 } from './icons'
 
 import {

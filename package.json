@@ -15,7 +15,8 @@
     "start": "vite",
     "prepare": "run-s build",
     "build": "LIBRARY=1 ./bin/build",
-    "lint:js": "eslint src/**/*",
+    "lint:js": "eslint src/**/*.ts?",
+    "typecheck": "tsc --noEmit",
     "deploy": "./bin/build && gh-pages -d dist"
   },
   "peerDependencies": {
