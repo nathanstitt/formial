@@ -1,0 +1,397 @@
+$ /Users/nas/code/formial/node_modules/.bin/sass src/editor/styles.scss
+.formial-editor {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  grid-template-rows: 1fr;
+  height: 100%;
+  gap: 10px;
+  position: relative;
+}
+.formial-editor .drop {
+  transition: all 0.3s ease-in-out;
+}
+.formial-editor .drop.horizontal {
+  height: 15px;
+  min-height: 15px;
+}
+.formial-editor .drop.horizontal.is-hovered {
+  height: 100px;
+  min-height: 100px;
+  background: #e8e8e8;
+}
+.formial-editor .drop.horizontal:last-child {
+  flex: 1;
+}
+.formial-editor .drop.vertical {
+  min-width: 20px;
+}
+.formial-editor .drop.vertical.is-hovered {
+  flex: 1;
+  background: #e8e8e8;
+}
+.formial-editor .controls ul {
+  padding: 0;
+  margin: 0;
+}
+.formial-editor .edit-panel {
+  height: 100%;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.formial-editor .edit-panel .edit-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+.formial-editor .edit-panel .footer {
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid lightGrey;
+}
+.formial-editor .edit-panel legend {
+  background-color: #000;
+  color: #fff;
+  padding: 3px 6px;
+  font-size: 16px;
+}
+.formial-editor .edit-panel label,
+.formial-editor .edit-panel .heading {
+  display: flex;
+  align-items: center;
+}
+.formial-editor .edit-panel label:not(.draggable),
+.formial-editor .edit-panel .heading:not(.draggable) {
+  margin-bottom: 5px;
+}
+.formial-editor .edit-panel label > *:first-child,
+.formial-editor .edit-panel .heading > *:first-child {
+  width: 125px;
+}
+.formial-editor .edit-panel .heading > * {
+  font-weight: bold;
+}
+.formial-editor .edit-panel .value {
+  flex: 1;
+  width: 125px;
+}
+.formial-editor .edit-panel button {
+  margin-left: 5px;
+}
+.formial-editor .edit-panel button svg {
+  height: 18px;
+}
+.formial-editor .edit-panel fieldset {
+  margin-top: 1rem;
+}
+.formial-editor .edit-panel fieldset .controls {
+  display: flex;
+  justify-content: flex-end;
+}
+.formial-editor .edit-panel fieldset .controls .add-attr {
+  border: 0;
+  padding: 0 5px;
+}
+.formial-editor .edit-panel textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 4px;
+}
+.formial-editor .edit-panel .widths .row {
+  display: flex;
+  justify-content: space-between;
+}
+.formial-editor .edit-panel .widths .row span {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  margin-right: 10px;
+  width: inherit;
+}
+.formial-editor .sidebar {
+  overflow: hidden;
+  display: flex;
+  padding-bottom: 20px;
+}
+.formial-editor .sidebar > * {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  flex-grow: 1;
+  min-height: 0;
+}
+.formial-editor .title {
+  border-bottom: 1px solid lightgray;
+  padding: 5px;
+}
+.formial-editor .scrolling {
+  flex-grow: 1;
+  overflow: auto;
+  min-height: 0;
+  padding-right: 10px;
+}
+.formial-editor .delete-btn {
+  border: 0;
+}
+.formial-editor .input-option-label {
+  padding: 2px 0 2px 5px;
+}
+.formial-editor .input-option-label .label {
+  flex: 1;
+  cursor: grab;
+}
+.formial-editor .drop-target {
+  transition: all 0.3s ease-in-out;
+  height: 10px;
+  minHeight: 10px;
+}
+.formial-editor .drop-target.is-hovered {
+  height: 40px;
+  minHeight: 40px;
+  border: 1px dashed #e8e8e8;
+}
+.formial-editor .drop-target:last-child {
+  flex: 1;
+}
+.formial-editor .choices {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  flex-direction: column;
+}
+.formial-editor .choices.horizontal {
+  flex-direction: row;
+}
+.formial-editor .choices.horizontal > label {
+  padding-right: 5px;
+}
+.formial-editor .choices.horizontal.layout-two-column > label {
+  width: 50%;
+}
+.formial-editor .choices.horizontal.layout-three-column > label {
+  width: 33%;
+}
+.formial-editor .values {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.formial-editor .control-preview {
+  padding: 10px;
+}
+.formial-editor .control-label {
+  cursor: pointer;
+  background-color: white;
+  list-style: none;
+  margin: 5px;
+  padding: 10px;
+  user-select: none;
+  border: 1px dashed #ddd;
+}
+.formial-editor .control-label svg {
+  height: 20px;
+  margin-right: 0.5rem;
+}
+.formial-editor .form-panel {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+.formial-editor .form-elements {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-items: flex-start;
+  background: #fafafa;
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease-in-out;
+  width: fit-content;
+  min-width: 100%;
+}
+.formial-editor .form-elements > .container-preview {
+  margin: 0 2px;
+}
+.formial-editor .form-elements p, .formial-editor .form-elements h1, .formial-editor .form-elements h2, .formial-editor .form-elements h3, .formial-editor .form-elements h4, .formial-editor .form-elements h5, .formial-editor .form-elements h6 {
+  padding: 0;
+  margin: 0;
+}
+.formial-editor .element-preview {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  padding: 10px;
+  color: #0c0c0c;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: fit-content;
+  border-width: 2px;
+  background: white;
+  border-color: transparent;
+  border-style: dashed;
+  cursor: pointer;
+}
+.formial-editor .element-preview .editing {
+  background: #ffffed;
+  border-color: #a5a500;
+}
+.formial-editor .element-preview input, .formial-editor .element-preview textarea, .formial-editor .element-preview select {
+  cursor: pointer;
+}
+.formial-editor .element-preview input:focus, .formial-editor .element-preview textarea:focus, .formial-editor .element-preview select:focus {
+  outline: none;
+  border-color: inherit;
+  box-shadow: none;
+}
+.formial-editor .element-preview.input .label, .formial-editor .element-preview.textarea .label {
+  margin-bottom: -20px;
+  z-index: 1;
+  font-size: 80%;
+  margin-left: 10px;
+}
+.formial-editor .element-preview .control-type {
+  font-size: 0.8rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 1px solid;
+  padding: 2px;
+  border-radius: 8px;
+}
+.formial-editor .element-preview:hover > .controls {
+  opacity: 1;
+}
+.formial-editor .element-preview .controls {
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.3s ease-in-out;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+}
+.formial-editor .element-preview .controls .move svg {
+  cursor: move;
+}
+.formial-editor .element-preview .controls button {
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+}
+.formial-editor .element-preview .controls button:hover svg {
+  color: #212121;
+}
+.formial-editor .element-preview .controls svg {
+  height: 20px;
+  color: gray;
+  transition: opacity 0.3s ease-in-out;
+}
+.formial-editor .element-preview > .controls {
+  background: white;
+  top: 0;
+  right: 0;
+  padding: 5px;
+  border-bottom-left-radius: 5px;
+  position: absolute;
+  width: fit-content;
+}
+.formial-editor .element-preview > .controls .editing {
+  background: #ffffed;
+}
+.formial-editor .element-preview > .controls > * {
+  margin: 0 5px;
+}
+.formial-editor .element-preview .inline-text {
+  padding: 0;
+  border: 0;
+  font-size: inherit;
+}
+.formial-editor .element-preview .inline-text:focus {
+  outline: none;
+}
+.formial-editor .element-preview .label {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+.formial-editor .element-preview .control-preview {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+}
+.formial-editor .element-preview .control-preview.row {
+  flex-direction: column;
+}
+.formial-editor .element-preview input + span {
+  margin-left: 10px;
+}
+.formial-editor .element-preview.container {
+  border: 1px dashed gray;
+  align-items: stretch;
+  padding: 5px;
+}
+.formial-editor .element-preview.container > .container.controls {
+  background: white;
+  border: 1px dashed gray;
+  width: fit-content;
+}
+.formial-editor .element-preview.container > .container.controls > * {
+  margin: 0 5px;
+}
+.formial-editor .element-preview.container.container-row {
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: fit-content;
+}
+.formial-editor .element-preview.container.container-row > .container-drop {
+  width: 100%;
+}
+.formial-editor .element-preview.container.container-row > .container-column {
+  margin: -1px;
+  flex: 1;
+}
+.formial-editor .element-preview.container.container-row > .container.controls {
+  top: -27px;
+  left: 0;
+  padding: 2px 5px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-width: 0;
+}
+.formial-editor .element-preview.container > .container-preview {
+  flex: 1;
+}
+.formial-editor .element-preview.container.empty {
+  align-items: stretch;
+}
+.formial-editor .element-preview.container.empty > .drop {
+  min-height: 80px;
+  flex: 1;
+}
+.formial-editor .element-preview.container.container-column > .container.controls {
+  top: calc(50% - 40px);
+  left: -25px;
+  right: auto;
+  display: flex;
+  width: 30px;
+  flex-direction: row-reverse;
+  border-radius: 5px;
+  align-items: center;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 80%;
+}
+.formial-editor .element-preview.container.container-column > .container.controls > * {
+  margin: 5px 0;
+}
+.formial-editor .element-preview.container.container-column > .element-preview {
+  flex: 1;
+}
