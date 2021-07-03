@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/.."
+
+yarn run vite build
+
+echo $DIR/src/editor/styles.scss $DIR/
+
+$(npm bin)/sass $DIR/styles.scss > $DIR/styles.css
