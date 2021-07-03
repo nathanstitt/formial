@@ -13,6 +13,7 @@
   },
   "scripts": {
     "start": "vite",
+    "prepare": "run-s build",
     "build": "LIBRARY=1 ./bin/build",
     "lint:js": "eslint src/**/*",
     "deploy": "./bin/build && gh-pages -d dist"
