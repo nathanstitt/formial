@@ -5,7 +5,7 @@ import { EditPanel } from './edit-panel'
 
 
 export const Sidebar:React.FC = () => (
-    <div className="sidebar">
+    <div className="editor-sidebar">
         <Controls />
         <EditPanel />
     </div>
