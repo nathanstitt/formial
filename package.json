@@ -1,6 +1,6 @@
 {
   "name": "formial",
-  "version": "1.0.0-1",
+  "version": "1.0.0-2",
   "description": "Form builder and renderer",
   "author": "nathanstitt",
   "license": "MIT",
@@ -56,8 +56,8 @@
     "vite": "^2.3.8"
   },
   "files": [
-      "dist",
-      "styles.*"
+    "dist",
+    "styles.*"
   ],
   "dependencies": {
     "@iconify-icons/fa-regular": "^1.1.0",
