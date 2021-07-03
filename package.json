@@ -55,6 +55,10 @@
     "typescript": "^3.7.5",
     "vite": "^2.3.8"
   },
+  "files": [
+      "dist",
+      "styles.*"
+  ],
   "dependencies": {
     "@iconify-icons/fa-regular": "^1.1.0",
     "@iconify-icons/fa-solid": "^1.1.1",
