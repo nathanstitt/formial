@@ -10,23 +10,22 @@ export default defineConfig({
     server: {
         port: 7711,
     },
+    base: './',
     build: {
         lib,
         emptyOutDir: true,
         rollupOptions: {
             // make sure to externalize deps that shouldn't be bundled
             // into your library
-            external: [
+            external: lib ? [
                 'react',
-
-            ],
+            ] : [],
             output: {
                 // Provide global variables to use in the UMD build
                 // for externalized deps
-                globals: {
-                    react: 'react',
-
-                },
+                // globals: {
+                //     react: 'react',
+                // },
             },
         },
     },
