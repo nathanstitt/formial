@@ -5,6 +5,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )/.."
 
 yarn run vite build
 
+tsc --emitDeclarationOnly
+
 echo $DIR/src/editor/styles.scss $DIR/
 
 $(npm bin)/sass $DIR/styles.scss > $DIR/styles.css

@@ -28,7 +28,7 @@ export interface Store {
 
 interface StoreContextI {
     store: Store
-    dispatch: React.Dispatch<Action> //  (patch:any): void
+    dispatch: React.Dispatch<Action>
 }
 
 export const StoreContext = React.createContext(null as any as StoreContextI)

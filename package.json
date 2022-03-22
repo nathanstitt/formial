@@ -8,6 +8,7 @@
   "main": "./dist/formial.umd.js",
   "module": "./dist/formial.es.js",
   "source": "src/index.tsx",
+  "typings": "dist/index.d.ts",
   "engines": {
     "node": ">=10"
   },
