@@ -7,11 +7,12 @@ import './default-controls'
 import { Title, Scrolling } from './components'
 
 
-const ControlLabel:React.FC<{ control: Control }> = ({ control }) => {
+const ControlLabel: React.FC<{ control: Control }> = ({ control }) => {
     const { id, name, icon } = control
     const { dispatch } = useStoreContext()
 
     const [{ opacity }, drag] = useDrag({
+        type: 'control',
         item: { id, type: 'control' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,

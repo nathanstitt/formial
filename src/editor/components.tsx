@@ -1,24 +1,25 @@
 import * as React from 'react'
 import cn from 'classnames'
+import { FCWC } from './types'
 
 interface SimpleComponentProps {
     className?: string
 }
 
-export const Title:React.FC<SimpleComponentProps> = ({children}) => (
+export const Title: FCWC<SimpleComponentProps> = ({ children }) => (
     <h4 className="title">
         {children}
     </h4>
 )
 
-export const Scrolling:React.FC<SimpleComponentProps> = ({children}) => (
+export const Scrolling: FCWC<SimpleComponentProps> = ({ children }) => (
     <div className="scrolling">
         {children}
     </div>
 )
 
 
-export const Values:React.FC<SimpleComponentProps> = ({children, className}) => (
+export const Values: FCWC<SimpleComponentProps> = ({ children, className }) => (
     <div className={cn('values', className)}>
         {children}
     </div>

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import cn from 'classnames'
+import { FC } from './types'
 import { useDrop, useDrag, DragElementWrapper, DragSourceOptions, ConnectDropTarget } from 'react-dnd'
 import { GripHorizontal, Edit, TrashAlt } from './icons'
 import {
@@ -33,7 +34,7 @@ type useFormDropReturn = {
 }
 
 
-const useFormDrop = ({ index, container }: DropProps):useFormDropReturn => {
+const useFormDrop = ({ index, container }: DropProps): useFormDropReturn => {
     const sc = useStoreContext()
     const [{ isHovered }, dropRef] = useDrop({
         accept: 'control',
@@ -55,13 +56,13 @@ const useFormDrop = ({ index, container }: DropProps):useFormDropReturn => {
     return { isHovered, dropRef }
 }
 
-export const HorizonontalDrop: React.FC<DropProps> = (props) => {
+export const HorizonontalDrop: FC<DropProps> = (props) => {
     const { isHovered, dropRef } = useFormDrop(props)
     return <div ref={dropRef} className={cn('drop', 'horizontal', { 'is-hovered': isHovered })} />
 }
 
 
-const VerticalDrop: React.FC<DropProps> = (props) => {
+const VerticalDrop: FC<DropProps> = (props) => {
     const { isHovered, dropRef } = useFormDrop(props)
 
     return (
@@ -75,7 +76,7 @@ const VerticalDrop: React.FC<DropProps> = (props) => {
 
 //`<{ editing?: boolean }>(({ editing }) => ({
 
-const Controls:React.FC<{
+const Controls: FC<{
     target: FormElement | Container
     container: Container,
     displayEdit: boolean,
@@ -83,104 +84,107 @@ const Controls:React.FC<{
 }> = ({
     target, container, drag, displayEdit,
 }) => {
-    const sc = useStoreContext()
-    const onDelete = (ev:React.MouseEvent<HTMLButtonElement>):void => {
-        ev.stopPropagation()
-        sc.dispatch({
-            type: 'DELETE_ELEMENT', elementId: target.id, containerId: container.id,
-        })
+        const sc = useStoreContext()
+        const onDelete = (ev: React.MouseEvent<HTMLButtonElement>): void => {
+            ev.stopPropagation()
+            sc.dispatch({
+                type: 'DELETE_ELEMENT', elementId: target.id, containerId: container.id,
+            })
+        }
+        return (
+            <div className={cn('controls', { container: isContainer(target) })}>
+                <span>{target.control.name}</span>
+                <button className='trash' onClick={onDelete}>
+                    <TrashAlt />
+                </button>
+                {displayEdit && (
+                    <button onClick={(): void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: target.id })}>
+                        <Edit />
+                    </button>)}
+                {drag && (
+                    <button className='move' ref={drag}>
+                        <GripHorizontal />
+                    </button>)}
+            </div>
+        )
     }
-    return (
-        <div className={cn('controls', { container: isContainer(target) })}>
-            <span>{target.control.name}</span>
-            <button className='trash' onClick={onDelete}>
-                <TrashAlt />
-            </button>
-            {displayEdit && (
-                <button onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: target.id })}>
-                    <Edit />
-                </button>)}
-            {drag && (
-                <button className='move' ref={drag}>
-                    <GripHorizontal />
-                </button>)}
-        </div>
-    )
-}
 
 
-const InputPreview: React.FC<{
+const InputPreview: FC<{
     index: number
     input: InputElement
     container: Container
 }> = ({
     index, input, container,
 }) => {
-    const [{ opacity }, drag] = useDrag({
-        item: { id: input.id, fromIndex: index, fromContainer: container, type: 'control' },
-        collect: monitor => ({
-            opacity: monitor.isDragging() ? 0.4 : 1,
-        }),
-    })
-    const sc = useStoreContext()
-    return (
-        <div
-            ref={drag}
-            style={{ opacity }}
-            className={cn('element-preview', input.control.id, {
-                'is-editing': sc.store.editingId === input.id,
-            })}
-            onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
-        >
-            <Controls displayEdit={false} target={input} container={container} />
-            <div className="control-preview">
-                <span className="label">{input.data.label}</span>
-                {input.placeholder}
+        const [{ opacity }, drag] = useDrag({
+            type: 'control',
+            item: { id: input.id, fromIndex: index, fromContainer: container, type: 'control' },
+            collect: monitor => ({
+                opacity: monitor.isDragging() ? 0.4 : 1,
+            }),
+        })
+        const sc = useStoreContext()
+        return (
+            <div
+                ref={drag}
+                style={{ opacity }}
+                className={cn('element-preview', input.control.id, {
+                    'is-editing': sc.store.editingId === input.id,
+                })}
+                onClick={(): void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: input.id })}
+            >
+                <Controls displayEdit={false} target={input} container={container} />
+                <div className="control-preview">
+                    <span className="label">{input.data.label}</span>
+                    {input.placeholder}
+                </div>
             </div>
-        </div>
-    )
-}
+        )
+    }
 
-const TextPreview: React.FC<{
+const TextPreview: FC<{
     index: number
     control: TextElement
     container: Container
 }> = ({
     index, control, container,
 }) => {
-    const sc = useStoreContext()
-    const [{ opacity }, drag] = useDrag({
-        item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
-        collect: monitor => ({
-            opacity: monitor.isDragging() ? 0.4 : 1,
-        }),
-    })
-    const text = React.createElement(control.data.tag, {}, control.data.text)
+        const sc = useStoreContext()
+        const [{ opacity }, drag] = useDrag({
+            type: 'control',
+            item: { id: control.id, fromIndex: index, fromContainer: container, type: 'control' },
+            collect: monitor => ({
+                opacity: monitor.isDragging() ? 0.4 : 1,
+            }),
+        })
+        const text = React.createElement(control.data.tag, {}, control.data.text)
 
-    return (
-        <div
-            style={{ opacity }}
-            ref={drag}
-            onClick={():void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
-            className={cn('element-preview', control.control.id, {
-                'is-editing': sc.store.editingId === control.id,
-            })}
-        >
-            <Controls displayEdit target={control} container={container} />
-            <div className='control-preview'>
-                {text}
+        return (
+            <div
+                style={{ opacity }}
+                ref={drag}
+                onClick={(): void => sc.dispatch({ type: 'EDIT_ELEMENT', elementId: control.id })}
+                className={cn('element-preview', control.control.id, {
+                    'is-editing': sc.store.editingId === control.id,
+                })}
+            >
+                <Controls displayEdit target={control} container={container} />
+                <div className='control-preview'>
+                    {text}
+                </div>
             </div>
-        </div>
-    )
-}
+        )
+    }
 
 
-const ContainerPreview:React.FC<{
+const ContainerPreview: FC<{
     container: Container
     parent: Container
     index: number
 }> = ({ parent, container, index }) => {
     const [{ opacity }, drag, preview] = useDrag({
+        type: 'control',
         item: { id: container.id, fromIndex: index, fromContainer: parent, type: 'control' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,
@@ -210,8 +214,8 @@ const ContainerPreview:React.FC<{
 }
 
 
-const ElementPreview:React.FC<{
-    el: FormElement|Container,
+const ElementPreview: FC<{
+    el: FormElement | Container,
     index: number,
     container: Container,
 }> = ({ el, index, container }) => {
@@ -229,7 +233,7 @@ const ElementPreview:React.FC<{
 
 
 
-export const FormElements:React.FC = () => {
+export const FormElements = () => {
     const { form } = useStore()
     const [{ isHovered }, drop] = useDrop({
         accept: 'control',

@@ -1,5 +1,9 @@
+import { createRoot } from 'react-dom/client'
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
 import Demo from './demo'
 
-ReactDOM.render(<Demo />, document.getElementById('app-root'))
+window.addEventListener('DOMContentLoaded', (event) => {
+    const el = document.getElementById('app-root')
+    const root = createRoot(el)
+    root.render(<React.StrictMode><Demo /></React.StrictMode>)
+});

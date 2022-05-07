@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Icon, IconifyIcon } from '@iconify/react'
 
-export type IconProps = Omit<IconifyIcon, 'icon'>
+export type IconProps = Omit<IconifyIcon, 'icon' | 'body'>
 
 import csdd from '@iconify-icons/fa-regular/caret-square-down'
 export const CaretSquareDown = (props:IconProps) => <Icon {...props} icon={csdd} />
@@ -39,4 +39,3 @@ export const TrashAlt = (props:IconProps) => <Icon {...props} icon={tad} />
 
 import ed from '@iconify-icons/fa-solid/edit'
 export const Edit = (props:IconProps) => <Icon {...props} icon={ed} />
-

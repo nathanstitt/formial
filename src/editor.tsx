@@ -29,7 +29,8 @@ export interface EditorProps {
     formRef?: React.MutableRefObject<FormRef | null>
 }
 
-export const Editor: React.FC<EditorProps> = ({
+
+export const EditorPanel: React.FC<EditorProps> = ({
     className, formRef, defaultValue,
 }) => {
     const ctx = useProvidedStoreContext(defaultValue)
@@ -49,15 +50,16 @@ export const Editor: React.FC<EditorProps> = ({
         }
     }, [formRef, ctx.store.form])
 
-
     return (
-        <DndProvider backend={HTML5Backend}>
-            <StoreContext.Provider value={ctx}>
-                <div className={cn('formial-editor', className)}>
-                    <FormPanel />
-                    <Sidebar />
-                </div>
-            </StoreContext.Provider>
-        </DndProvider>
+        <StoreContext.Provider value={ctx}>
+            <div className={cn('formial-editor', className)}>
+                <FormPanel />
+                <Sidebar />
+            </div>
+        </StoreContext.Provider>
     )
+}
+
+export const Editor: React.FC<EditorProps> = ( props ) => {
+    return <DndProvider backend={HTML5Backend}><EditorPanel {...props} /></DndProvider>
 }

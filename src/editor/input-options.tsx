@@ -97,6 +97,7 @@ const Option:FC<{
     const sc = useStoreContext()
     const inputRef = useRef<HTMLInputElement>(null)
     const [{ opacity }, drag] = useDrag({
+        type: 'control',
         item: { id: option.id, index, type: 'option' },
         collect: monitor => ({
             opacity: monitor.isDragging() ? 0.4 : 1,
